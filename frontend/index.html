@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bog'chaOS — Aqlli Bog'cha SaaS Tizimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">
+          <div class="logo-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <h2>Bog'cha<span>OS</span></h2>
+            <span class="badge-saas">Enterprise Pro</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tenant Info -->
+      <div class="tenant-card">
+        <div class="tenant-avatar">SK</div>
+        <div class="tenant-details">
+          <h4>Smart Kids Academy</h4>
+          <span class="tenant-badge"><span class="pulse-dot"></span> PRO Tarif</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="sidebar-nav" id="sidebarNav">
+        <button class="nav-item active" data-tab="dashboard" data-roles="director,accountant">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+          <span>Asosiy Panel</span>
+        </button>
+
+        <button class="nav-item" data-tab="children" data-roles="director,teacher,accountant,nurse">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Bolalar & Guruhlar</span>
+          <span class="nav-counter" id="totalChildrenBadge">9</span>
+        </button>
+
+        <button class="nav-item" data-tab="attendance" data-roles="director,teacher">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+          <span>Jonli Davomat</span>
+          <span class="nav-status-badge">Jonli</span>
+        </button>
+
+        <button class="nav-item" data-tab="tabel" data-roles="director,accountant">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+          <span>Oylik Davomat Tabeli</span>
+        </button>
+
+        <button class="nav-item" data-tab="billing" data-roles="director,accountant">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+          <span>Moliya & To'lovlar</span>
+        </button>
+
+        <button class="nav-item" data-tab="staff" data-roles="director,accountant">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Xodimlar & Maosh</span>
+        </button>
+
+        <button class="nav-item" data-tab="contracts" data-roles="director">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>Shartnomalar & Hujjatlar</span>
+        </button>
+
+        <button class="nav-item" data-tab="telegram-simulator" data-roles="director">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          <span>Ota-ona Telegram TMA</span>
+        </button>
+
+        <button class="nav-item" data-tab="settings" data-roles="director">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Sozlamalar & Tarif</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar" id="currentUserAvatar">NA</div>
+          <div class="user-info">
+            <span class="user-name" id="currentUserName">Nodira Azimova</span>
+            <span class="user-role" id="currentUserRole">Boshqaruvchi</span>
+          </div>
+          <button class="icon-button" onclick="logoutUser()" title="Tizimdan chiqish">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content">
+      <!-- TOP NAVBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="globalSearchInput" placeholder="Bola, ota-ona yoki guruhni qidiring...">
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Logged-in user's role (read-only; access is enforced by who actually logged in) -->
+          <div class="role-switcher-box">
+            <span class="role-label">Rol:</span>
+            <span class="badge badge-indigo" id="currentRoleBadge">—</span>
+          </div>
+
+          <div class="live-clock" id="liveClock">
+            <span class="clock-date">2 Oktabr, 2026</span>
+            <span class="clock-time">09:15:30</span>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button class="icon-button theme-toggle" id="themeToggle" title="Rejimni almashtirish">
+            <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- CONTENT PANELS -->
+      <div class="content-container">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: ASOSIY PANEL (DASHBOARD) -->
+        <!-- ========================================== -->
+        <section class="tab-panel active" id="tab-dashboard">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title" id="dashboardGreeting">Salom, Nodira Azimova! 👋</h1>
+              <p class="panel-subtitle">Bog'cha bo'yicha bugungi kunlik hisobot va barcha faoliyatlar oqimi.</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn btn-secondary" onclick="switchTab('tabel')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/></svg>
+                Oylik Tabelga o'tish
+              </button>
+              <button class="btn btn-primary" onclick="openModal('addChildModal')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Yangi bola qo'shish
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI STAT CARDS -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon-wrapper color-indigo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Jami Bolalar</span>
+                <h3 class="stat-value" id="kpiTotalChildren">9 nafar</h3>
+                <span class="stat-trend positive">5 ta guruh bo'yicha</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon-wrapper color-emerald">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Bugungi Davomat</span>
+                <h3 class="stat-value" id="kpiAttendanceRate">7 / 9 (77.8%)</h3>
+                <span class="stat-trend positive">🟢 Telegram xabarnomalari yuborilgan</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon-wrapper color-amber">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Oylik Tushum (Oktabr)</span>
+                <h3 class="stat-value" id="kpiRevenue">13,200,000 UZS</h3>
+                <span class="stat-trend positive">Baza bilan sinxron</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon-wrapper color-rose">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Qarzdorlik</span>
+                <h3 class="stat-value text-rose" id="kpiDebts">3,300,000 UZS</h3>
+                <span class="stat-trend negative">⚠️ 2 ta oilada to'lov kutilmoqda</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts and Activity Feed -->
+          <div class="dashboard-grid-2">
+            <div class="card glass-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Haftalik Davomat Dinamikasi</h3>
+                  <span class="card-subtitle">Kunlik qatnashish foizlari</span>
+                </div>
+                <span class="badge badge-emerald">O'rtacha 89%</span>
+              </div>
+              <div class="chart-wrapper">
+                <div class="custom-bar-chart" id="weeklyChartContainer"></div>
+              </div>
+            </div>
+
+            <div class="card glass-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Jonli Hodisalar Jurnali</h3>
+                  <span class="card-subtitle">Telegram va to'lovlar oqimi</span>
+                </div>
+                <span class="pulse-status">Jonli</span>
+              </div>
+              <div class="activity-feed" id="activityFeed"></div>
+            </div>
+          </div>
+
+          <!-- Groups Grid -->
+          <div class="section-title-wrap">
+            <h3>Guruhlar Holati</h3>
+            <span class="badge badge-indigo">5 ta faol guruh</span>
+          </div>
+          <div class="groups-mini-grid" id="groupsMiniGrid"></div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: BOLALAR VA GURUHLAR -->
+        <!-- ========================================== -->
+        <section class="tab-panel" id="tab-children">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">Bolalar va Guruhlar Boshqaruvi</h1>
+              <p class="panel-subtitle">Barcha ro'yxatdan o'tgan bolalar, guruhlar, allergiyalar va ota-onalar kontaktlari.</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn btn-primary" onclick="openModal('addChildModal')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Yangi bola qo'shish
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <div class="group-tabs" id="groupFilterTabs">
+              <button class="filter-tab active" data-group="ALL">Barchasi</button>
+              <button class="filter-tab" data-group="Yulduzcha">Yulduzcha</button>
+              <button class="filter-tab" data-group="Qaldirg'och">Qaldirg'och</button>
+              <button class="filter-tab" data-group="Kichkintoy">Kichkintoy</button>
+            </div>
+            <div class="filter-inputs">
+              <input type="text" class="input-search" id="childSearchFilter" placeholder="Ism yoki ota-ona telefoni...">
+              <select class="custom-select" id="childStatusFilter">
+                <option value="ALL">Barcha statuslar</option>
+                <option value="ACTIVE">Faol</option>
+                <option value="DEBT">Qarzdor</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card glass-card no-padding">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Bola Ismi va Surati</th>
+                    <th>Guruhi</th>
+                    <th>Yoshi / Tug'ilgan kuni</th>
+                    <th>Ota-onasi & Aloqa</th>
+                    <th>Соғлиги</th>
+                    <th>Скидка</th>
+                    <th>Изох</th>
+                    <th>Нархи</th>
+                    <th id="thPaymentStatus">To'lov Holati</th>
+                    <th id="thDocuments" class="text-right">Hujjatlar</th>
+                    <th id="thDelete" class="text-right">O'chirish</th>
+                  </tr>
+                </thead>
+                <tbody id="childrenTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: JONLI DAVOMAT -->
+        <!-- ========================================== -->
+        <section class="tab-panel" id="tab-attendance">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">Kunlik Jonli Davomat</h1>
+              <p class="panel-subtitle">Tarbiyachi 1 ta tugma bilan belgilaganida, ota-onasiga Telegram botdan xabar boradi.</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn btn-success" onclick="markAllPresent()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Barchasini "Keldi" qilish
+              </button>
+            </div>
+          </div>
+
+          <div class="attendance-control-card glass-card">
+            <div class="control-col">
+              <label>Sana:</label>
+              <input type="date" id="attendanceDate" class="custom-input" value="2026-10-02">
+            </div>
+            <div class="control-col">
+              <label>Guruhni tanlang:</label>
+              <select id="attendanceGroupSelect" class="custom-select">
+                <option value="Yulduzcha">Yulduzcha (3-4 yosh)</option>
+                <option value="Qaldirg'och">Qaldirg'och (5-6 yosh)</option>
+                <option value="Kichkintoy">Kichkintoy (2-3 yosh)</option>
+              </select>
+            </div>
+            <div class="control-col attendance-stats-summary">
+              <div class="att-counter"><span class="badge-dot dot-emerald"></span> Kelgan: <b id="attCountPresent">0</b></div>
+              <div class="att-counter"><span class="badge-dot dot-rose"></span> Kelmagan: <b id="attCountAbsent">0</b></div>
+              <div class="att-counter"><span class="badge-dot dot-amber"></span> Sababli: <b id="attCountExcused">0</b></div>
+              <div class="att-counter"><span class="badge-dot dot-indigo"></span> Kech keldi: <b id="attCountLate">0</b></div>
+            </div>
+          </div>
+
+          <div class="attendance-cards-grid" id="attendanceCardsGrid"></div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: OYLIK DAVOMAT TABELI (MONTHLY TABEL) -->
+        <!-- ========================================== -->
+        <section class="tab-panel" id="tab-tabel">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">Oylik Davomat Tabeli & Kompensatsiya</h1>
+              <p class="panel-subtitle">31 kunlik to'liq tabel. Sababli kelmagan kunlar oziq-ovqat normasiga ko'ra keyingi oydan chegiriladi.</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn btn-secondary" onclick="exportTabelExcel()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Excelga eksport
+              </button>
+              <button class="btn btn-primary" onclick="applyCompensationToInvoices()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Kompensatsiyani Invoyslarga hisoblash
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabel Explanation Card -->
+          <div class="tabel-legend-card glass-card mb-4">
+            <div class="legend-item"><span class="tabel-cell-demo p-cell">P</span> <b>Kelgan</b> (Davomat qilingan)</div>
+            <div class="legend-item"><span class="tabel-cell-demo e-cell">E</span> <b>Sababli</b> (Shifokor spravkasi bor - 25,000 UZS/kun qaytariladi)</div>
+            <div class="legend-item"><span class="tabel-cell-demo a-cell">A</span> <b>Sababsiz</b> (Qaytarilmaydi)</div>
+            <div class="legend-item"><span class="tabel-cell-demo w-cell">W</span> <b>Dam olish kuni</b></div>
+          </div>
+
+          <div class="card glass-card no-padding">
+            <div class="table-responsive">
+              <table class="data-table tabel-grid-table" id="tabelFullGrid">
+                <thead id="tabelHeaderRow"></thead>
+                <tbody id="tabelBodyRows"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: MOLIYA & TO'LOVLAR -->
+        <!-- ========================================== -->
+        <section class="tab-panel" id="tab-billing">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">Moliya, Hisob-fakturalar va Kvitansiyalar</h1>
+              <p class="panel-subtitle">Oylik tushumlar, qarzdorlar va Click / Payme to'lovlari hisoboti.</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn btn-secondary" onclick="sendDebtReminders()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                Qarzdorlarga Telegram eslatma
+              </button>
+            </div>
+          </div>
+
+          <!-- Daromad / Chiqim Statistikasi -->
+          <div class="section-title-wrap">
+            <h3>Moliyaviy Statistika</h3>
+            <span class="badge badge-indigo">Haqiqiy to'lovlar asosida</span>
+          </div>
+          <div class="stats-grid mb-4" id="financeStatsGrid"></div>
+
+          <div class="card glass-card no-padding">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Chek / ID</th>
+                    <th>Bola & Guruhi</th>
+                    <th>Ota-onasi</th>
+                    <th>Oylik To'lov</th>
+                    <th>Kompensatsiya</th>
+                    <th>To'langan</th>
+                    <th>Qoldiq Qarz</th>
+                    <th>Status</th>
+                    <th class="text-right">Amal</th>
+                    <th class="text-right">Kvitansiya</th>
+                  </tr>
+                </thead>
+                <tbody id="invoicesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 9: XODIMLAR & OYLIK MAOSH (PAYROLL) -->
+        <!-- ========================================== -->
+        <section class="tab-panel" id="tab-staff">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">Xodimlar Ro'yxati va Oylik Maosh (Payroll)</h1>
+              <p class="panel-subtitle">Tarbiyachilar, enagalar, oshpaz va texnik xodimlar maoshi va avanslari nazorati.</p>
+            </div>
+          </div>
+
+          <div class="card glass-card no-padding">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>F.I.Sh & Lavozimi</th>
+                    <th>Telefon</th>
+                    <th>Asosiy Oklad</th>
+                    <th>KPI / Bonus</th>
+                    <th>To'langan Avans</th>
+                    <th>To'lanadigan Qoldiq</th>
+                    <th>Holat</th>
+                    <th class="text-right">Amal</th>
+                  </tr>
+                </thead>
+                <tbody id="staffPayrollTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 10: SHARTNOMALAR VA HUJJATLAR -->
+        <!-- ========================================== -->
+        <section class="tab-panel" id="tab-contracts">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">Shartnomalar va Tibbiy Hujjatlar</h1>
+              <p class="panel-subtitle">Ota-onalar bilan rasmiy 2-tomonlama shartnomalar, emlash (privivka) va spravkalar.</p>
+            </div>
+          </div>
+
+          <div class="card glass-card no-padding">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Shartnoma №</th>
+                    <th>Bola & Guruh</th>
+                    <th>Ota-onasi</th>
+                    <th>Shartnoma Sanasi</th>
+                    <th>Emlash (Privivka)</th>
+                    <th>Tibbiy Spravka</th>
+                    <th class="text-right">Shartnoma</th>
+                  </tr>
+                </thead>
+                <tbody id="contractsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 12: TELEGRAM TMA SIMULATOR -->
+        <!-- ========================================== -->
+        <section class="tab-panel" id="tab-telegram-simulator">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">Ota-onalar Uchun Telegram Mini App (TMA) Simulyatori</h1>
+              <p class="panel-subtitle">Ota-onalar ilova yuklab o'tirmaydi. Telegram orqali ochiladigan shaxsiy kabinet.</p>
+            </div>
+          </div>
+
+          <div class="tma-simulator-layout">
+            <div class="tma-info-card glass-card">
+              <h3>📱 Nega Telegram Web App (TMA)?</h3>
+              <ul class="feature-checklist">
+                <li><b>Yuklab olish shart emas:</b> Har bir ota-onaning telefonida Telegram bor.</li>
+                <li><b>Tezkor ulanish:</b> Bog'cha botiga kirib bitta tugma orqali kabinet ochiladi.</li>
+                <li><b>To'g'ridan-to'g'ri to'lov:</b> Click, Payme orqali 1 klikda to'lash.</li>
+                <li><b>Jonli xabarnomalar:</b> Bola bog'chaga kirdi/chiqdi xabari va rasm/videolar.</li>
+              </ul>
+
+              <div class="tma-action-box">
+                <h4>Simulyatorda bolani tanlang:</h4>
+                <select id="tmaChildSelect" class="custom-select" onchange="updateTmaSimulator()"></select>
+                <div class="mt-4">
+                  <button class="btn btn-secondary w-100" onclick="triggerSimulatedTelegramAlert()">
+                    🔔 Ota-onaga sinov Telegram xabari yuborish
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Phone Mockup -->
+            <div class="phone-mockup-wrapper">
+              <div class="smartphone-frame">
+                <div class="smartphone-notch"></div>
+                <div class="tma-screen">
+                  <div class="tma-header">
+                    <span class="tma-close">✕ Yopish</span>
+                    <span class="tma-title">SmartKids TMA</span>
+                    <span class="tma-menu">•••</span>
+                  </div>
+                  <div class="tma-body">
+                    <div class="tma-profile-card">
+                      <div class="tma-avatar" id="tmaChildAvatar">IR</div>
+                      <div class="tma-child-meta">
+                        <h4 id="tmaChildName">Imron Rahimov</h4>
+                        <span id="tmaChildGroup">Yulduzcha guruhi</span>
+                      </div>
+                      <span class="tma-status-tag" id="tmaChildStatus">🟢 Bog'chada</span>
+                    </div>
+
+                    <div class="tma-widget">
+                      <div class="tma-widget-title"><span>Bugungi Davomat</span><small>02.10.2026</small></div>
+                      <div class="tma-time-row"><span>Kelish vaqti:</span><strong class="text-emerald" id="tmaCheckInTime">08:18 da</strong></div>
+                      <div class="tma-time-row"><span>Tarbiyachi:</span><span>Gulbahor Karimova</span></div>
+                    </div>
+
+                    <div class="tma-widget">
+                      <div class="tma-widget-title"><span>Bugun Nima Yeydi?</span><small>Taomnoma</small></div>
+                      <p class="tma-menu-snippet">🥣 Nonushta: Suli kashasi & non<br>🍲 Tushlik: Tovuq sho'rva & Teftel</p>
+                    </div>
+
+                    <div class="tma-widget tma-payment-widget">
+                      <div class="tma-widget-title"><span>Oktabr To'lovi</span><span class="badge badge-emerald" id="tmaPaymentStatus">To'langan</span></div>
+                      <div class="tma-amount-row"><span id="tmaPaymentAmount">1,800,000 UZS</span></div>
+                      <button class="tma-btn-pay" onclick="alert('Click / Payme ochildi!')">💳 Click / Payme orqali to'lash</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 13: SOZLAMALAR -->
+        <!-- ========================================== -->
+        <section class="tab-panel" id="tab-settings">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">Tizim Sozlamalari & SaaS Obunasi</h1>
+              <p class="panel-subtitle">Bog'cha rekvizitlari, xodimlar, SMS shlyuz va SaaS tarifi.</p>
+            </div>
+          </div>
+          <div class="settings-grid">
+            <div class="card glass-card">
+              <h3 class="card-title">🏢 Bog'cha Ma'lumotlari</h3>
+              <div class="form-group mt-4"><label>Bog'cha nomi:</label><input type="text" class="custom-input" value="Smart Kids Academy"></div>
+              <div class="form-group"><label>Telefon raqam:</label><input type="text" class="custom-input" value="+998 71 200 11 22"></div>
+              <div class="form-group"><label>Manzil:</label><input type="text" class="custom-input" value="Toshkent sh., Chilonzor tumani, 5-mavze 12-uy"></div>
+              <button class="btn btn-primary" onclick="alert('Sozlamalar saqlandi!')">Saqlash</button>
+            </div>
+
+            <div class="card glass-card">
+              <h3 class="card-title">💎 SaaS Obuna Holati (Bog'chaOS)</h3>
+              <div class="plan-banner mt-4">
+                <div class="plan-badge">PRO TARIF</div>
+                <h2>950,000 UZS / oy</h2>
+                <p>150 tagacha bolalar, Cheksiz Telegram xabarnomalar, Kvitansiyalar, Omborxona va Oylik Tabel.</p>
+                <div class="plan-expiry"><span>Keyingi to'lov: <b>25 Oktabr, 2026</b></span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: YANGI BOLA QO'SHISH -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="addChildModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Yangi Bola Ro'yxatdan O'tkazish</h3>
+        <button class="modal-close" onclick="closeModal('addChildModal')">✕</button>
+      </div>
+      <form id="addChildForm" onsubmit="handleChildSubmit(event)">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group"><label>Ismi:</label><input type="text" id="newChildFirstName" required class="custom-input" placeholder="Azizbek"></div>
+            <div class="form-group"><label>Familiyasi:</label><input type="text" id="newChildLastName" required class="custom-input" placeholder="Umarov"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Tug'ilgan sanasi:</label><input type="date" id="newChildBirthDate" required class="custom-input" value="2022-05-10"></div>
+            <div class="form-group">
+              <label>Guruh:</label>
+              <select id="newChildGroup" class="custom-select" required>
+                <option value="Yulduzcha">Yulduzcha (3-4 yosh)</option>
+                <option value="Qaldirg'och">Qaldirg'och (5-6 yosh)</option>
+                <option value="Kichkintoy">Kichkintoy (2-3 yosh)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Ota-onasi F.I.Sh:</label><input type="text" id="newChildParentName" required class="custom-input" placeholder="Nodir Umarov"></div>
+            <div class="form-group"><label>Telefon (Telegram):</label><input type="text" id="newChildParentPhone" required class="custom-input" placeholder="+998 90 123 45 67"></div>
+          </div>
+          <div class="form-group"><label>Allergiyalari:</label><input type="text" id="newChildAllergies" class="custom-input" placeholder="Tuxumga allergiya yoki Yo'q"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addChildModal')">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary">Saqlash va Telegramga ulash</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: SOG'LIGINI TAHRIRLASH (nurse/director) -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="editHealthModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">🩺 Соғлиги / Salomatligini Tahrirlash</h3>
+        <button class="modal-close" onclick="closeModal('editHealthModal')">✕</button>
+      </div>
+      <form id="editHealthForm" onsubmit="handleHealthSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="editHealthChildId">
+          <div class="form-group"><label>Bola:</label><input type="text" id="editHealthChildName" class="custom-input" disabled></div>
+          <div class="form-group"><label>Соғлиги / Salomatlik holati:</label><input type="text" id="editHealthValue" required class="custom-input" placeholder="Masalan: Sog'lom yoki Tuxumga allergiya"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('editHealthModal')">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary">Saqlash</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: SKIDKA / IZOH / NARXI TAHRIRLASH (accountant/director/super_admin) -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="editPricingModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">✏️ Скидка / Изох / Нархи Tahrirlash</h3>
+        <button class="modal-close" onclick="closeModal('editPricingModal')">✕</button>
+      </div>
+      <form id="editPricingForm" onsubmit="handlePricingSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="editPricingChildId">
+          <div class="form-group"><label>Bola:</label><input type="text" id="editPricingChildName" class="custom-input" disabled></div>
+          <div class="form-group"><label>Скидка:</label><input type="text" id="editPricingDiscount" class="custom-input" placeholder="Masalan: 50% yoki Транспорт"></div>
+          <div class="form-group"><label>Изох:</label><input type="text" id="editPricingNote" class="custom-input" placeholder="Masalan: ходим yoki 2 та фарзанд"></div>
+          <div class="form-group"><label>Нархи (UZS):</label><input type="number" step="1000" id="editPricingPrice" class="custom-input" placeholder="Masalan: 2800000"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('editPricingModal')">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary">Saqlash</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: TO'LOV QABUL QILISH -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="recordPaymentModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">💳 To'lov Qabul Qilish</h3>
+        <button class="modal-close" onclick="closeModal('recordPaymentModal')">✕</button>
+      </div>
+      <form id="recordPaymentForm" onsubmit="handleRecordPayment(event)">
+        <div class="modal-body">
+          <input type="hidden" id="paymentChildId">
+          <div class="form-group"><label>Bola:</label><input type="text" id="paymentChildName" class="custom-input" disabled></div>
+          <div class="form-group"><label>Qoldiq qarz:</label><input type="text" id="paymentChildDebt" class="custom-input" disabled></div>
+          <div class="form-group"><label>To'lov summasi (UZS):</label><input type="number" id="paymentAmount" required class="custom-input" placeholder="Masalan: 1400000"></div>
+          <div class="form-group">
+            <label>To'lov usuli:</label>
+            <select id="paymentMethod" class="custom-select">
+              <option value="CLICK">Click</option>
+              <option value="PAYME">Payme</option>
+              <option value="CASH">Naqd pul</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('recordPaymentModal')">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary">To'lovni Qabul Qilish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: RASMIY SHARTNOMA KO'RISH (CONTRACT) -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="contractViewModal">
+    <div class="modal-box contract-modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Davlat Standartidagi Ikki Tomonlama Shartnoma</h3>
+        <button class="modal-close" onclick="closeModal('contractViewModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="contract-paper" id="contractPaper">
+          <div class="contract-head">
+            <h3>MAKTABGACHA TA'LIM MUASSASASIDA XIZMAT KO'RSATISH SHARTNOMASI № <span id="contractDocNumber">SH-2025-042</span></h3>
+            <p>Toshkent shahri &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; «01» Sentabr 2025-yil</p>
+          </div>
+          <div class="contract-content">
+            <p>Bir tomondan <b>«SMART KIDS ACADEMY» NTM</b> rahbari N.Azimova, ikkinchi tomondan tarbiyalanuvchi <b id="contractDocChildName">Imron Rahimov</b>ning qonuniy vakili <b id="contractDocParentName">Xurshid Rahimov</b> o'rtasida quyidagi shartlar tuzildi:</p>
+            <h4>1. Shartnoma Predmeti</h4>
+            <p>Muassasa bolani o'quv dasturi, 4 mahal issiq ovqat, tibbiy nazorat va xavfsiz muhit bilan ta'minlash majburiyatini oladi.</p>
+            <h4>2. To'lov Shartlari va Oziq-ovqat Kompensatsiyasi</h4>
+            <p>Oylik to'lov miqdori har oyning 10-sanasiga qadar to'lanadi. Agar bola tibbiy ma'lumotnoma (spravka) bilan uzrli sababga ko'ra kelmasa, kelmagan kunlar uchun kunlik oziq-ovqat normasi (25,000 UZS/kun) keyingi oy to'lovidan avtomatik chegiriladi.</p>
+            <h4>3. Tomonlarning Rekvizitlari va Imzolari</h4>
+            <div class="contract-signatures">
+              <div>
+                <b>Muassasa:</b><br>
+                «Smart Kids Academy» NTM<br>
+                Direktor: N.Azimova (M.O'.)<br>
+                <i>[ Muhr va Imzo ]</i>
+              </div>
+              <div>
+                <b>Ota-ona (Vakil):</b><br>
+                F.I.Sh: <span id="contractDocSignParent">Xurshid Rahimov</span><br>
+                Tel: <span id="contractDocSignPhone">+998 90 123 45 67</span><br>
+                <i>[ Shaxsiy Imzo ]</i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.print()">🖨️ Chop etish / PDF</button>
+        <button class="btn btn-primary" onclick="closeModal('contractViewModal')">Yopish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: KVITANSIYA / CHEK KO'RISH -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="receiptModal">
+    <div class="modal-box receipt-box">
+      <div class="modal-header">
+        <h3 class="modal-title">To'lov Kvitansiyasi</h3>
+        <button class="modal-close" onclick="closeModal('receiptModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="receipt-print-area">
+          <div class="receipt-header">
+            <h4>SMART KIDS ACADEMY MCHJ</h4>
+            <p>Bog'cha to'lovi uchun rasmiy kvitansiya</p>
+            <span class="receipt-code" id="receiptInvoiceCode">INV-2026-10-C1</span>
+          </div>
+          <div class="receipt-divider"></div>
+          <div class="receipt-details">
+            <div class="receipt-row"><span>Tarbiyalanuvchi:</span> <strong id="receiptChildName">Imron Rahimov</strong></div>
+            <div class="receipt-row"><span>Guruh:</span> <span id="receiptGroupName">Yulduzcha</span></div>
+            <div class="receipt-row"><span>To'lov davri:</span> <span>Oktabr, 2026</span></div>
+            <div class="receipt-row"><span>To'lov usuli:</span> <span>Click / Payme</span></div>
+            <div class="receipt-row"><span>Sana:</span> <span>02.10.2026</span></div>
+            <div class="receipt-divider"></div>
+            <div class="receipt-row total-row"><span>Jami to'langan summa:</span> <strong class="text-emerald" id="receiptAmount">1,800,000 UZS</strong></div>
+          </div>
+          <div class="receipt-qr">
+            <div class="fake-qr-code">
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="6" height="6" x="2" y="2"/><rect width="6" height="6" x="16" y="2"/><rect width="6" height="6" x="2" y="16"/><path d="M10 2h4"/><path d="M10 6h4"/><path d="M2 10h8"/><path d="M14 10h8"/><path d="M10 14h4"/><path d="M10 18h4"/><path d="M14 18h8"/><path d="M18 14h4"/></svg>
+            </div>
+            <small>Davlat soliq qo'mitasi fiskal moduli orqali tasdiqlangan</small>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="window.print()">🖨️ Chop etish</button>
+        <button class="btn btn-primary" onclick="closeModal('receiptModal')">Yopish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

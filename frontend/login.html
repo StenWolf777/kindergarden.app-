@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kirish — Bog'chaOS Enterprise</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                  radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 40%),
+                  var(--bg-app);
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--bg-card-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(99, 102, 241, 0.15);
+      animation: fadeIn 0.3s ease;
+    }
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .auth-header h1 {
+      font-size: 1.65rem;
+      margin-bottom: 6px;
+    }
+    .auth-header p {
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+    }
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: var(--bg-surface);
+      padding: 5px;
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+    }
+    .auth-tab-btn {
+      padding: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .auth-tab-btn.active {
+      background: var(--color-primary);
+      color: white;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+    }
+    .otp-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .otp-box {
+      width: 54px;
+      height: 60px;
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 800;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      outline: none;
+      transition: all var(--transition-fast);
+    }
+    .otp-box:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+  </style>
+</head>
+<body class="auth-page">
+
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <h2>Bog'cha<span>OS</span></h2>
+        <span class="badge-saas">Xavfsiz Kirish</span>
+      </div>
+    </div>
+
+    <div class="auth-header">
+      <h1>Tizimga Kirish</h1>
+      <p id="authSubtitle">Smart Kids Academy boshqaruv portaliga xush kelibsiz.</p>
+    </div>
+
+    <!-- Auth Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab-btn active" id="tabPasswordBtn" onclick="switchAuthTab('password')">🔑 Parol bilan</button>
+      <button class="auth-tab-btn" id="tabOtpBtn" onclick="switchAuthTab('otp')">📱 SMS / Telegram kod</button>
+    </div>
+
+    <!-- FORM 1: Parol bilan kirish -->
+    <form id="passwordLoginForm" onsubmit="handlePasswordLogin(event)">
+      <div class="form-group">
+        <label>Telefon raqam:</label>
+        <input type="text" id="loginPhone" required class="custom-input" placeholder="+998 90 111 22 33">
+      </div>
+
+      <div class="form-group">
+        <label>Parol:</label>
+        <input type="password" id="loginPassword" required class="custom-input" placeholder="••••••••">
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 mt-4" id="loginSubmitBtn">
+        Tizimga kirish ➔
+      </button>
+    </form>
+
+    <!-- FORM 2: SMS / Telegram OTP bilan kirish -->
+    <form id="otpLoginForm" onsubmit="handleOtpSubmit(event)" style="display: none;">
+      <div id="otpStep1">
+        <div class="form-group">
+          <label>Telefon raqamingiz:</label>
+          <input type="text" id="otpPhoneInput" class="custom-input" placeholder="+998 93 444 55 66" value="+998 93 444 55 66">
+        </div>
+        <button type="button" class="btn btn-primary w-100 mt-3" onclick="sendOtpCode()">
+          📲 1 martalik kod olish (SMS/Telegram)
+        </button>
+      </div>
+
+      <div id="otpStep2" style="display: none;">
+        <label style="display: block; text-align: center; font-size: 0.85rem; color: var(--text-secondary);">
+          Telegramga yuborilgan 4 xonali kodni kiriting:
+        </label>
+        <div class="otp-inputs">
+          <input type="text" maxlength="1" class="otp-box" id="otp1" autofocus oninput="otpNext(this, 'otp2')">
+          <input type="text" maxlength="1" class="otp-box" id="otp2" oninput="otpNext(this, 'otp3')">
+          <input type="text" maxlength="1" class="otp-box" id="otp3" oninput="otpNext(this, 'otp4')">
+          <input type="text" maxlength="1" class="otp-box" id="otp4" oninput="otpNext(this, null)">
+        </div>
+        <button type="submit" class="btn btn-success w-100">
+          Tasdiqlash va Kirish
+        </button>
+        <button type="button" class="btn btn-secondary w-100 mt-2" onclick="resetOtpStep()">
+          Qayta raqam kiritish
+        </button>
+      </div>
+    </form>
+
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:8000/api/v1';
+
+    function switchAuthTab(type) {
+      const passForm = document.getElementById('passwordLoginForm');
+      const otpForm = document.getElementById('otpLoginForm');
+      const passBtn = document.getElementById('tabPasswordBtn');
+      const otpBtn = document.getElementById('tabOtpBtn');
+
+      if (type === 'password') {
+        passForm.style.display = 'block';
+        otpForm.style.display = 'none';
+        passBtn.classList.add('active');
+        otpBtn.classList.remove('active');
+      } else {
+        passForm.style.display = 'none';
+        otpForm.style.display = 'block';
+        passBtn.classList.remove('active');
+        otpBtn.classList.add('active');
+      }
+    }
+
+    async function handlePasswordLogin(e) {
+      e.preventDefault();
+      const phone = document.getElementById('loginPhone').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const btn = document.getElementById('loginSubmitBtn');
+      btn.innerText = "Tekshirilmoqda...";
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, password })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          localStorage.setItem('bogcha_user', JSON.stringify(data.user));
+          localStorage.setItem('bogcha_token', data.token);
+          showToast(`Xush kelibsiz, ${data.user.name}!`, 'success');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 800);
+        } else {
+          showToast(data.detail || "Kirishda xatolik yuz berdi", 'warning');
+          btn.innerText = "Tizimga kirish ➔";
+        }
+      } catch (err) {
+        showToast("Backend bilan ulanib bo'lmadi", 'warning');
+        btn.innerText = "Tizimga kirish ➔";
+      }
+    }
+
+    async function sendOtpCode() {
+      const phone = document.getElementById('otpPhoneInput').value.trim();
+      try {
+        const res = await fetch(`${API_BASE}/auth/send-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('otpStep1').style.display = 'none';
+          document.getElementById('otpStep2').style.display = 'block';
+          showToast(`📲 Telegram kod yuborildi! (Demo kod: ${data.demo_code})`, 'info');
+          // Auto-fill demo code for instant test convenience
+          document.getElementById('otp1').value = data.demo_code[0];
+          document.getElementById('otp2').value = data.demo_code[1];
+          document.getElementById('otp3').value = data.demo_code[2];
+          document.getElementById('otp4').value = data.demo_code[3];
+        }
+      } catch (err) {
+        showToast("Xatolik yuz berdi", 'warning');
+      }
+    }
+
+    async function handleOtpSubmit(e) {
+      e.preventDefault();
+      const phone = document.getElementById('otpPhoneInput').value.trim();
+      const code = document.getElementById('otp1').value +
+                   document.getElementById('otp2').value +
+                   document.getElementById('otp3').value +
+                   document.getElementById('otp4').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/verify-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, code })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          localStorage.setItem('bogcha_user', JSON.stringify(data.user));
+          localStorage.setItem('bogcha_token', data.token);
+          showToast(`Kod tasdiqlandi. Xush kelibsiz!`, 'success');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 800);
+        } else {
+          showToast("Tasdiq kodi noto'g'ri", 'warning');
+        }
+      } catch (err) {
+        showToast("Xatolik", 'warning');
+      }
+    }
+
+    function otpNext(current, nextId) {
+      if (current.value.length >= 1 && nextId) {
+        document.getElementById(nextId).focus();
+      }
+    }
+
+    function resetOtpStep() {
+      document.getElementById('otpStep1').style.display = 'block';
+      document.getElementById('otpStep2').style.display = 'none';
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  </script>
+</body>
+</html>
