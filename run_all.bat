@@ -5,11 +5,16 @@ echo ========================================================
 echo       Bog'chaOS SaaS Tizimini Ishga Tushirish
 echo ========================================================
 echo.
+
+rem Use the Python that has FastAPI/uvicorn installed; another Python may be first on PATH.
+set "PY=python"
+if exist "%LOCALAPPDATA%\Programs\Python\Python312\python.exe" set "PY=%LOCALAPPDATA%\Programs\Python\Python312\python.exe"
+
 echo 1. FastAPI Backend server ishga tushirilmoqda (Port 8000)...
-start "BogchaOS-Backend" cmd /k "cd /d %~dp0backend && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000"
+start "BogchaOS-Backend" cmd /k "cd /d "%~dp0backend" && "%PY%" -m uvicorn app.main:app --host 127.0.0.1 --port 8000"
 
 echo 2. Frontend Dashboard veb-server ishga tushirilmoqda (Port 4321)...
-start "BogchaOS-Frontend" cmd /k "cd /d %~dp0frontend && python -m http.server 4321"
+start "BogchaOS-Frontend" cmd /k "cd /d "%~dp0frontend" && "%PY%" -m http.server 4321"
 
 timeout /t 2 > nul
 

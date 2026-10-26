@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-22T00:00:00Z",
+  "title": "Design System: Bog'chaOS",
+  "extensions": {
+    "colorMeta": {
+      "register-ink": { "role": "primary", "displayName": "Register Ink", "canonical": "#1f3c96", "tonalRamp": ["#0c1840", "#132662", "#182f78", "#1f3c96", "#3a58b4", "#6d86cf", "#b3c1ea", "#e4e9f5"] },
+      "register-ink-deep": { "role": "primary", "displayName": "Register Ink Deep", "canonical": "#182f78" },
+      "ink-tint": { "role": "primary", "displayName": "Ink Tint", "canonical": "#e4e9f5" },
+      "red-pencil": { "role": "secondary", "displayName": "Red Pencil", "canonical": "#c0262d", "tonalRamp": ["#420c0f", "#6b1418", "#951d23", "#c0262d", "#d9545a", "#e88a8e", "#f3bfc1", "#fae4e4"] },
+      "red-pencil-tint": { "role": "secondary", "displayName": "Red Pencil Tint", "canonical": "#fae4e4" },
+      "mark-present": { "role": "tertiary", "displayName": "Present Green", "canonical": "#1c7a4a", "tonalRamp": ["#08261a", "#0f412b", "#166340", "#1c7a4a", "#3d9a69", "#74bb93", "#b3dbc4", "#e2f0e7"] },
+      "mark-present-tint": { "role": "tertiary", "displayName": "Present Tint", "canonical": "#e2f0e7" },
+      "mark-excused": { "role": "tertiary", "displayName": "Excused Ochre", "canonical": "#9a5800", "tonalRamp": ["#2e1a00", "#4f2e00", "#744200", "#9a5800", "#bf7a1f", "#d9a256", "#ecd0a0", "#f8ecd6"] },
+      "mark-excused-tint": { "role": "tertiary", "displayName": "Excused Tint", "canonical": "#f8ecd6" },
+      "mark-late": { "role": "tertiary", "displayName": "Late Violet", "canonical": "#6a3d9a", "tonalRamp": ["#20122f", "#36204f", "#502e75", "#6a3d9a", "#8a62b6", "#ac8fcf", "#d3c2e8", "#eee6f6"] },
+      "mark-late-tint": { "role": "tertiary", "displayName": "Late Tint", "canonical": "#eee6f6" },
+      "green-grey-ground": { "role": "neutral", "displayName": "Green-Grey Ground", "canonical": "#f1f3ef" },
+      "page-white": { "role": "neutral", "displayName": "Page White", "canonical": "#ffffff" },
+      "page-hover": { "role": "neutral", "displayName": "Page Hover", "canonical": "#f7f8f5" },
+      "page-surface": { "role": "neutral", "displayName": "Page Surface", "canonical": "#eceee9" },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "#d8ddd5" },
+      "hairline-strong": { "role": "neutral", "displayName": "Hairline Strong", "canonical": "#a8b0a5" },
+      "blue-black-ink": { "role": "neutral", "displayName": "Blue-Black Ink", "canonical": "#1a1f2b", "tonalRamp": ["#1a1f2b", "#2f3644", "#485160", "#5b6370", "#7a818b", "#a1a7ae", "#c9cdd1", "#eef0f2"] },
+      "ink-secondary": { "role": "neutral", "displayName": "Ink Secondary", "canonical": "#485160" },
+      "ink-muted": { "role": "neutral", "displayName": "Ink Muted", "canonical": "#5b6370" },
+      "night-ground": { "role": "neutral", "displayName": "Night Ground", "canonical": "#0f1411" },
+      "night-page": { "role": "neutral", "displayName": "Night Page", "canonical": "#171e1a" },
+      "night-sidebar": { "role": "neutral", "displayName": "Night Sidebar", "canonical": "#151b17" },
+      "night-surface": { "role": "neutral", "displayName": "Night Surface", "canonical": "#202925" },
+      "night-hairline": { "role": "neutral", "displayName": "Night Hairline", "canonical": "#2b3530" },
+      "night-ink": { "role": "neutral", "displayName": "Night Ink", "canonical": "#e8ece7" },
+      "night-ink-line": { "role": "primary", "displayName": "Night Ink Line", "canonical": "#9db2f2" },
+      "night-ink-fill": { "role": "primary", "displayName": "Night Ink Fill", "canonical": "#2c4aa8" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Panel titles, set as the register heading." },
+      "headline": { "displayName": "Headline", "purpose": "Summary-line figures and the attendance progress count." },
+      "title": { "displayName": "Title", "purpose": "Card and modal titles; child names in attendance." },
+      "body": { "displayName": "Body", "purpose": "Tables, forms, descriptions; tabular numerals throughout." },
+      "label": { "displayName": "Label", "purpose": "Table heads, field labels, badges and tallies, sentence case." }
+    },
+    "shadows": [
+      { "name": "float", "value": "0 16px 40px rgba(26, 31, 43, 0.18)", "purpose": "Modals and the phone sidebar drawer (night: rgba(0,0,0,0.55))." },
+      { "name": "lift", "value": "0 2px 8px rgba(26, 31, 43, 0.08)", "purpose": "Login card only." },
+      { "name": "rest", "value": "0 1px 2px rgba(26, 31, 43, 0.06)", "purpose": "Active login tab only; none at night." },
+      { "name": "toast", "value": "0 8px 24px rgba(26, 31, 43, 0.25)", "purpose": "Dark ink toasts." }
+    ],
+    "motion": [
+      { "name": "fast", "value": "0.16s cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Fill, stroke and colour changes on controls." },
+      { "name": "normal", "value": "0.26s cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Drawer slide, scrim, theme change." },
+      { "name": "panel-in", "value": "fadeIn 0.3s: opacity 0 -> 1, translateY 8px -> 0", "purpose": "Tab panel entrance." },
+      { "name": "undo-drain", "value": "scaleX 1 -> 0, linear, --att-undo-ms (5000ms)", "purpose": "Countdown bar for the attendance undo window." },
+      { "name": "press", "value": "scale(0.97) on :active", "purpose": "Attendance button press feedback." },
+      { "name": "reduced-motion", "value": "all animation and transition durations 0.01ms", "purpose": "prefers-reduced-motion: reduce." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action per panel; solid deep ink fill in both themes.",
+      "html": "<button class=\"ds-btn-primary\">Yangi bola qo'shish</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 9px 18px; border-radius: var(--radius-md, 6px); font-family: 'Golos Text', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--on-fill, #fff); background: var(--fill-primary, #1f3c96); border: 1px solid transparent; cursor: pointer; transition: background-color 0.16s cubic-bezier(0.22,1,0.36,1); } .ds-btn-primary:hover { background: var(--fill-primary-hover, #182f78); } .ds-btn-primary:focus-visible { outline: 2px solid var(--border-focus, #1f3c96); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Neutral companion action: white page with a strong hairline.",
+      "html": "<button class=\"ds-btn-secondary\">Oylik Tabelga o'tish</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 9px 18px; border-radius: var(--radius-md, 6px); font-family: 'Golos Text', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--text-primary, #1a1f2b); background: var(--bg-card, #fff); border: 1px solid var(--border-strong, #a8b0a5); cursor: pointer; transition: background-color 0.16s cubic-bezier(0.22,1,0.36,1); } .ds-btn-secondary:hover { background: var(--bg-surface, #eceee9); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--border-focus, #1f3c96); outline-offset: 2px; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Delete and destructive actions, in red pencil.",
+      "html": "<button class=\"ds-btn-danger\">O'chirish</button>",
+      "css": ".ds-btn-danger { display: inline-flex; align-items: center; min-height: 40px; padding: 9px 18px; border-radius: var(--radius-md, 6px); font-family: 'Golos Text', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--color-rose, #c0262d); background: var(--bg-card, #fff); border: 1px solid currentColor; cursor: pointer; transition: background-color 0.16s cubic-bezier(0.22,1,0.36,1); } .ds-btn-danger:hover { background: var(--color-rose-bg, #fae4e4); } .ds-btn-danger:focus-visible { outline: 2px solid var(--border-focus, #1f3c96); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Form fields and selects.",
+      "html": "<input class=\"ds-input\" placeholder=\"F.I.Sh.\">",
+      "css": ".ds-input { min-height: 40px; padding: 8px 12px; background: var(--bg-input, #fff); border: 1px solid var(--border-strong, #a8b0a5); border-radius: var(--radius-md, 6px); color: var(--text-primary, #1a1f2b); font-family: 'Golos Text', sans-serif; font-size: 0.9rem; outline: none; transition: border-color 0.16s cubic-bezier(0.22,1,0.36,1); } .ds-input::placeholder { color: var(--text-muted, #5b6370); } .ds-input:focus { border-color: var(--border-focus, #1f3c96); outline: 2px solid var(--color-indigo-bg, #e4e9f5); outline-offset: 0; }"
+    },
+    {
+      "name": "Sidebar Nav",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "White sidebar page; active section in ink tint.",
+      "html": "<nav class=\"ds-nav\"><button class=\"ds-nav-item ds-active\">Asosiy Panel</button><button class=\"ds-nav-item\">Jonli Davomat</button><button class=\"ds-nav-item\">Oylik Davomat Tabeli</button></nav>",
+      "css": ".ds-nav { display: flex; flex-direction: column; gap: 4px; width: 264px; padding: 8px 12px; background: var(--bg-sidebar, #fff); border-right: 1px solid var(--sidebar-rule, #d8ddd5); } .ds-nav-item { display: flex; align-items: center; min-height: 44px; padding: 10px 12px; border: none; border-radius: var(--radius-md, 6px); background: transparent; color: var(--sidebar-muted, #485160); font-family: 'Golos Text', sans-serif; font-size: 0.92rem; font-weight: 500; text-align: left; cursor: pointer; transition: background-color 0.16s cubic-bezier(0.22,1,0.36,1), color 0.16s cubic-bezier(0.22,1,0.36,1); } .ds-nav-item:hover { background: var(--sidebar-hover, #f1f3ef); color: var(--sidebar-text, #1a1f2b); } .ds-nav-item:focus-visible { outline: 2px solid var(--border-focus, #1f3c96); outline-offset: 2px; } .ds-nav-item.ds-active { background: var(--color-indigo-bg, #e4e9f5); color: var(--color-primary, #1f3c96); font-weight: 600; }"
+    },
+    {
+      "name": "Status Badges",
+      "kind": "chip",
+      "refersTo": "badge-present",
+      "description": "Status ink on its own tint: present/paid, excused/pending, absent/debt, info.",
+      "html": "<span class=\"ds-badge ds-present\">To'langan</span> <span class=\"ds-badge ds-excused\">Kutilmoqda</span> <span class=\"ds-badge ds-absent\">Qarzdor</span> <span class=\"ds-badge ds-info\">3-6</span>",
+      "css": ".ds-badge { display: inline-block; padding: 3px 10px; border-radius: 9999px; font-family: 'Golos Text', sans-serif; font-size: 0.75rem; font-weight: 600; } .ds-present { background: var(--color-emerald-bg, #e2f0e7); color: var(--color-emerald, #1c7a4a); } .ds-excused { background: var(--color-amber-bg, #f8ecd6); color: var(--color-amber, #9a5800); } .ds-absent { background: var(--color-rose-bg, #fae4e4); color: var(--color-rose, #c0262d); } .ds-info { background: var(--color-indigo-bg, #e4e9f5); color: var(--color-indigo, #1f3c96); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "White page on the ground, hairline edge, no shadow.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Haftalik Davomat Dinamikasi</h3><p class=\"ds-card-sub\">Kunlik qatnashish foizlari</p></div>",
+      "css": ".ds-card { background: var(--bg-card, #fff); border: 1px solid var(--border-subtle, #d8ddd5); border-radius: var(--radius-lg, 8px); padding: 24px; color: var(--text-primary, #1a1f2b); font-family: 'Golos Text', sans-serif; } .ds-card-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; margin: 0; } .ds-card-sub { font-size: 0.82rem; color: var(--text-secondary, #485160); margin: 2px 0 0; }"
+    },
+    {
+      "name": "Ruled Summary Line",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Summary figures as one ruled register line divided by vertical hairlines, not tiles.",
+      "html": "<div class=\"ds-summary\"><div class=\"ds-stat\"><span class=\"ds-stat-l\">Jami Bolalar</span><b class=\"ds-stat-v\">103 nafar</b></div><div class=\"ds-stat\"><span class=\"ds-stat-l\">Bugungi Davomat</span><b class=\"ds-stat-v\">98 / 103</b></div><div class=\"ds-stat\"><span class=\"ds-stat-l\">Qarzdorlik</span><b class=\"ds-stat-v ds-problem\">2 400 000 UZS</b></div></div>",
+      "css": ".ds-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); background: var(--bg-card, #fff); border: 1px solid var(--border-subtle, #d8ddd5); border-radius: var(--radius-lg, 8px); overflow: hidden; font-family: 'Golos Text', sans-serif; font-variant-numeric: tabular-nums; } .ds-stat { display: flex; flex-direction: column; padding: 16px 20px; box-shadow: -1px 0 0 var(--border-subtle, #d8ddd5); } .ds-stat-l { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary, #485160); } .ds-stat-v { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text-primary, #1a1f2b); white-space: nowrap; } .ds-problem { color: var(--color-rose, #c0262d); }"
+    },
+    {
+      "name": "Attendance Register Row",
+      "kind": "custom",
+      "refersTo": "attendance-button",
+      "description": "Signature: child row with four register-mark buttons ending in the fixed mark column. Pressed buttons fill with the deep mark colour.",
+      "html": "<div class=\"ds-att\"><div class=\"ds-att-av\">AK</div><div class=\"ds-att-name\">Alisher Karimov<small>Keldi, 08:20</small></div><div class=\"ds-att-btns\"><button class=\"ds-att-btn ds-on\" aria-pressed=\"true\"><svg class=\"ds-mark\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>Keldi</button><button class=\"ds-att-btn\"><svg class=\"ds-mark\" viewBox=\"0 0 24 24\"><path d=\"M6.5 6.5l11 11M17.5 6.5l-11 11\"/></svg>Kelmadi</button><button class=\"ds-att-btn\"><svg class=\"ds-mark\" viewBox=\"0 0 24 24\"><path d=\"M7 3.5h7l3.5 3.5v13.5H7z\"/><path d=\"M10 12h4.5M10 15.5h4.5\"/></svg>Sababli</button><button class=\"ds-att-btn\"><svg class=\"ds-mark\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/></svg>Kechikdi</button></div><span class=\"ds-att-mark\"><svg class=\"ds-mark\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg></span></div>",
+      "css": ".ds-att { display: grid; grid-template-columns: 36px minmax(160px, 1fr) auto 40px; align-items: center; column-gap: 16px; padding: 10px 16px; background: var(--bg-card, #fff); border: 1px solid var(--border-subtle, #d8ddd5); border-radius: var(--radius-lg, 8px); font-family: 'Golos Text', sans-serif; color: var(--text-primary, #1a1f2b); } .ds-att-av { width: 36px; height: 36px; border-radius: 50%; background: var(--color-indigo-bg, #e4e9f5); color: var(--color-primary, #1f3c96); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; } .ds-att-name { font-size: 1rem; font-weight: 700; } .ds-att-name small { display: block; font-size: 0.88rem; font-weight: 400; color: var(--color-emerald, #1c7a4a); } .ds-att-btns { display: grid; grid-template-columns: repeat(4, auto); gap: 6px; } .ds-att-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 6px 12px; border-radius: var(--radius-md, 6px); border: 1px solid var(--border-subtle, #d8ddd5); background: var(--bg-surface, #eceee9); color: var(--text-primary, #1a1f2b); font: inherit; font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: background-color 0.16s cubic-bezier(0.22,1,0.36,1), border-color 0.16s cubic-bezier(0.22,1,0.36,1), transform 0.16s cubic-bezier(0.22,1,0.36,1); } .ds-att-btn:hover:not(.ds-on) { border-color: var(--text-secondary, #485160); } .ds-att-btn:active { transform: scale(0.97); } .ds-att-btn:focus-visible { outline: 2px solid var(--border-focus, #1f3c96); outline-offset: 2px; } .ds-att-btn.ds-on { background: #1c7a4a; border-color: #1c7a4a; color: #fff; } .ds-mark { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; } .ds-att-mark { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background: var(--color-emerald-bg, #e2f0e7); color: var(--color-emerald, #1c7a4a); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Class Register",
+    "overview": "Bog'chaOS is drawn as the sinf jurnali every teacher already keeps: white pages laid over a faint green-grey ground, one hairline weight for every ruled line, blue-black ink for anything you act on, and a red pencil that only comes out for problems. The sidebar is a plain white page with hairline rules (user-pinned, replacing the earlier bottle-green cloth cover); the open section is picked out in a pale ink-blue tint. Nothing glows, nothing has a gradient, and nothing lifts on hover.\n\nThe signature is the register mark. Every attendance status is a drawn mark (check, cross, note, clock) from one SVG symbol sprite, each in its own ink colour, always in a fixed mark column. The same marks recur in attendance rows, tally chips, the monthly tabel grid and the dashboard activity feed, so state is carried by shape as well as hue.\n\nDensity is calm and operational: teachers mark a group in seconds on a phone in daylight, directors read money and staff at a desk in the same register language. Light is the default; a dark \"register at night\" variant swaps the pages for deep green-black sheets while solid ink fills stay deep enough to carry white labels.",
+    "keyCharacteristics": [
+      "Golos Text everywhere, tabular numerals on by default at the body level.",
+      "Light default on a green-grey ground (data-theme=\"light\"), full dark override via [data-theme=\"dark\"].",
+      "One action ink, one problem pencil, four status marks; no decorative colour.",
+      "1px hairlines for every rule, small paper radii, flat unmodulated fills.",
+      "Summary figures read as one ruled line, not separate stat tiles."
+    ],
+    "rules": [
+      { "name": "The Red Pencil Rule", "body": "Red (#c0262d) appears only where something is wrong: absent, debt, error, critical, delete. A red element that is not a problem is a bug.", "section": "colors" },
+      { "name": "The One Ink Rule", "body": "Register Ink is the only action and focus hue. Present green, excused ochre and late violet are mark inks, not accents.", "section": "colors" },
+      { "name": "The Deep Fill Rule", "body": "Solid fills that carry white text (primary button, pressed attendance buttons) stay deep in both themes: --fill-primary for ink, --att-present/absent/excused/late for marks. Light text-ink variants are never used as fills.", "section": "colors" },
+      { "name": "The Tabular Ledger Rule", "body": "font-variant-numeric: tabular-nums is set on body; every count, sum, time and date column aligns like a ledger.", "section": "typography" },
+      { "name": "The Loaded Weights Rule", "body": "Golos Text is loaded at 400, 500, 600 and 700. Use only those.", "section": "typography" },
+      { "name": "The No Glow Rule", "body": "No gradients, glows, coloured shadows or hover lifts. Hover changes fill or stroke, never position.", "section": "elevation" },
+      { "name": "The One Hairline Rule", "body": "Every rule, border and divider is 1px. Emphasis comes from the stronger hairline colour (#a8b0a5) or a status colour, not a thicker line. (The 2-3px undo-countdown bar and today's 2px inset underline are progress and position indicators, not rules.)", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use the custom properties (--bg-*, --text-*, --color-*, --fill-*, --radius-*) so both themes stay live.",
+      "Do draw every status with the sprite mark plus its colour; shape and hue together.",
+      "Do use --fill-primary for solid ink fills and --color-primary for ink text and lines.",
+      "Do keep every rule at 1px and every card on Page White with a Hairline edge.",
+      "Do print values outright (chart percentages are always shown); touch screens have no hover.",
+      "Do keep phone attendance targets at 48px and the bulk action sticky at the bottom."
+    ],
+    "donts": [
+      "Don't use red (#c0262d) for anything that is not a problem.",
+      "Don't add gradients, glows, coloured shadows or hover lifts.",
+      "Don't split summary figures into separate stat tiles; keep the ruled summary line.",
+      "Don't introduce a second display family, emoji or glyph icons for status; the register marks are the status vocabulary.",
+      "Don't use uppercase tracked labels above titles; labels stay sentence case.",
+      "Don't bring the register chrome into the Telegram Mini App simulator; it deliberately uses Telegram's own palette and system font."
+    ]
+  }
+}

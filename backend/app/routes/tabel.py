@@ -1,11 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from app.database import get_connection
+from app.security import require
 import json
 
 router = APIRouter(prefix="/api/v1/tabel", tags=["Oylik Tabel"])
 
 @router.get("")
-def get_monthly_tabel(group_name: str = "Yulduzcha", month: str = "2026-10"):
+def get_monthly_tabel(group_name: str = "Yulduzcha", month: str = "2026-10",
+                      user: dict = Depends(require("tabel.view"))):
     conn = get_connection()
     c = conn.cursor()
 
@@ -20,9 +22,9 @@ def get_monthly_tabel(group_name: str = "Yulduzcha", month: str = "2026-10"):
     FROM children ch
     JOIN groups g ON ch.group_id = g.id
     LEFT JOIN monthly_tabel tb ON ch.id = tb.child_id AND tb.month = ?
-    WHERE ch.status = 'ACTIVE'
+    WHERE ch.status = 'ACTIVE' AND ch.org_id = ?
     """
-    params = [month]
+    params = [month, user["org"]]
 
     if group_name and group_name != "ALL":
         query += " AND g.name = ?"
@@ -36,7 +38,7 @@ def get_monthly_tabel(group_name: str = "Yulduzcha", month: str = "2026-10"):
     for r in rows:
         try:
             days_dict = json.loads(r["days_json"])
-        except:
+        except (TypeError, ValueError):
             days_dict = {}
 
         result.append({

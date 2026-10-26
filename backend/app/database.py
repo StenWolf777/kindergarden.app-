@@ -207,6 +207,35 @@ def init_db():
         paid_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- 10.2 Xodimlar davomati
+    CREATE TABLE IF NOT EXISTS staff_attendance (
+        id TEXT PRIMARY KEY,
+        org_id TEXT NOT NULL,
+        staff_id TEXT NOT NULL,
+        date TEXT NOT NULL,
+        status TEXT NOT NULL, -- 'PRESENT', 'ABSENT', 'EXCUSED', 'LATE'
+        check_in_time TEXT,
+        UNIQUE(staff_id, date)
+    );
+
+    -- 10.3 Qarz eslatmalari sozlamalari va jurnali
+    CREATE TABLE IF NOT EXISTS reminder_settings (
+        org_id TEXT PRIMARY KEY,
+        enabled INTEGER DEFAULT 0,
+        days_before INTEGER DEFAULT 5,
+        days_after INTEGER DEFAULT 5,
+        times TEXT DEFAULT '["09:00"]',
+        template TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS reminder_log (
+        org_id TEXT NOT NULL,
+        invoice_id TEXT NOT NULL,
+        sent_date TEXT NOT NULL,
+        slot TEXT NOT NULL,
+        PRIMARY KEY (invoice_id, sent_date, slot)
+    );
+
     -- 11. Faoliyat Jurnali
     CREATE TABLE IF NOT EXISTS activity_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -222,8 +251,37 @@ def init_db():
     if cursor.fetchone()[0] == 0:
         seed_all_data(cursor)
 
+    migrate(cursor)
+
     conn.commit()
     conn.close()
+
+def migrate(cursor):
+    from app.security import hash_password, is_hashed
+
+    existing = {r[1] for r in cursor.execute("PRAGMA table_info(children)")}
+    for column, ddl in (("monthly_fee", "REAL"), ("discount", "TEXT"), ("note", "TEXT")):
+        if column not in existing:
+            cursor.execute(f"ALTER TABLE children ADD COLUMN {column} {ddl}")
+
+    payment_columns = {r[1] for r in cursor.execute("PRAGMA table_info(payments)")}
+    for column in ("period", "note", "recorded_by"):
+        if column not in payment_columns:
+            cursor.execute(f"ALTER TABLE payments ADD COLUMN {column} TEXT")
+
+    group_columns = {r[1] for r in cursor.execute("PRAGMA table_info(groups)")}
+    if "teacher2_name" not in group_columns:
+        cursor.execute("ALTER TABLE groups ADD COLUMN teacher2_name TEXT")
+
+    org_columns = {r[1] for r in cursor.execute("PRAGMA table_info(organizations)")}
+    for column in ("telegram_group_id", "telegram_group_title", "telegram_group_username"):
+        if column not in org_columns:
+            cursor.execute(f"ALTER TABLE organizations ADD COLUMN {column} TEXT")
+
+    # Older databases stored passwords as plain text; hash them in place (the password itself is unchanged).
+    for user_id, stored in cursor.execute("SELECT id, password_hash FROM users").fetchall():
+        if not is_hashed(stored):
+            cursor.execute("UPDATE users SET password_hash = ? WHERE id = ?", (hash_password(stored), user_id))
 
 def seed_all_data(cursor):
     org_id = "org_smart_kids"
@@ -247,8 +305,13 @@ def seed_all_data(cursor):
         ("u_superadmin", org_id, "SUPER_ADMIN", "Nigora", "+998900000001", gen_password(), "N"),
         ("u_nurse2", org_id, "NURSE", "Turdiqulova Nozliyaoy", "+998900000002", gen_password(), "TN"),
     ]
-    cursor.executemany("INSERT OR REPLACE INTO users (id, org_id, role, full_name, phone, password_hash, avatar) VALUES (?, ?, ?, ?, ?, ?, ?)", users)
+    from app.security import hash_password
+    cursor.executemany(
+        "INSERT OR REPLACE INTO users (id, org_id, role, full_name, phone, password_hash, avatar) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [(uid, org, role, name, phone, hash_password(pw), av) for uid, org, role, name, phone, pw, av in users],
+    )
 
+    # Shown once on first run only; the database keeps just the hashes.
     print("[Bog'chaOS] Birinchi marta ishga tushirildi — yangi parollar yaratildi:")
     for uid, _, role, name, phone, pw, _ in users:
         print(f"  {role:12s} | {name:25s} | {phone:16s} | {pw}")

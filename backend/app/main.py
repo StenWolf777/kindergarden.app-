@@ -1,18 +1,34 @@
 """
 Bog'chaOS REST API Server (FastAPI)
 """
+import asyncio
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import init_db
-from app.routes import dashboard, children, attendance, billing, tabel, staff, auth
+from app import finance, telegram_bot
+from app.routes import dashboard, children, attendance, billing, tabel, staff, auth, telegram
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Initialize Database
     init_db()
     print("[Bog'chaOS Backend] Malumotlar bazasi va jadvallar muvaffaqiyatli ishga tushirildi.")
+
+    stop = asyncio.Event()
+    reminders = asyncio.create_task(finance.run_reminder_scheduler(stop))
+    poller = None
+    if telegram_bot.bot_enabled():
+        poller = asyncio.create_task(telegram_bot.run_polling(stop))
+        print("[Bog'chaOS Backend] Telegram bot ulandi: ota-onalar /start orqali ro'yxatdan o'tishi mumkin.")
+    else:
+        print("[Bog'chaOS Backend] Telegram bot tokeni yo'q: xabarlar yuborilmaydi.")
     yield
+    stop.set()
+    reminders.cancel()
+    if poller:
+        poller.cancel()
 
 app = FastAPI(
     title="Bog'chaOS Backend API",
@@ -21,13 +37,19 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS sozlamalari (Frontend ulanishi uchun)
+# Only the dashboard's own origins may call the API. Set BOGCHA_ALLOWED_ORIGINS
+# (comma-separated) when deploying to a real domain.
+ALLOWED_ORIGINS = [
+    o.strip() for o in os.getenv(
+        "BOGCHA_ALLOWED_ORIGINS", "http://localhost:4321,http://127.0.0.1:4321"
+    ).split(",") if o.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # Routerlarni ulash
@@ -38,6 +60,7 @@ app.include_router(attendance.router)
 app.include_router(billing.router)
 app.include_router(tabel.router)
 app.include_router(staff.router)
+app.include_router(telegram.router)
 
 @app.get("/")
 def root():
