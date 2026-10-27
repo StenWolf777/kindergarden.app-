@@ -31,3 +31,9 @@ Thumbs.db
 .impeccable/questions/
 .impeccable/hook.cache.json
 .impeccable/config.local.json
+
+# e2e (Playwright) — keep the test source, not installed deps or run output
+e2e/node_modules/
+e2e/test-results/
+e2e/playwright-report/
+backend/.pytest_cache/

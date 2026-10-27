@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261027c">
   <script>try { const t = localStorage.getItem('bogcha_theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}</script>
   <style>
     .auth-page {
@@ -70,7 +70,7 @@
 
     <div class="auth-header">
       <h1>Tizimga Kirish</h1>
-      <p id="authSubtitle">Smart Kids Academy boshqaruv portaliga xush kelibsiz.</p>
+      <p id="authSubtitle">"EXKLUZIV DELUXE" boshqaruv portaliga xush kelibsiz.</p>
     </div>
 
     <form id="passwordLoginForm" onsubmit="handlePasswordLogin(event)">
@@ -116,7 +116,7 @@
           localStorage.setItem('bogcha_token', data.token);
           showToast(`Xush kelibsiz, ${data.user.name}!`, 'success');
           setTimeout(() => {
-            window.location.href = 'index.html';
+            window.location.href = `index.html?t=${Date.now()}`;
           }, 800);
         } else {
           showToast(data.detail || "Kirishda xatolik yuz berdi", 'warning');

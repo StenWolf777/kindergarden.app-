@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>try { const t = localStorage.getItem('bogcha_theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}</script>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261027c">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -37,10 +37,10 @@
 
       <!-- Tenant Info -->
       <div class="tenant-card">
-        <div class="tenant-avatar">SK</div>
+        <div class="tenant-avatar" id="tenantAvatar">…</div>
         <div class="tenant-details">
-          <p class="tenant-name">Smart Kids Academy</p>
-          <span class="tenant-badge"><span class="pulse-dot"></span> PRO Tarif</span>
+          <p class="tenant-name" id="tenantName">…</p>
+          <span class="tenant-badge"><span class="pulse-dot"></span> <span id="tenantPlan">…</span></span>
         </div>
       </div>
 
@@ -66,6 +66,11 @@
         <button class="nav-item" data-tab="photos" data-perm="photos.send">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="11" r="2"/><path d="m21 17-5-5-8 8"/></svg>
           <span>Rasm yuborish</span>
+        </button>
+
+        <button class="nav-item" data-tab="kitchen" data-perm="kitchen.view">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18"/><path d="M12 11V4a1 1 0 0 1 1-1 5 5 0 0 1 5 5v2"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>
+          <span>Ошхона харажатлари</span>
         </button>
 
         <button class="nav-item" data-tab="tabel" data-perm="tabel.view">
@@ -430,6 +435,23 @@
           </form>
         </section>
 
+        <section class="tab-panel" id="tab-kitchen">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title">Ошхона харажатлари</h1>
+              <p class="panel-subtitle">Haftalik oziq-ovqat xaridlari: mahsulot, miqdor, narx va bitta bolaga to'g'ri keladigan xarajat.</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn btn-primary" data-perm-action="kitchen.manage" onclick="openKitchenForm()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Yangi hisobot
+              </button>
+            </div>
+          </div>
+
+          <div class="kitchen-list" id="kitchenList"></div>
+        </section>
+
         <!-- ========================================== -->
         <!-- TAB 4: OYLIK DAVOMAT TABELI (MONTHLY TABEL) -->
         <!-- ========================================== -->
@@ -733,9 +755,9 @@
           <div class="settings-grid">
             <div class="card glass-card">
               <h2 class="card-title">Bog'cha ma'lumotlari</h2>
-              <div class="form-group mt-4"><label>Bog'cha nomi:</label><input type="text" class="custom-input" value="Smart Kids Academy"></div>
-              <div class="form-group"><label>Telefon raqam:</label><input type="text" class="custom-input" value="+998 71 200 11 22"></div>
-              <div class="form-group"><label>Manzil:</label><input type="text" class="custom-input" value="Toshkent sh., Chilonzor tumani, 5-mavze 12-uy"></div>
+              <div class="form-group mt-4"><label for="settingsOrgName">Bog'cha nomi:</label><input type="text" id="settingsOrgName" class="custom-input" value=""></div>
+              <div class="form-group"><label for="settingsOrgPhone">Telefon raqam:</label><input type="text" id="settingsOrgPhone" class="custom-input" value=""></div>
+              <div class="form-group"><label for="settingsOrgAddress">Manzil:</label><input type="text" id="settingsOrgAddress" class="custom-input" value=""></div>
               <button class="btn btn-primary" onclick="alert('Sozlamalar saqlandi!')">Saqlash</button>
             </div>
 
@@ -948,7 +970,7 @@
             <p>Toshkent shahri &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; «01» Sentabr 2025-yil</p>
           </div>
           <div class="contract-content">
-            <p>Bir tomondan <b>«SMART KIDS ACADEMY» NTM</b> rahbari N.Azimova, ikkinchi tomondan tarbiyalanuvchi <b id="contractDocChildName">Imron Rahimov</b>ning qonuniy vakili <b id="contractDocParentName">Xurshid Rahimov</b> o'rtasida quyidagi shartlar tuzildi:</p>
+            <p>Bir tomondan <b>«<span id="contractOrgName">…</span>» NTM</b> rahbari N.Azimova, ikkinchi tomondan tarbiyalanuvchi <b id="contractDocChildName">Imron Rahimov</b>ning qonuniy vakili <b id="contractDocParentName">Xurshid Rahimov</b> o'rtasida quyidagi shartlar tuzildi:</p>
             <h4>1. Shartnoma Predmeti</h4>
             <p>Muassasa bolani o'quv dasturi, 4 mahal issiq ovqat, tibbiy nazorat va xavfsiz muhit bilan ta'minlash majburiyatini oladi.</p>
             <h4>2. To'lov Shartlari va Oziq-ovqat Kompensatsiyasi</h4>
@@ -957,7 +979,7 @@
             <div class="contract-signatures">
               <div>
                 <b>Muassasa:</b><br>
-                «Smart Kids Academy» NTM<br>
+                «<span id="contractOrgName2">…</span>» NTM<br>
                 Direktor: N.Azimova (M.O'.)<br>
                 <i>[ Muhr va Imzo ]</i>
               </div>
@@ -1042,8 +1064,62 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="kitchenFormModal">
+    <div class="modal-box kitchen-modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="kitchenFormTitle">Yangi haftalik hisobot</h3>
+        <button class="modal-close" onclick="closeModal('kitchenFormModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <form id="kitchenForm">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group"><label for="kitchenWeekStart">Hafta boshi</label><input type="date" id="kitchenWeekStart" required class="custom-input"></div>
+            <div class="form-group"><label for="kitchenWeekEnd">Hafta oxiri</label><input type="date" id="kitchenWeekEnd" required class="custom-input"></div>
+          </div>
+          <div class="form-group"><label for="kitchenChildCount">Haftalik bola soni</label><input type="number" id="kitchenChildCount" required min="1" class="custom-input" placeholder="Masalan: 90"></div>
+
+          <div class="kitchen-items-head">
+            <span>Mahsulot nomi</span><span>Miqdori</span><span>Narxi (so'm)</span><span>Jami</span><span></span>
+          </div>
+          <div class="kitchen-items" id="kitchenItemRows"></div>
+          <button type="button" class="btn btn-secondary btn-sm" id="kitchenAddRow">+ Mahsulot qo'shish</button>
+
+          <div class="kitchen-totals">
+            <span>Jami: <b id="kitchenTotalAmount">0 so'm</b></span>
+            <span>Bitta bolaga: <b id="kitchenPerChild">0 so'm</b></span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('kitchenFormModal')">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary" id="kitchenSubmitBtn">Saqlash</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="kitchenDetailModal">
+    <div class="modal-box kitchen-modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="kitchenDetailTitle">Hisobot</h3>
+        <button class="modal-close" onclick="closeModal('kitchenDetailModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <p class="kitchen-detail-summary" id="kitchenDetailSummary"></p>
+        <table class="data-table">
+          <thead><tr><th>№</th><th>Mahsulot</th><th>Miqdori</th><th>Narxi</th><th class="text-right">Jami</th></tr></thead>
+          <tbody id="kitchenDetailItems"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" id="kitchenDeleteBtn" data-perm-action="kitchen.manage">O'chirish</button>
+        <button type="button" class="btn btn-secondary" id="kitchenEditBtn" data-perm-action="kitchen.manage">Tahrirlash</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('kitchenDetailModal')">Yopish</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20261027c"></script>
 </body>
 </html>

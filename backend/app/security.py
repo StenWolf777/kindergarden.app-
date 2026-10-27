@@ -50,6 +50,8 @@ PERMISSIONS: dict[str, set[str]] = {
     "parents.invite": MANAGEMENT | {"teacher"},
     "photos.send": MANAGEMENT | {"teacher"},
     "telegram.group.manage": MANAGEMENT,
+    "kitchen.view": MANAGEMENT | {"accountant", "nurse"},
+    "kitchen.manage": {"super_admin", "accountant"},
     "groups.manage": MANAGEMENT,
     "attendance.view": ALL_STAFF,
     "attendance.mark": MANAGEMENT | {"teacher"},

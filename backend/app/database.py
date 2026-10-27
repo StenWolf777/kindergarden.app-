@@ -9,7 +9,9 @@ import secrets
 import string
 from datetime import datetime, date
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "..", "bogcha_data.db")
+# Override for tests/deployment, e.g. BOGCHA_DB_PATH=/tmp/test.db; never touches
+# the real database unless this is unset.
+DB_PATH = os.getenv("BOGCHA_DB_PATH") or os.path.join(os.path.dirname(__file__), "..", "bogcha_data.db")
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -234,6 +236,30 @@ def init_db():
         sent_date TEXT NOT NULL,
         slot TEXT NOT NULL,
         PRIMARY KEY (invoice_id, sent_date, slot)
+    );
+
+    -- 12. Ошхона харажатлари (Haftalik oziq-ovqat xarajatlari)
+    CREATE TABLE IF NOT EXISTS food_expense_reports (
+        id TEXT PRIMARY KEY,
+        org_id TEXT NOT NULL,
+        week_start TEXT NOT NULL,
+        week_end TEXT NOT NULL,
+        child_count INTEGER NOT NULL,
+        total_amount REAL NOT NULL DEFAULT 0,
+        created_by TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(org_id, week_start)
+    );
+
+    CREATE TABLE IF NOT EXISTS food_expense_items (
+        id TEXT PRIMARY KEY,
+        report_id TEXT NOT NULL,
+        position INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        quantity REAL NOT NULL,
+        unit_price REAL NOT NULL,
+        line_total REAL NOT NULL,
+        FOREIGN KEY (report_id) REFERENCES food_expense_reports(id)
     );
 
     -- 11. Faoliyat Jurnali

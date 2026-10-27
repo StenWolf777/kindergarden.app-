@@ -3,7 +3,9 @@
 // Barcha 7 ta modul: Rollar, Davomat, Tabel, Omborxona, To'garaklar, Maosh, Shartnomalar
 // ============================================================================
 
-const API_BASE = 'http://127.0.0.1:8000/api/v1';
+// The e2e suite points this at an isolated test backend via window.__BOGCHA_API_BASE__;
+// production is unaffected since that global is never set outside of tests.
+const API_BASE = window.__BOGCHA_API_BASE__ || 'http://127.0.0.1:8000/api/v1';
 
 const STATE = {
   theme: 'light',
@@ -31,12 +33,14 @@ document.addEventListener('DOMContentLoaded', () => {
   initPhotos();
   initReminders();
   initStaffAttendance();
+  initKitchen();
   initUserSession().then(ok => {
     if (!ok) return;
     syncWithBackend();
     if (can('photos.send')) loadPhotoStatus();
     if (can('billing.remind')) loadReminders();
     if (can('staff.view')) loadStaffAttendance();
+    if (can('kitchen.view')) loadKitchenReports();
   });
 
   // Search Listeners
@@ -133,7 +137,7 @@ function apiFetch(url, options = {}) {
   return fetch(url, { ...options, headers }).then(res => {
     if (res.status === 401) {
       try { localStorage.removeItem('bogcha_user'); localStorage.removeItem('bogcha_token'); } catch (e) {}
-      window.location.href = 'login.html';
+      window.location.href = `login.html?t=${Date.now()}`;
     }
     return res;
   });
@@ -176,7 +180,7 @@ async function initUserSession() {
   let token = null;
   try { token = localStorage.getItem('bogcha_token'); } catch (e) {}
   if (!token) {
-    window.location.href = 'login.html';
+    window.location.href = `login.html?t=${Date.now()}`;
     return false;
   }
   try {
@@ -189,6 +193,21 @@ async function initUserSession() {
     document.getElementById('currentUserAvatar').innerText = user.avatar || user.name.split(' ').map(n => n[0]).join('');
     const greet = document.getElementById('dashboardGreeting');
     if (greet) greet.innerText = `Salom, ${user.name}!`;
+    if (user.org) {
+      STATE.org = user.org;
+      const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+      setText('tenantAvatar', user.org.avatar);
+      setText('tenantName', user.org.name);
+      setText('tenantPlan', `${user.org.plan_tier} Tarif`);
+      setText('contractOrgName', user.org.name.toUpperCase());
+      setText('contractOrgName2', user.org.name);
+      const orgName = document.getElementById('settingsOrgName');
+      if (orgName) orgName.value = user.org.name;
+      const orgPhone = document.getElementById('settingsOrgPhone');
+      if (orgPhone) orgPhone.value = user.org.phone || '';
+      const orgAddress = document.getElementById('settingsOrgAddress');
+      if (orgAddress) orgAddress.value = user.org.address || '';
+    }
     return true;
   } catch (e) {
     showToast("Server bilan ulanib bo'lmadi. Sahifani yangilang.", 'warning');
@@ -200,7 +219,7 @@ function logoutUser() {
   try { localStorage.removeItem('bogcha_user'); localStorage.removeItem('bogcha_token'); } catch (e) {}
   showToast("Tizimdan chiqildi", "info");
   setTimeout(() => {
-    window.location.href = 'login.html';
+    window.location.href = `login.html?t=${Date.now()}`;
   }, 400);
 }
 
@@ -1585,6 +1604,216 @@ async function markStaffAttendance(staffId, status) {
   } finally {
     STAFF_ATT.saving.delete(staffId);
     renderStaffAttendance();
+  }
+}
+
+// ============================================================================
+// Ошхона харажатлари (weekly kitchen / food expense reports)
+// ============================================================================
+
+const KITCHEN = { reports: [], openId: null, editingId: null };
+
+function initKitchen() {
+  const form = document.getElementById('kitchenForm');
+  if (!form) return;
+  document.getElementById('kitchenAddRow')?.addEventListener('click', () => addKitchenRow());
+  document.getElementById('kitchenItemRows')?.addEventListener('input', e => {
+    if (e.target.classList.contains('kitchen-qty') || e.target.classList.contains('kitchen-price')) updateKitchenRowTotal(e.target.closest('.kitchen-item-row'));
+  });
+  document.getElementById('kitchenItemRows')?.addEventListener('click', e => {
+    const btn = e.target.closest('[data-remove-row]');
+    if (!btn) return;
+    const rows = document.getElementById('kitchenItemRows');
+    if (rows.children.length > 1) { btn.closest('.kitchen-item-row').remove(); } else { clearKitchenRow(btn.closest('.kitchen-item-row')); }
+    updateKitchenTotals();
+  });
+  form.addEventListener('submit', submitKitchenReport);
+  document.getElementById('kitchenDeleteBtn')?.addEventListener('click', deleteKitchenReport);
+  document.getElementById('kitchenEditBtn')?.addEventListener('click', editKitchenReport);
+}
+
+function clearKitchenRow(row) {
+  row.querySelectorAll('input').forEach(i => { i.value = ''; });
+  row.querySelector('.kitchen-row-total').textContent = '0';
+}
+
+function addKitchenRow(name = '', quantity = '', price = '') {
+  const wrap = document.getElementById('kitchenItemRows');
+  const row = document.createElement('div');
+  row.className = 'kitchen-item-row';
+  row.innerHTML = `
+    <input type="text" class="custom-input kitchen-name" placeholder="Masalan: Ун" value="${escapeHtml(name)}">
+    <input type="number" class="custom-input kitchen-qty" min="0" step="any" placeholder="0" value="${quantity}">
+    <input type="number" class="custom-input kitchen-price" min="0" step="any" placeholder="0" value="${price}">
+    <span class="kitchen-row-total">0</span>
+    <button type="button" class="icon-button" data-remove-row aria-label="Qatorni o'chirish">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>`;
+  wrap.appendChild(row);
+  updateKitchenRowTotal(row);
+}
+
+function updateKitchenRowTotal(row) {
+  if (!row) return;
+  const qty = parseFloat(row.querySelector('.kitchen-qty').value) || 0;
+  const price = parseFloat(row.querySelector('.kitchen-price').value) || 0;
+  row.querySelector('.kitchen-row-total').textContent = new Intl.NumberFormat('uz-UZ').format(qty * price);
+  updateKitchenTotals();
+}
+
+function updateKitchenTotals() {
+  let total = 0;
+  document.querySelectorAll('#kitchenItemRows .kitchen-item-row').forEach(row => {
+    total += (parseFloat(row.querySelector('.kitchen-qty').value) || 0) * (parseFloat(row.querySelector('.kitchen-price').value) || 0);
+  });
+  const count = parseInt(document.getElementById('kitchenChildCount').value, 10) || 0;
+  document.getElementById('kitchenTotalAmount').textContent = formatMoney(total);
+  document.getElementById('kitchenPerChild').textContent = count > 0 ? formatMoney(total / count) : '—';
+}
+
+function openKitchenForm(report = null) {
+  KITCHEN.editingId = report ? report.id : null;
+  document.getElementById('kitchenFormTitle').textContent = report ? "Hisobotni tahrirlash" : "Yangi haftalik hisobot";
+  document.getElementById('kitchenSubmitBtn').textContent = report ? 'Saqlash' : 'Saqlash';
+  document.getElementById('kitchenForm').reset();
+  document.getElementById('kitchenItemRows').innerHTML = '';
+  if (report) {
+    document.getElementById('kitchenWeekStart').value = report.week_start;
+    document.getElementById('kitchenWeekEnd').value = report.week_end;
+    document.getElementById('kitchenChildCount').value = report.child_count;
+    report.items.forEach(it => addKitchenRow(it.name, it.quantity, it.unit_price));
+  } else {
+    for (let i = 0; i < 5; i++) addKitchenRow();
+  }
+  updateKitchenTotals();
+  openModal('kitchenFormModal');
+}
+
+async function editKitchenReport() {
+  if (!KITCHEN.openId) return;
+  const res = await apiFetch(`${API_BASE}/kitchen/reports/${encodeURIComponent(KITCHEN.openId)}`);
+  const data = await res.json();
+  if (!res.ok) return showToast(data.detail || "Hisobotni yuklab bo'lmadi.", 'warning');
+  closeModal('kitchenDetailModal');
+  openKitchenForm(data);
+}
+
+document.addEventListener('input', e => { if (e.target.id === 'kitchenChildCount') updateKitchenTotals(); });
+
+async function submitKitchenReport(e) {
+  e.preventDefault();
+  const items = [...document.querySelectorAll('#kitchenItemRows .kitchen-item-row')]
+    .map(row => ({
+      name: row.querySelector('.kitchen-name').value.trim(),
+      quantity: parseFloat(row.querySelector('.kitchen-qty').value),
+      unit_price: parseFloat(row.querySelector('.kitchen-price').value),
+    }))
+    .filter(it => it.name && it.quantity > 0 && !isNaN(it.unit_price));
+
+  if (!items.length) return showToast('Kamida bitta mahsulot kiriting.', 'warning');
+
+  const body = {
+    week_start: document.getElementById('kitchenWeekStart').value,
+    week_end: document.getElementById('kitchenWeekEnd').value,
+    child_count: parseInt(document.getElementById('kitchenChildCount').value, 10),
+    items,
+  };
+  const btn = document.getElementById('kitchenSubmitBtn');
+  btn.disabled = true;
+  const editingId = KITCHEN.editingId;
+  try {
+    const res = await apiFetch(editingId ? `${API_BASE}/kitchen/reports/${encodeURIComponent(editingId)}` : `${API_BASE}/kitchen/reports`, {
+      method: editingId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(Array.isArray(data.detail) ? "Ma'lumotlar to'liq emas." : (data.detail || 'Xatolik'));
+    closeModal('kitchenFormModal');
+    showToast(`Hisobot saqlandi: ${formatMoney(data.total_amount)}, bitta bolaga ${formatMoney(data.cost_per_child)}.`, 'success');
+    loadKitchenReports();
+  } catch (err) {
+    showToast(err.message, 'warning');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function formatDateUz(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${d}-${MONTH_NAMES[m - 1].toLowerCase()}`;
+}
+
+async function loadKitchenReports() {
+  const list = document.getElementById('kitchenList');
+  if (!list) return;
+  list.innerHTML = `<p class="att-empty">Yuklanmoqda…</p>`;
+  try {
+    const res = await apiFetch(`${API_BASE}/kitchen/reports`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    KITCHEN.reports = data;
+    renderKitchenList();
+  } catch (err) {
+    list.innerHTML = `<div class="att-empty"><p>${escapeHtml(err.message || "Hisobotlarni yuklab bo'lmadi.")}</p></div>`;
+  }
+}
+
+function renderKitchenList() {
+  const list = document.getElementById('kitchenList');
+  if (!KITCHEN.reports.length) {
+    list.innerHTML = `<p class="att-empty">Hali hisobot kiritilmagan. "Yangi hisobot" tugmasini bosing.</p>`;
+    return;
+  }
+  const latest = KITCHEN.reports[0];
+  const prev = KITCHEN.reports[1];
+  const trend = prev ? latest.cost_per_child - prev.cost_per_child : null;
+  list.innerHTML = `
+    <div class="kitchen-summary">
+      <div><span>So'nggi hafta</span><b>${escapeHtml(formatDateUz(latest.week_start))} – ${escapeHtml(formatDateUz(latest.week_end))}</b></div>
+      <div><span>Bitta bolaga</span><b>${formatMoney(latest.cost_per_child)}</b>${trend !== null ? `<small class="${trend > 0 ? 'text-rose' : trend < 0 ? 'text-emerald' : ''}">${trend > 0 ? '+' : ''}${formatMoney(trend)} o'tgan haftaga nisbatan</small>` : ''}</div>
+      <div><span>Jami xarajat</span><b>${formatMoney(latest.total_amount)}</b></div>
+    </div>
+    <div class="kitchen-history">${KITCHEN.reports.map(r => `
+      <button type="button" class="kitchen-history-row" onclick="openKitchenDetail('${escapeHtml(r.id)}')">
+        <span class="kitchen-history-week">${escapeHtml(formatDateUz(r.week_start))} – ${escapeHtml(formatDateUz(r.week_end))}</span>
+        <span class="kitchen-history-count">${r.child_count} bola</span>
+        <span class="kitchen-history-total">${formatMoney(r.total_amount)}</span>
+        <span class="kitchen-history-per">${formatMoney(r.cost_per_child)} / bola</span>
+        <svg class="todo-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+      </button>`).join('')}</div>`;
+}
+
+async function openKitchenDetail(reportId) {
+  KITCHEN.openId = reportId;
+  document.getElementById('kitchenDetailItems').innerHTML = '';
+  document.getElementById('kitchenDetailSummary').textContent = 'Yuklanmoqda…';
+  openModal('kitchenDetailModal');
+  try {
+    const res = await apiFetch(`${API_BASE}/kitchen/reports/${encodeURIComponent(reportId)}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    document.getElementById('kitchenDetailTitle').textContent = `${formatDateUz(data.week_start)} – ${formatDateUz(data.week_end)}`;
+    document.getElementById('kitchenDetailSummary').textContent =
+      `${data.child_count} bola · Jami ${formatMoney(data.total_amount)} · Bitta bolaga ${formatMoney(data.cost_per_child)}`;
+    document.getElementById('kitchenDetailItems').innerHTML = data.items.map((it, i) => `
+      <tr><td>${i + 1}</td><td>${escapeHtml(it.name)}</td><td>${it.quantity}</td><td>${formatMoney(it.unit_price)}</td><td class="text-right">${formatMoney(it.line_total)}</td></tr>
+    `).join('');
+  } catch (err) {
+    document.getElementById('kitchenDetailSummary').textContent = err.message || "Yuklab bo'lmadi.";
+  }
+}
+
+async function deleteKitchenReport() {
+  if (!KITCHEN.openId) return;
+  if (!confirm("Bu haftalik hisobotni butunlay o'chirmoqchimisiz?")) return;
+  try {
+    const res = await apiFetch(`${API_BASE}/kitchen/reports/${encodeURIComponent(KITCHEN.openId)}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    closeModal('kitchenDetailModal');
+    showToast("Hisobot o'chirildi.", 'info');
+    loadKitchenReports();
+  } catch (err) {
+    showToast(err.message, 'warning');
   }
 }
 

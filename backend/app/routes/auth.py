@@ -56,6 +56,11 @@ def login(data: LoginSchema):
 
 @router.get("/me")
 def me(user: dict = Depends(current_user)):
+    conn = get_connection()
+    org = conn.execute(
+        "SELECT name, phone, address, plan_tier FROM organizations WHERE id = ?", (user["org"],)
+    ).fetchone()
+    conn.close()
     return {
         "id": user["id"],
         "role": user["role"],
@@ -63,4 +68,11 @@ def me(user: dict = Depends(current_user)):
         "phone": user["phone"],
         "avatar": user["avatar"],
         "permissions": sorted(user["permissions"]),
+        "org": {
+            "name": org["name"],
+            "avatar": "".join(w[0] for w in org["name"].split()[:2]).upper(),
+            "phone": org["phone"],
+            "address": org["address"],
+            "plan_tier": org["plan_tier"],
+        } if org else None,
     }
