@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>try { const t = localStorage.getItem('bogcha_theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}</script>
-  <link rel="stylesheet" href="styles.css?v=20261027c">
+  <link rel="stylesheet" href="styles.css?v=20261027d">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -30,7 +30,7 @@
           </div>
           <div class="logo-text">
             <h2>Bog'cha<span>OS</span></h2>
-            <span class="badge-saas">Enterprise Pro</span>
+            <span class="badge-saas" data-i18n="brand.tagline">Enterprise Pro</span>
           </div>
         </div>
       </div>
@@ -48,59 +48,59 @@
       <nav class="sidebar-nav" id="sidebarNav">
         <button class="nav-item active" data-tab="dashboard" data-perm="dashboard.view">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-          <span>Asosiy Panel</span>
+          <span data-i18n="nav.dashboard">Asosiy Panel</span>
         </button>
 
         <button class="nav-item" data-tab="children" data-perm="children.view">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Bolalar & Guruhlar</span>
+          <span data-i18n="nav.children">Bolalar & Guruhlar</span>
           <span class="nav-counter" id="totalChildrenBadge">9</span>
         </button>
 
         <button class="nav-item" data-tab="attendance" data-perm="attendance.view">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
-          <span>Jonli Davomat</span>
-          <span class="nav-status-badge">Jonli</span>
+          <span data-i18n="nav.attendance">Jonli Davomat</span>
+          <span class="nav-status-badge" data-i18n="nav.live">Jonli</span>
         </button>
 
         <button class="nav-item" data-tab="photos" data-perm="photos.send">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="11" r="2"/><path d="m21 17-5-5-8 8"/></svg>
-          <span>Rasm yuborish</span>
+          <span data-i18n="nav.photos">Rasm yuborish</span>
         </button>
 
         <button class="nav-item" data-tab="kitchen" data-perm="kitchen.view">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18"/><path d="M12 11V4a1 1 0 0 1 1-1 5 5 0 0 1 5 5v2"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>
-          <span>Ошхона харажатлари</span>
+          <span data-i18n="nav.kitchen">Ошхона харажатлари</span>
         </button>
 
         <button class="nav-item" data-tab="tabel" data-perm="tabel.view">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
-          <span>Oylik Davomat Tabeli</span>
+          <span data-i18n="nav.tabel">Oylik Davomat Tabeli</span>
         </button>
 
         <button class="nav-item" data-tab="billing" data-perm="billing.view">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
-          <span>Moliya & To'lovlar</span>
+          <span data-i18n="nav.billing">Moliya & To'lovlar</span>
         </button>
 
         <button class="nav-item" data-tab="staff" data-perm="staff.view">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Xodimlar & Maosh</span>
+          <span data-i18n="nav.staff">Xodimlar & Maosh</span>
         </button>
 
         <button class="nav-item" data-tab="contracts" data-perm="contracts.view">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          <span>Shartnomalar & Hujjatlar</span>
+          <span data-i18n="nav.contracts">Shartnomalar & Hujjatlar</span>
         </button>
 
         <button class="nav-item" data-tab="telegram-simulator" data-perm="tma.view">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-          <span>Ota-ona Telegram TMA</span>
+          <span data-i18n="nav.tma">Ota-ona Telegram TMA</span>
         </button>
 
         <button class="nav-item" data-tab="settings" data-perm="settings.view">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          <span>Sozlamalar & Tarif</span>
+          <span data-i18n="nav.settings">Sozlamalar & Tarif</span>
         </button>
       </nav>
 
@@ -111,7 +111,7 @@
             <span class="user-name" id="currentUserName">Nodira Azimova</span>
             <span class="user-role" id="currentUserRole">Boshqaruvchi</span>
           </div>
-          <button class="icon-button" onclick="logoutUser()" title="Tizimdan chiqish">
+          <button class="icon-button" onclick="logoutUser()" title="Tizimdan chiqish" data-i18n-title="sidebar.logout.title">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
           </button>
         </div>
@@ -123,20 +123,19 @@
       <!-- TOP NAVBAR -->
       <header class="topbar">
         <div class="topbar-left">
-          <button class="icon-button menu-toggle" id="menuToggle" aria-label="Menyuni ochish" aria-expanded="false" aria-controls="appSidebar">
+          <button class="icon-button menu-toggle" id="menuToggle" aria-label="Menyuni ochish" data-i18n-title="common.openMenu" aria-expanded="false" aria-controls="appSidebar">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
           </button>
           <div class="search-box">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="text" id="globalSearchInput" placeholder="Bola, ota-ona yoki guruhni qidiring...">
+            <input type="text" id="globalSearchInput" placeholder="Bola, ota-ona yoki guruhni qidiring..." data-i18n-placeholder="topbar.search.placeholder">
           </div>
         </div>
 
         <div class="topbar-right">
-          <span class="demo-chip" title="Ko'rsatilgan bolalar, guruhlar va summalar sinov uchun">Demo ma'lumotlar</span>
           <!-- Logged-in user's role (read-only; access is enforced by who actually logged in) -->
           <div class="role-switcher-box">
-            <span class="role-label">Rol:</span>
+            <span class="role-label" data-i18n="topbar.roleLabel">Rol:</span>
             <span class="badge badge-indigo" id="currentRoleBadge">…</span>
           </div>
 
@@ -145,8 +144,13 @@
             <span class="clock-time">09:15:30</span>
           </div>
 
+          <!-- Language Toggle -->
+          <button class="icon-button lang-toggle" id="langToggle" title="Tilni almashtirish" data-i18n-title="topbar.lang.title">
+            <span id="langToggleLabel">UZ</span>
+          </button>
+
           <!-- Theme Toggle -->
-          <button class="icon-button theme-toggle" id="themeToggle" title="Rejimni almashtirish">
+          <button class="icon-button theme-toggle" id="themeToggle" title="Rejimni almashtirish" data-i18n-title="topbar.theme.title">
             <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
             <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
           </button>
@@ -163,16 +167,16 @@
           <div class="panel-header">
             <div>
               <h1 class="panel-title" id="dashboardGreeting">Salom, Nodira Azimova!</h1>
-              <p class="panel-subtitle">Bog'cha bo'yicha bugungi kunlik hisobot va barcha faoliyatlar oqimi.</p>
+              <p class="panel-subtitle" data-i18n="dash.subtitle">Bog'cha bo'yicha bugungi kunlik hisobot va barcha faoliyatlar oqimi.</p>
             </div>
             <div class="header-actions">
               <button class="btn btn-secondary" onclick="switchTab('tabel')">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/></svg>
-                Oylik Tabelga o'tish
+                <span data-i18n="dash.btn.goTabel">Oylik Tabelga o'tish</span>
               </button>
               <button class="btn btn-primary" data-perm-action="children.create" onclick="openModal('addChildModal')">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Yangi bola qo'shish
+                <span data-i18n="dash.btn.addChild">Yangi bola qo'shish</span>
               </button>
             </div>
           </div>
@@ -184,7 +188,7 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
               <div class="stat-info">
-                <span class="stat-label">Jami Bolalar</span>
+                <span class="stat-label" data-i18n="dash.kpi.totalChildren">Jami Bolalar</span>
                 <p class="stat-value" id="kpiTotalChildren">…</p>
                 <span class="stat-trend" id="kpiChildrenNote"></span>
               </div>
@@ -192,7 +196,7 @@
 
             <div class="stat-card">
               <div class="stat-info">
-                <span class="stat-label">Bugun keldi</span>
+                <span class="stat-label" data-i18n="dash.kpi.attendanceToday">Bugun keldi</span>
                 <p class="stat-value" id="kpiAttendanceRate">…</p>
                 <span class="stat-trend" id="kpiAttendanceNote"></span>
               </div>
@@ -200,7 +204,7 @@
 
             <div class="stat-card">
               <div class="stat-info">
-                <span class="stat-label">Xodimlar bugun ishda</span>
+                <span class="stat-label" data-i18n="dash.kpi.staffToday">Xodimlar bugun ishda</span>
                 <p class="stat-value" id="kpiStaff">…</p>
                 <span class="stat-trend" id="kpiStaffNote"></span>
               </div>
@@ -208,7 +212,7 @@
 
             <div class="stat-card">
               <div class="stat-info">
-                <span class="stat-label">Bu oy tushum</span>
+                <span class="stat-label" data-i18n="dash.kpi.revenueMonth">Bu oy tushum</span>
                 <p class="stat-value" id="kpiRevenue">…</p>
                 <span class="stat-trend" id="kpiRevenueNote"></span>
               </div>
@@ -216,7 +220,7 @@
 
             <div class="stat-card">
               <div class="stat-info">
-                <span class="stat-label">Qarzdorlik</span>
+                <span class="stat-label" data-i18n="dash.kpi.debts">Qarzdorlik</span>
                 <p class="stat-value text-rose" id="kpiDebts">…</p>
                 <span class="stat-trend negative" id="kpiDebtsNote"></span>
               </div>
@@ -228,8 +232,8 @@
             <div class="card">
               <div class="card-header">
                 <div>
-                  <h2 class="card-title">Bajarish kerak</h2>
-                  <span class="card-subtitle">Bugun e'tibor talab qiladigan ishlar</span>
+                  <h2 class="card-title" data-i18n="dash.todo.title">Bajarish kerak</h2>
+                  <span class="card-subtitle" data-i18n="dash.todo.subtitle">Bugun e'tibor talab qiladigan ishlar</span>
                 </div>
               </div>
               <ul class="todo-list" id="attentionList"></ul>
@@ -238,10 +242,10 @@
             <div class="card">
               <div class="card-header">
                 <div>
-                  <h2 class="card-title">Eng katta qarzdorlar</h2>
-                  <span class="card-subtitle">Bosing: to'lov qabul qilish oynasi ochiladi</span>
+                  <h2 class="card-title" data-i18n="dash.debtors.title">Eng katta qarzdorlar</h2>
+                  <span class="card-subtitle" data-i18n="dash.debtors.subtitle">Bosing: to'lov qabul qilish oynasi ochiladi</span>
                 </div>
-                <button type="button" class="btn btn-sm btn-secondary" data-perm-action="billing.view" onclick="switchTab('billing')">Barchasi</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-perm-action="billing.view" onclick="switchTab('billing')" data-i18n="common.all">Barchasi</button>
               </div>
               <ul class="debtor-list" id="topDebtorsList"></ul>
             </div>
@@ -252,8 +256,8 @@
             <div class="card glass-card">
               <div class="card-header">
                 <div>
-                  <h2 class="card-title">Tushum: oxirgi 6 oy</h2>
-                  <span class="card-subtitle">Qabul qilingan to'lovlar</span>
+                  <h2 class="card-title" data-i18n="dash.income.title">Tushum: oxirgi 6 oy</h2>
+                  <span class="card-subtitle" data-i18n="dash.income.subtitle">Qabul qilingan to'lovlar</span>
                 </div>
               </div>
               <div class="chart-wrapper">
@@ -265,10 +269,10 @@
             <div class="card glass-card">
               <div class="card-header">
                 <div>
-                  <h2 class="card-title">Jonli Hodisalar Jurnali</h2>
-                  <span class="card-subtitle">Telegram va to'lovlar oqimi</span>
+                  <h2 class="card-title" data-i18n="dash.activity.title">Jonli Hodisalar Jurnali</h2>
+                  <span class="card-subtitle" data-i18n="dash.activity.subtitle">Telegram va to'lovlar oqimi</span>
                 </div>
-                <span class="pulse-status">Jonli</span>
+                <span class="pulse-status" data-i18n="nav.live">Jonli</span>
               </div>
               <div class="activity-feed" id="activityFeed"></div>
             </div>
@@ -276,7 +280,7 @@
 
           <!-- Groups Grid -->
           <div class="section-title-wrap">
-            <h2 class="section-heading">Guruhlar holati</h2>
+            <h2 class="section-heading" data-i18n="dash.groups.title">Guruhlar holati</h2>
             <span class="badge badge-indigo" id="groupsCountBadge"></span>
           </div>
           <div class="groups-mini-grid" id="groupsMiniGrid"></div>
@@ -288,31 +292,31 @@
         <section class="tab-panel" id="tab-children">
           <div class="panel-header">
             <div>
-              <h1 class="panel-title">Bolalar va Guruhlar Boshqaruvi</h1>
-              <p class="panel-subtitle">Barcha ro'yxatdan o'tgan bolalar, guruhlar, allergiyalar va ota-onalar kontaktlari.</p>
+              <h1 class="panel-title" data-i18n="children.title">Bolalar va Guruhlar Boshqaruvi</h1>
+              <p class="panel-subtitle" data-i18n="children.subtitle">Barcha ro'yxatdan o'tgan bolalar, guruhlar, allergiyalar va ota-onalar kontaktlari.</p>
             </div>
             <div class="header-actions">
               <button class="btn btn-secondary" id="btnAddGroup" data-perm-action="groups.manage" onclick="openAddGroupModal()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Yangi guruh qo'shish
+                <span data-i18n="children.btn.addGroup">Yangi guruh qo'shish</span>
               </button>
               <button class="btn btn-primary" data-perm-action="children.create" onclick="openModal('addChildModal')">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Yangi bola qo'shish
+                <span data-i18n="dash.btn.addChild">Yangi bola qo'shish</span>
               </button>
             </div>
           </div>
 
           <div class="filter-bar">
             <div class="group-tabs" id="groupFilterTabs">
-              <button class="filter-tab active" data-group="ALL">Barchasi</button>
+              <button class="filter-tab active" data-group="ALL" data-i18n="common.all">Barchasi</button>
             </div>
             <div class="filter-inputs">
-              <input type="text" class="input-search" id="childSearchFilter" placeholder="Ism yoki ota-ona telefoni...">
+              <input type="text" class="input-search" id="childSearchFilter" placeholder="Ism yoki ota-ona telefoni..." data-i18n-placeholder="children.search.placeholder">
               <select class="custom-select" id="childStatusFilter">
-                <option value="ALL">Barcha statuslar</option>
-                <option value="ACTIVE">Faol</option>
-                <option value="DEBT">Qarzdor</option>
+                <option value="ALL" data-i18n="children.filter.allStatuses">Barcha statuslar</option>
+                <option value="ACTIVE" data-i18n="children.filter.active">Faol</option>
+                <option value="DEBT" data-i18n="children.filter.debt">Qarzdor</option>
               </select>
             </div>
           </div>
@@ -322,17 +326,17 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Bola Ismi va Surati</th>
-                    <th>Guruhi</th>
-                    <th>Yoshi / Tug'ilgan kuni</th>
-                    <th>Ota-onasi & Aloqa</th>
-                    <th>Соғлиги</th>
-                    <th data-perm-col="children.finance">Скидка</th>
-                    <th data-perm-col="children.finance">Изох</th>
-                    <th data-perm-col="children.finance">Нархи</th>
-                    <th id="thPaymentStatus" data-perm-col="children.finance">To'lov Holati</th>
-                    <th id="thDocuments" class="text-right" data-perm-col="children.finance">Hujjatlar</th>
-                    <th id="thDelete" class="text-right col-actions">O'chirish</th>
+                    <th data-i18n="children.th.name">Bola Ismi va Surati</th>
+                    <th data-i18n="children.th.group">Guruhi</th>
+                    <th data-i18n="children.th.age">Yoshi / Tug'ilgan kuni</th>
+                    <th data-i18n="children.th.parent">Ota-onasi & Aloqa</th>
+                    <th data-i18n="children.th.health">Соғлиги</th>
+                    <th data-perm-col="children.finance" data-i18n="children.th.discount">Скидка</th>
+                    <th data-perm-col="children.finance" data-i18n="children.th.note">Изох</th>
+                    <th data-perm-col="children.finance" data-i18n="children.th.price">Нархи</th>
+                    <th id="thPaymentStatus" data-perm-col="children.finance" data-i18n="children.th.paymentStatus">To'lov Holati</th>
+                    <th id="thDocuments" class="text-right" data-perm-col="children.finance" data-i18n="children.th.documents">Hujjatlar</th>
+                    <th id="thDelete" class="text-right col-actions" data-i18n="common.delete">O'chirish</th>
                   </tr>
                 </thead>
                 <tbody id="childrenTableBody"></tbody>
@@ -347,40 +351,40 @@
         <section class="tab-panel" id="tab-attendance">
           <div class="panel-header">
             <div>
-              <h1 class="panel-title" id="attTitle">Kunlik davomat</h1>
-              <p class="panel-subtitle">Kunlik davomat. "Keldi" belgisi saqlangach, ota-onaga Telegram orqali xabar boradi.</p>
+              <h1 class="panel-title" id="attTitle" data-i18n="att.title">Kunlik davomat</h1>
+              <p class="panel-subtitle" data-i18n="att.subtitle">Kunlik davomat. "Keldi" belgisi saqlangach, ota-onaga Telegram orqali xabar boradi.</p>
             </div>
           </div>
 
           <div class="att-controls">
             <label class="att-field">
-              <span>Guruh</span>
+              <span data-i18n="att.field.group">Guruh</span>
               <select id="attendanceGroupSelect" class="custom-select"></select>
             </label>
             <label class="att-field">
-              <span>Sana</span>
+              <span data-i18n="att.field.date">Sana</span>
               <input type="date" id="attendanceDate" class="custom-input">
             </label>
           </div>
 
           <div class="att-summary" aria-live="polite">
-            <p class="att-progress"><b id="attCountMarked">0</b> / <span id="attCountTotal">0</span> belgilandi</p>
+            <p class="att-progress"><b id="attCountMarked">0</b> / <span id="attCountTotal">0</span> <span data-i18n="att.markedSuffix">belgilandi</span></p>
             <ul class="att-tally">
-              <li class="tally-present"><svg class="mark" aria-hidden="true"><use href="#mark-PRESENT"/></svg><span id="attCountPresent">0</span> keldi</li>
-              <li class="tally-absent"><svg class="mark" aria-hidden="true"><use href="#mark-ABSENT"/></svg><span id="attCountAbsent">0</span> kelmadi</li>
-              <li class="tally-excused"><svg class="mark" aria-hidden="true"><use href="#mark-EXCUSED"/></svg><span id="attCountExcused">0</span> sababli</li>
-              <li class="tally-late"><svg class="mark" aria-hidden="true"><use href="#mark-LATE"/></svg><span id="attCountLate">0</span> kech keldi</li>
+              <li class="tally-present"><svg class="mark" aria-hidden="true"><use href="#mark-PRESENT"/></svg><span id="attCountPresent">0</span> <span data-i18n="att.tally.present">keldi</span></li>
+              <li class="tally-absent"><svg class="mark" aria-hidden="true"><use href="#mark-ABSENT"/></svg><span id="attCountAbsent">0</span> <span data-i18n="att.tally.absent">kelmadi</span></li>
+              <li class="tally-excused"><svg class="mark" aria-hidden="true"><use href="#mark-EXCUSED"/></svg><span id="attCountExcused">0</span> <span data-i18n="att.tally.excused">sababli</span></li>
+              <li class="tally-late"><svg class="mark" aria-hidden="true"><use href="#mark-LATE"/></svg><span id="attCountLate">0</span> <span data-i18n="att.tally.late">kech keldi</span></li>
             </ul>
           </div>
 
-          <p class="att-readonly-note" id="attReadonlyNote" hidden>Bu o'tgan kun, faqat ko'rish mumkin. Davomat faqat bugungi kun uchun belgilanadi.</p>
+          <p class="att-readonly-note" id="attReadonlyNote" hidden data-i18n="att.readonlyNote.viewOnly">Bu o'tgan kun, faqat ko'rish mumkin. Davomat faqat bugungi kun uchun belgilanadi.</p>
 
           <div class="attendance-list" id="attendanceCardsGrid"></div>
 
           <div class="att-actionbar" id="attActionBar" hidden>
             <button type="button" class="btn btn-success att-mark-rest" id="btnMarkRest" onclick="markAllPresent()">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span id="btnMarkRestLabel">Qolganlarni "Keldi" qilish</span>
+              <span id="btnMarkRestLabel" data-i18n="att.markRest">Qolganlarni "Keldi" qilish</span>
             </button>
           </div>
         </section>
@@ -388,49 +392,49 @@
         <section class="tab-panel" id="tab-photos">
           <div class="panel-header">
             <div>
-              <h1 class="panel-title">Rasm yuborish</h1>
-              <p class="panel-subtitle">Bolalar rasmlarini ota-onalarga Telegram orqali yuboring.</p>
+              <h1 class="panel-title" data-i18n="photos.title">Rasm yuborish</h1>
+              <p class="panel-subtitle" data-i18n="photos.subtitle">Bolalar rasmlarini ota-onalarga Telegram orqali yuboring.</p>
             </div>
           </div>
 
           <div class="card photo-channel" id="photoChannelCard">
-            <p class="photo-channel-status" id="photoChannelStatus">Yuklanmoqda…</p>
-            <p class="photo-warning" id="photoPublicWarning" hidden>Bu kanal <b>ochiq</b>: uni Telegramda istalgan odam topib, rasmlarni ko'rishi mumkin. Bolalar rasmlari uchun kanalni yopiq (private) qiling. Bot shundan keyin ham ishlayveradi.</p>
+            <p class="photo-channel-status" id="photoChannelStatus" data-i18n="photos.channel.loading">Yuklanmoqda…</p>
+            <p class="photo-warning" id="photoPublicWarning" hidden data-i18n="photos.warning" data-i18n-html="true">Bu kanal <b>ochiq</b>: uni Telegramda istalgan odam topib, rasmlarni ko'rishi mumkin. Bolalar rasmlari uchun kanalni yopiq (private) qiling. Bot shundan keyin ham ishlayveradi.</p>
             <form class="photo-connect" id="photoConnectForm" hidden>
-              <label for="photoChannelInput">Kanal yoki guruh manzili</label>
+              <label for="photoChannelInput" data-i18n="photos.channelLabel">Kanal yoki guruh manzili</label>
               <div class="photo-connect-row">
-                <input type="text" id="photoChannelInput" class="custom-input" placeholder="https://t.me/kanal_nomi yoki @kanal_nomi" autocomplete="off">
-                <button type="submit" class="btn btn-secondary">Ulash</button>
+                <input type="text" id="photoChannelInput" class="custom-input" placeholder="https://t.me/kanal_nomi yoki @kanal_nomi" autocomplete="off" data-i18n-placeholder="photos.channelPlaceholder">
+                <button type="submit" class="btn btn-secondary" data-i18n="photos.connectBtn">Ulash</button>
               </div>
-              <small>Avval botni kanalga administrator qilib qo'shing.</small>
+              <small data-i18n="photos.connectHint">Avval botni kanalga administrator qilib qo'shing.</small>
             </form>
           </div>
 
           <form class="card photo-form" id="photoForm">
             <fieldset class="photo-target">
-              <legend>Kimga yuborilsin?</legend>
-              <label class="photo-radio"><input type="radio" name="photoTarget" value="channel" checked> Kanalga (barcha ota-onalar)</label>
-              <label class="photo-radio"><input type="radio" name="photoTarget" value="child"> Bitta bolaning ota-onasiga</label>
+              <legend data-i18n="photos.targetLegend">Kimga yuborilsin?</legend>
+              <label class="photo-radio"><input type="radio" name="photoTarget" value="channel" checked> <span data-i18n="photos.target.channel">Kanalga (barcha ota-onalar)</span></label>
+              <label class="photo-radio"><input type="radio" name="photoTarget" value="child"> <span data-i18n="photos.target.child">Bitta bolaning ota-onasiga</span></label>
               <select id="photoChildSelect" class="custom-select" hidden aria-label="Bolani tanlang"></select>
             </fieldset>
 
             <label class="photo-drop" for="photoFiles">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="11" r="2"/><path d="m21 17-5-5-8 8"/></svg>
-              <span><b>Rasmlarni tanlang</b> yoki telefonda suratga oling</span>
-              <small>10 tagacha rasm, JPG yoki PNG</small>
+              <span><b data-i18n="photos.dropTitle">Rasmlarni tanlang</b> <span data-i18n="photos.dropOr">yoki telefonda suratga oling</span></span>
+              <small data-i18n="photos.dropHint">10 tagacha rasm, JPG yoki PNG</small>
             </label>
             <input type="file" id="photoFiles" accept="image/jpeg,image/png" multiple hidden>
 
             <div class="photo-previews" id="photoPreviews"></div>
 
             <div class="form-group">
-              <label for="photoCaption">Izoh (ixtiyoriy)</label>
-              <textarea id="photoCaption" class="custom-input photo-caption" rows="2" maxlength="1024" placeholder="Masalan: Bugun rasm chizish mashg'ulotida"></textarea>
+              <label for="photoCaption" data-i18n="photos.captionLabel">Izoh (ixtiyoriy)</label>
+              <textarea id="photoCaption" class="custom-input photo-caption" rows="2" maxlength="1024" placeholder="Masalan: Bugun rasm chizish mashg'ulotida" data-i18n-placeholder="photos.captionPlaceholder"></textarea>
             </div>
 
             <div class="photo-actions">
-              <span id="photoCount">Rasm tanlanmagan</span>
-              <button type="submit" class="btn btn-primary" id="photoSendBtn" disabled>Yuborish</button>
+              <span id="photoCount" data-i18n="photos.noneSelected">Rasm tanlanmagan</span>
+              <button type="submit" class="btn btn-primary" id="photoSendBtn" disabled data-i18n="common.send">Yuborish</button>
             </div>
           </form>
         </section>
@@ -438,13 +442,13 @@
         <section class="tab-panel" id="tab-kitchen">
           <div class="panel-header">
             <div>
-              <h1 class="panel-title">Ошхона харажатлари</h1>
-              <p class="panel-subtitle">Haftalik oziq-ovqat xaridlari: mahsulot, miqdor, narx va bitta bolaga to'g'ri keladigan xarajat.</p>
+              <h1 class="panel-title" data-i18n="kitchen.title">Ошхона харажатлари</h1>
+              <p class="panel-subtitle" data-i18n="kitchen.subtitle">Haftalik oziq-ovqat xaridlari: mahsulot, miqdor, narx va bitta bolaga to'g'ri keladigan xarajat.</p>
             </div>
             <div class="header-actions">
               <button class="btn btn-primary" data-perm-action="kitchen.manage" onclick="openKitchenForm()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Yangi hisobot
+                <span data-i18n="kitchen.newReport">Yangi hisobot</span>
               </button>
             </div>
           </div>
@@ -458,28 +462,28 @@
         <section class="tab-panel" id="tab-tabel">
           <div class="panel-header">
             <div>
-              <h1 class="panel-title">Oylik Davomat Tabeli & Kompensatsiya</h1>
-              <p class="panel-subtitle">31 kunlik to'liq tabel. Sababli kelmagan kunlar oziq-ovqat normasiga ko'ra keyingi oydan chegiriladi.</p>
+              <h1 class="panel-title" data-i18n="tabel.title">Oylik Davomat Tabeli & Kompensatsiya</h1>
+              <p class="panel-subtitle" data-i18n="tabel.subtitle">31 kunlik to'liq tabel. Sababli kelmagan kunlar oziq-ovqat normasiga ko'ra keyingi oydan chegiriladi.</p>
             </div>
             <div class="header-actions">
               <button class="btn btn-secondary" onclick="exportTabelExcel()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Excelga eksport
+                <span data-i18n="tabel.export">Excelga eksport</span>
               </button>
               <button class="btn btn-primary" onclick="applyCompensationToInvoices()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                Kompensatsiyani Invoyslarga hisoblash
+                <span data-i18n="tabel.applyComp">Kompensatsiyani Invoyslarga hisoblash</span>
               </button>
             </div>
           </div>
 
           <!-- Tabel Explanation Card -->
           <div class="tabel-legend-card glass-card mb-4">
-            <div class="legend-item"><span class="tabel-cell-demo p-cell"><svg class="mark" aria-hidden="true"><use href="#mark-PRESENT"/></svg></span> <b>Kelgan</b> (Davomat qilingan)</div>
-            <div class="legend-item"><span class="tabel-cell-demo e-cell"><svg class="mark" aria-hidden="true"><use href="#mark-EXCUSED"/></svg></span> <b>Sababli</b> (Shifokor spravkasi bor - 25,000 UZS/kun qaytariladi)</div>
-            <div class="legend-item"><span class="tabel-cell-demo a-cell"><svg class="mark" aria-hidden="true"><use href="#mark-ABSENT"/></svg></span> <b>Sababsiz</b> (Qaytarilmaydi)</div>
-            <div class="legend-item"><span class="tabel-cell-demo l-cell"><svg class="mark" aria-hidden="true"><use href="#mark-LATE"/></svg></span> <b>Kech keldi</b></div>
-            <div class="legend-item"><span class="tabel-cell-demo w-cell">–</span> <b>Dam olish kuni</b></div>
+            <div class="legend-item"><span class="tabel-cell-demo p-cell"><svg class="mark" aria-hidden="true"><use href="#mark-PRESENT"/></svg></span> <b data-i18n="tabel.legend.present">Kelgan</b> <span data-i18n="tabel.legend.presentNote">(Davomat qilingan)</span></div>
+            <div class="legend-item"><span class="tabel-cell-demo e-cell"><svg class="mark" aria-hidden="true"><use href="#mark-EXCUSED"/></svg></span> <b data-i18n="tabel.legend.excused">Sababli</b> <span data-i18n="tabel.legend.excusedNote">(Shifokor spravkasi bor - 25,000 UZS/kun qaytariladi)</span></div>
+            <div class="legend-item"><span class="tabel-cell-demo a-cell"><svg class="mark" aria-hidden="true"><use href="#mark-ABSENT"/></svg></span> <b data-i18n="tabel.legend.absent">Sababsiz</b> <span data-i18n="tabel.legend.absentNote">(Qaytarilmaydi)</span></div>
+            <div class="legend-item"><span class="tabel-cell-demo l-cell"><svg class="mark" aria-hidden="true"><use href="#mark-LATE"/></svg></span> <b data-i18n="tabel.legend.late">Kech keldi</b></div>
+            <div class="legend-item"><span class="tabel-cell-demo w-cell">–</span> <b data-i18n="tabel.legend.weekend">Dam olish kuni</b></div>
           </div>
 
           <div class="card glass-card no-padding">
@@ -498,13 +502,13 @@
         <section class="tab-panel" id="tab-billing">
           <div class="panel-header">
             <div>
-              <h1 class="panel-title">Moliya, Hisob-fakturalar va Kvitansiyalar</h1>
-              <p class="panel-subtitle">Oylik tushumlar, qarzdorlar va Click / Payme to'lovlari hisoboti.</p>
+              <h1 class="panel-title" data-i18n="billing.title">Moliya, Hisob-fakturalar va Kvitansiyalar</h1>
+              <p class="panel-subtitle" data-i18n="billing.subtitle">Oylik tushumlar, qarzdorlar va Click / Payme to'lovlari hisoboti.</p>
             </div>
             <div class="header-actions">
               <button class="btn btn-secondary" data-perm-action="billing.remind" onclick="document.getElementById('remindersCard').scrollIntoView({ behavior: 'smooth' })">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                To'lov eslatmalari
+                <span data-i18n="billing.remindersBtn">To'lov eslatmalari</span>
               </button>
             </div>
           </div>
@@ -512,63 +516,63 @@
           <section class="card reminders-card" id="remindersCard" data-perm-action="billing.remind">
             <div class="card-header">
               <div>
-                <h2 class="card-title">Avtomatik to'lov eslatmalari</h2>
-                <span class="card-subtitle">To'lov muddati yaqinlashganda va o'tganda ota-onaga Telegram orqali yuboriladi</span>
+                <h2 class="card-title" data-i18n="billing.reminders.title">Avtomatik to'lov eslatmalari</h2>
+                <span class="card-subtitle" data-i18n="billing.reminders.subtitle">To'lov muddati yaqinlashganda va o'tganda ota-onaga Telegram orqali yuboriladi</span>
               </div>
             </div>
 
             <div class="reminder-stats">
-              <div><span>Eslatma</span><b id="remStatus">…</b><small id="remWindow"></small></div>
-              <div><span>Muddati yaqin</span><b id="remDueSoon">…</b><small>bola</small></div>
-              <div><span>Kechikkan</span><b id="remOverdue" class="text-rose">…</b><small>bola</small></div>
-              <div><span>Telegramga ulangan</span><b id="remLinked">…</b><small>ota-ona</small></div>
-              <div><span>Jami qoldiq</span><b id="remTotal">…</b><small>UZS</small></div>
+              <div><span data-i18n="billing.stat.reminder">Eslatma</span><b id="remStatus">…</b><small id="remWindow"></small></div>
+              <div><span data-i18n="billing.stat.dueSoon">Muddati yaqin</span><b id="remDueSoon">…</b><small data-i18n="common.child">bola</small></div>
+              <div><span data-i18n="billing.stat.overdue">Kechikkan</span><b id="remOverdue" class="text-rose">…</b><small data-i18n="common.child">bola</small></div>
+              <div><span data-i18n="billing.stat.linked">Telegramga ulangan</span><b id="remLinked">…</b><small data-i18n="common.parent">ota-ona</small></div>
+              <div><span data-i18n="billing.stat.totalLeft">Jami qoldiq</span><b id="remTotal">…</b><small>UZS</small></div>
             </div>
 
             <form id="reminderForm" class="reminder-form">
               <label class="switch-row">
-                <span><b>Eslatma yoqilgan</b><small>O'chirilsa, avtomatik xabar yuborilmaydi</small></span>
+                <span><b data-i18n="billing.switch.enabled">Eslatma yoqilgan</b><small data-i18n="billing.switch.enabledHint">O'chirilsa, avtomatik xabar yuborilmaydi</small></span>
                 <input type="checkbox" id="remEnabled" class="switch">
               </label>
 
               <div class="stepper-row">
-                <span>Muddatdan oldin</span>
-                <div class="stepper"><button type="button" class="icon-button" data-step="remBefore:-1" aria-label="Kamaytirish">−</button><b><span id="remBefore">5</span> kun</b><button type="button" class="icon-button" data-step="remBefore:1" aria-label="Ko'paytirish">+</button></div>
+                <span data-i18n="billing.stepper.before">Muddatdan oldin</span>
+                <div class="stepper"><button type="button" class="icon-button" data-step="remBefore:-1" aria-label="Kamaytirish" data-i18n-title="common.decrease">−</button><b><span id="remBefore">5</span> <span data-i18n="common.days">kun</span></b><button type="button" class="icon-button" data-step="remBefore:1" aria-label="Ko'paytirish" data-i18n-title="common.increase">+</button></div>
               </div>
               <div class="stepper-row">
-                <span>Muddatdan keyin</span>
-                <div class="stepper"><button type="button" class="icon-button" data-step="remAfter:-1" aria-label="Kamaytirish">−</button><b><span id="remAfter">5</span> kun</b><button type="button" class="icon-button" data-step="remAfter:1" aria-label="Ko'paytirish">+</button></div>
+                <span data-i18n="billing.stepper.after">Muddatdan keyin</span>
+                <div class="stepper"><button type="button" class="icon-button" data-step="remAfter:-1" aria-label="Kamaytirish" data-i18n-title="common.decrease">−</button><b><span id="remAfter">5</span> <span data-i18n="common.days">kun</span></b><button type="button" class="icon-button" data-step="remAfter:1" aria-label="Ko'paytirish" data-i18n-title="common.increase">+</button></div>
               </div>
-              <p class="reminder-help">Eslatma muddatdan shuncha kun oldin boshlanadi va muddat o'tgach yana shuncha kun davom etadi; to'lov qilingach to'xtaydi.</p>
+              <p class="reminder-help" data-i18n="billing.help">Eslatma muddatdan shuncha kun oldin boshlanadi va muddat o'tgach yana shuncha kun davom etadi; to'lov qilingach to'xtaydi.</p>
 
               <div class="reminder-block">
-                <span class="reminder-label">Yuborish vaqti</span>
+                <span class="reminder-label" data-i18n="billing.sendTimeLabel">Yuborish vaqti</span>
                 <div class="time-chips" id="remTimes"></div>
                 <div class="time-add">
                   <input type="time" id="remTimeInput" class="custom-input" value="18:00" aria-label="Yangi vaqt">
-                  <button type="button" class="btn btn-secondary btn-sm" id="remTimeAdd">Vaqt qo'shish</button>
+                  <button type="button" class="btn btn-secondary btn-sm" id="remTimeAdd" data-i18n="billing.addTimeBtn">Vaqt qo'shish</button>
                 </div>
-                <small class="reminder-help">Kuniga 6 martagacha.</small>
+                <small class="reminder-help" data-i18n="billing.timesHint">Kuniga 6 martagacha.</small>
               </div>
 
               <div class="reminder-block">
-                <label class="reminder-label" for="remTemplate">Xabar matni</label>
+                <label class="reminder-label" for="remTemplate" data-i18n="billing.templateLabel">Xabar matni</label>
                 <textarea id="remTemplate" class="custom-input reminder-template" rows="3" maxlength="1000"></textarea>
                 <div class="field-chips" id="remFields"></div>
                 <p class="reminder-preview" id="remPreview"></p>
               </div>
 
               <div class="reminder-actions">
-                <button type="button" class="btn btn-secondary" id="remSendNow">Hozir yuborish</button>
-                <button type="submit" class="btn btn-primary">Saqlash</button>
+                <button type="button" class="btn btn-secondary" id="remSendNow" data-i18n="billing.sendNow">Hozir yuborish</button>
+                <button type="submit" class="btn btn-primary" data-i18n="common.save">Saqlash</button>
               </div>
             </form>
           </section>
 
           <!-- Daromad / Chiqim Statistikasi -->
           <div class="section-title-wrap">
-            <h2 class="section-heading">Moliyaviy Statistika</h2>
-            <span class="badge badge-indigo">Haqiqiy to'lovlar asosida</span>
+            <h2 class="section-heading" data-i18n="billing.statsHeading">Moliyaviy Statistika</h2>
+            <span class="badge badge-indigo" data-i18n="billing.statsBadge">Haqiqiy to'lovlar asosida</span>
           </div>
           <div class="stats-grid mb-4" id="financeStatsGrid"></div>
 
@@ -577,15 +581,15 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Chek / ID</th>
-                    <th>Bola & Guruhi</th>
-                    <th>Ota-onasi</th>
-                    <th>Oylik To'lov</th>
-                    <th>Kompensatsiya</th>
-                    <th>To'langan</th>
-                    <th>Qoldiq Qarz</th>
-                    <th>Status</th>
-                    <th class="text-right col-actions">Amallar</th>
+                    <th data-i18n="billing.th.receipt">Chek / ID</th>
+                    <th data-i18n="billing.th.childGroup">Bola & Guruhi</th>
+                    <th data-i18n="billing.th.parent">Ota-onasi</th>
+                    <th data-i18n="billing.th.monthlyFee">Oylik To'lov</th>
+                    <th data-i18n="billing.th.compensation">Kompensatsiya</th>
+                    <th data-i18n="billing.th.paid">To'langan</th>
+                    <th data-i18n="billing.th.debt">Qoldiq Qarz</th>
+                    <th data-i18n="billing.th.status">Status</th>
+                    <th class="text-right col-actions" data-i18n="billing.th.actions">Amallar</th>
                   </tr>
                 </thead>
                 <tbody id="invoicesTableBody"></tbody>
@@ -600,16 +604,16 @@
         <section class="tab-panel" id="tab-staff">
           <div class="panel-header">
             <div>
-              <h1 class="panel-title">Xodimlar Ro'yxati va Oylik Maosh (Payroll)</h1>
-              <p class="panel-subtitle">Tarbiyachilar, enagalar, oshpaz va texnik xodimlar maoshi va avanslari nazorati.</p>
+              <h1 class="panel-title" data-i18n="staff.title">Xodimlar Ro'yxati va Oylik Maosh (Payroll)</h1>
+              <p class="panel-subtitle" data-i18n="staff.subtitle">Tarbiyachilar, enagalar, oshpaz va texnik xodimlar maoshi va avanslari nazorati.</p>
             </div>
           </div>
 
           <section class="card staff-att-card">
             <div class="card-header">
               <div>
-                <h2 class="card-title">Bugungi xodimlar davomati</h2>
-                <span class="card-subtitle" id="staffAttSummary">Yuklanmoqda…</span>
+                <h2 class="card-title" data-i18n="staff.attendanceTitle">Bugungi xodimlar davomati</h2>
+                <span class="card-subtitle" id="staffAttSummary" data-i18n="common.loading">Yuklanmoqda…</span>
               </div>
             </div>
             <div class="staff-att-list" id="staffAttList"></div>
@@ -620,14 +624,14 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>F.I.Sh & Lavozimi</th>
-                    <th>Telefon</th>
-                    <th>Asosiy Oklad</th>
-                    <th>KPI / Bonus</th>
-                    <th>To'langan Avans</th>
-                    <th>To'lanadigan Qoldiq</th>
-                    <th>Holat</th>
-                    <th class="text-right">Amal</th>
+                    <th data-i18n="staff.th.name">F.I.Sh & Lavozimi</th>
+                    <th data-i18n="staff.th.phone">Telefon</th>
+                    <th data-i18n="staff.th.baseSalary">Asosiy Oklad</th>
+                    <th data-i18n="staff.th.bonus">KPI / Bonus</th>
+                    <th data-i18n="staff.th.advance">To'langan Avans</th>
+                    <th data-i18n="staff.th.remaining">To'lanadigan Qoldiq</th>
+                    <th data-i18n="staff.th.status">Holat</th>
+                    <th class="text-right" data-i18n="staff.th.action">Amal</th>
                   </tr>
                 </thead>
                 <tbody id="staffPayrollTableBody"></tbody>
@@ -642,8 +646,8 @@
         <section class="tab-panel" id="tab-contracts">
           <div class="panel-header">
             <div>
-              <h1 class="panel-title">Shartnomalar va Tibbiy Hujjatlar</h1>
-              <p class="panel-subtitle">Ota-onalar bilan rasmiy 2-tomonlama shartnomalar, emlash (privivka) va spravkalar.</p>
+              <h1 class="panel-title" data-i18n="contracts.title">Shartnomalar va Tibbiy Hujjatlar</h1>
+              <p class="panel-subtitle" data-i18n="contracts.subtitle">Ota-onalar bilan rasmiy 2-tomonlama shartnomalar, emlash (privivka) va spravkalar.</p>
             </div>
           </div>
 
@@ -652,13 +656,13 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Shartnoma №</th>
-                    <th>Bola & Guruh</th>
-                    <th>Ota-onasi</th>
-                    <th>Shartnoma Sanasi</th>
-                    <th>Emlash (Privivka)</th>
-                    <th>Tibbiy Spravka</th>
-                    <th class="text-right">Shartnoma</th>
+                    <th data-i18n="contracts.th.number">Shartnoma №</th>
+                    <th data-i18n="contracts.th.childGroup">Bola & Guruh</th>
+                    <th data-i18n="contracts.th.parent">Ota-onasi</th>
+                    <th data-i18n="contracts.th.date">Shartnoma Sanasi</th>
+                    <th data-i18n="contracts.th.vaccination">Emlash (Privivka)</th>
+                    <th data-i18n="contracts.th.medCert">Tibbiy Spravka</th>
+                    <th class="text-right" data-i18n="contracts.th.contract">Shartnoma</th>
                   </tr>
                 </thead>
                 <tbody id="contractsTableBody"></tbody>
@@ -673,26 +677,26 @@
         <section class="tab-panel" id="tab-telegram-simulator">
           <div class="panel-header">
             <div>
-              <h1 class="panel-title">Ota-onalar Uchun Telegram Mini App (TMA) Simulyatori</h1>
-              <p class="panel-subtitle">Ota-onalar ilova yuklab o'tirmaydi. Telegram orqali ochiladigan shaxsiy kabinet.</p>
+              <h1 class="panel-title" data-i18n="tma.title">Ota-onalar Uchun Telegram Mini App (TMA) Simulyatori</h1>
+              <p class="panel-subtitle" data-i18n="tma.subtitle">Ota-onalar ilova yuklab o'tirmaydi. Telegram orqali ochiladigan shaxsiy kabinet.</p>
             </div>
           </div>
 
           <div class="tma-simulator-layout">
             <div class="tma-info-card glass-card">
-              <h2 class="section-heading">Nega Telegram Web App (TMA)?</h2>
+              <h2 class="section-heading" data-i18n="tma.whyHeading">Nega Telegram Web App (TMA)?</h2>
               <ul class="feature-checklist">
-                <li><b>Yuklab olish shart emas:</b> Har bir ota-onaning telefonida Telegram bor.</li>
-                <li><b>Tezkor ulanish:</b> Bog'cha botiga kirib bitta tugma orqali kabinet ochiladi.</li>
-                <li><b>To'g'ridan-to'g'ri to'lov:</b> Click, Payme orqali 1 klikda to'lash.</li>
-                <li><b>Jonli xabarnomalar:</b> Bola bog'chaga kirdi/chiqdi xabari va rasm/videolar.</li>
+                <li><b data-i18n="tma.feature1.b">Yuklab olish shart emas:</b> <span data-i18n="tma.feature1">Har bir ota-onaning telefonida Telegram bor.</span></li>
+                <li><b data-i18n="tma.feature2.b">Tezkor ulanish:</b> <span data-i18n="tma.feature2">Bog'cha botiga kirib bitta tugma orqali kabinet ochiladi.</span></li>
+                <li><b data-i18n="tma.feature3.b">To'g'ridan-to'g'ri to'lov:</b> <span data-i18n="tma.feature3">Click, Payme orqali 1 klikda to'lash.</span></li>
+                <li><b data-i18n="tma.feature4.b">Jonli xabarnomalar:</b> <span data-i18n="tma.feature4">Bola bog'chaga kirdi/chiqdi xabari va rasm/videolar.</span></li>
               </ul>
 
               <div class="tma-action-box">
-                <h3 class="tma-pick-label">Simulyatorda bolani tanlang:</h3>
+                <h3 class="tma-pick-label" data-i18n="tma.pickChild">Simulyatorda bolani tanlang:</h3>
                 <select id="tmaChildSelect" class="custom-select" onchange="updateTmaSimulator()"></select>
                 <div class="mt-4">
-                  <button class="btn btn-secondary w-100" onclick="triggerSimulatedTelegramAlert()">
+                  <button class="btn btn-secondary w-100" onclick="triggerSimulatedTelegramAlert()" data-i18n="tma.sendTestAlert">
                     Ota-onaga sinov Telegram xabari yuborish
                   </button>
                 </div>
@@ -705,8 +709,8 @@
                 <div class="smartphone-notch"></div>
                 <div class="tma-screen">
                   <div class="tma-header">
-                    <span class="tma-close">✕ Yopish</span>
-                    <span class="tma-title">SmartKids TMA</span>
+                    <span class="tma-close" data-i18n="tma.close">✕ Yopish</span>
+                    <span class="tma-title" id="tmaAppTitle">TMA</span>
                     <span class="tma-menu">•••</span>
                   </div>
                   <div class="tma-body">
@@ -720,20 +724,20 @@
                     </div>
 
                     <div class="tma-widget">
-                      <div class="tma-widget-title"><span>Bugungi Davomat</span><small>02.10.2026</small></div>
-                      <div class="tma-time-row"><span>Kelish vaqti:</span><strong class="text-emerald" id="tmaCheckInTime">08:18 da</strong></div>
-                      <div class="tma-time-row"><span>Tarbiyachi:</span><span>Gulbahor Karimova</span></div>
+                      <div class="tma-widget-title"><span data-i18n="tma.todayAttendance">Bugungi Davomat</span><small>02.10.2026</small></div>
+                      <div class="tma-time-row"><span data-i18n="tma.checkInLabel">Kelish vaqti:</span><strong class="text-emerald" id="tmaCheckInTime">08:18 da</strong></div>
+                      <div class="tma-time-row"><span data-i18n="tma.teacherLabel">Tarbiyachi:</span><span>Gulbahor Karimova</span></div>
                     </div>
 
                     <div class="tma-widget">
-                      <div class="tma-widget-title"><span>Bugun Nima Yeydi?</span><small>Taomnoma</small></div>
+                      <div class="tma-widget-title"><span data-i18n="tma.todayMenu">Bugun Nima Yeydi?</span><small data-i18n="tma.menuSubtitle">Taomnoma</small></div>
                       <p class="tma-menu-snippet">🥣 Nonushta: Suli kashasi & non<br>🍲 Tushlik: Tovuq sho'rva & Teftel</p>
                     </div>
 
                     <div class="tma-widget tma-payment-widget">
-                      <div class="tma-widget-title"><span>Oktabr To'lovi</span><span class="badge badge-emerald" id="tmaPaymentStatus">To'langan</span></div>
+                      <div class="tma-widget-title"><span data-i18n="tma.paymentWidgetTitle">Oktabr To'lovi</span><span class="badge badge-emerald" id="tmaPaymentStatus" data-i18n="status.paid">To'langan</span></div>
                       <div class="tma-amount-row"><span id="tmaPaymentAmount">1,800,000 UZS</span></div>
-                      <button class="tma-btn-pay" onclick="alert('Click / Payme ochildi!')">💳 Click / Payme orqali to'lash</button>
+                      <button class="tma-btn-pay" onclick="alert('Click / Payme ochildi!')" data-i18n="tma.payBtn">💳 Click / Payme orqali to'lash</button>
                     </div>
                   </div>
                 </div>
@@ -748,26 +752,46 @@
         <section class="tab-panel" id="tab-settings">
           <div class="panel-header">
             <div>
-              <h1 class="panel-title">Tizim Sozlamalari & SaaS Obunasi</h1>
-              <p class="panel-subtitle">Bog'cha rekvizitlari, xodimlar, SMS shlyuz va SaaS tarifi.</p>
+              <h1 class="panel-title" data-i18n="settings.title">Tizim Sozlamalari & SaaS Obunasi</h1>
+              <p class="panel-subtitle" data-i18n="settings.subtitle">Bog'cha rekvizitlari, xodimlar, SMS shlyuz va SaaS tarifi.</p>
             </div>
           </div>
           <div class="settings-grid">
             <div class="card glass-card">
-              <h2 class="card-title">Bog'cha ma'lumotlari</h2>
-              <div class="form-group mt-4"><label for="settingsOrgName">Bog'cha nomi:</label><input type="text" id="settingsOrgName" class="custom-input" value=""></div>
-              <div class="form-group"><label for="settingsOrgPhone">Telefon raqam:</label><input type="text" id="settingsOrgPhone" class="custom-input" value=""></div>
-              <div class="form-group"><label for="settingsOrgAddress">Manzil:</label><input type="text" id="settingsOrgAddress" class="custom-input" value=""></div>
-              <button class="btn btn-primary" onclick="alert('Sozlamalar saqlandi!')">Saqlash</button>
+              <h2 class="card-title" data-i18n="settings.orgInfo">Bog'cha ma'lumotlari</h2>
+              <div class="form-group mt-4"><label for="settingsOrgName" data-i18n="settings.orgName">Bog'cha nomi:</label><input type="text" id="settingsOrgName" class="custom-input" value=""></div>
+              <div class="form-group"><label for="settingsOrgPhone" data-i18n="settings.orgPhone">Telefon raqam:</label><input type="text" id="settingsOrgPhone" class="custom-input" value=""></div>
+              <div class="form-group"><label for="settingsOrgAddress" data-i18n="settings.orgAddress">Manzil:</label><input type="text" id="settingsOrgAddress" class="custom-input" value=""></div>
+              <button class="btn btn-primary" data-perm-action="settings.manage" onclick="saveOrgSettings()" data-i18n="common.save">Saqlash</button>
             </div>
 
             <div class="card glass-card">
-              <h2 class="card-title">Obuna holati: Pro tarif</h2>
+              <h2 class="card-title" data-i18n="settings.subscription">Obuna holati: Pro tarif</h2>
               <div class="plan-banner mt-4">
                 <h2>950,000 UZS / oy</h2>
-                <p>150 tagacha bolalar, Cheksiz Telegram xabarnomalar, Kvitansiyalar, Omborxona va Oylik Tabel.</p>
-                <div class="plan-expiry"><span>Keyingi to'lov: <b>25 Oktabr, 2026</b></span></div>
+                <p data-i18n="settings.planDesc">150 tagacha bolalar, Cheksiz Telegram xabarnomalar, Kvitansiyalar, Omborxona va Oylik Tabel.</p>
+                <div class="plan-expiry"><span data-i18n="settings.nextPayment">Keyingi to'lov:</span> <b>25 Oktabr, 2026</b></div>
               </div>
+            </div>
+
+            <div class="card glass-card span-2" data-perm-action="audit.view">
+              <h2 class="card-title" data-i18n="settings.auditTitle">O'zgarishlar tarixi</h2>
+              <p class="panel-subtitle" data-i18n="settings.auditSubtitle">Narx, chegirma, o'chirish kabi muhim o'zgarishlar: kim, qachon va nimani o'zgartirgani.</p>
+              <div class="table-responsive mt-4">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th data-i18n="settings.audit.when">Vaqt</th>
+                      <th data-i18n="settings.audit.who">Kim</th>
+                      <th data-i18n="settings.audit.action">Amal</th>
+                      <th data-i18n="settings.audit.target">Obyekt</th>
+                      <th data-i18n="settings.audit.changes">O'zgarish</th>
+                    </tr>
+                  </thead>
+                  <tbody id="auditLogBody"></tbody>
+                </table>
+              </div>
+              <p class="audit-empty" id="auditLogEmpty" data-i18n="settings.audit.empty" style="display:none;">Hali hech qanday yozuv yo'q.</p>
             </div>
           </div>
         </section>
@@ -782,31 +806,31 @@
   <div class="modal-overlay" id="addChildModal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">Yangi Bola Ro'yxatdan O'tkazish</h3>
+        <h3 class="modal-title" data-i18n="modal.addChild.title">Yangi Bola Ro'yxatdan O'tkazish</h3>
         <button class="modal-close" onclick="closeModal('addChildModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <form id="addChildForm" onsubmit="handleChildSubmit(event)">
         <div class="modal-body">
           <div class="form-row">
-            <div class="form-group"><label>Ismi:</label><input type="text" id="newChildFirstName" required class="custom-input" placeholder="Azizbek"></div>
-            <div class="form-group"><label>Familiyasi:</label><input type="text" id="newChildLastName" required class="custom-input" placeholder="Umarov"></div>
+            <div class="form-group"><label data-i18n="modal.addChild.firstName">Ismi:</label><input type="text" id="newChildFirstName" required class="custom-input" placeholder="Azizbek"></div>
+            <div class="form-group"><label data-i18n="modal.addChild.lastName">Familiyasi:</label><input type="text" id="newChildLastName" required class="custom-input" placeholder="Umarov"></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label>Tug'ilgan sanasi:</label><input type="date" id="newChildBirthDate" required class="custom-input" value="2022-05-10"></div>
+            <div class="form-group"><label data-i18n="modal.addChild.birthDate">Tug'ilgan sanasi:</label><input type="date" id="newChildBirthDate" required class="custom-input" value="2022-05-10"></div>
             <div class="form-group">
-              <label>Guruh:</label>
+              <label data-i18n="modal.addChild.group">Guruh:</label>
               <select id="newChildGroup" class="custom-select" required></select>
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label>Ota-onasi F.I.Sh:</label><input type="text" id="newChildParentName" required class="custom-input" placeholder="Nodir Umarov"></div>
-            <div class="form-group"><label>Telefon (Telegram):</label><input type="text" id="newChildParentPhone" required class="custom-input" placeholder="+998 90 123 45 67"></div>
+            <div class="form-group"><label data-i18n="modal.addChild.parentName">Ota-onasi F.I.Sh:</label><input type="text" id="newChildParentName" required class="custom-input" placeholder="Nodir Umarov"></div>
+            <div class="form-group"><label data-i18n="modal.addChild.parentPhone">Telefon (Telegram):</label><input type="text" id="newChildParentPhone" required class="custom-input" placeholder="+998 90 123 45 67"></div>
           </div>
-          <div class="form-group"><label>Allergiyalari:</label><input type="text" id="newChildAllergies" class="custom-input" placeholder="Tuxumga allergiya yoki Yo'q"></div>
+          <div class="form-group"><label data-i18n="modal.addChild.allergies">Allergiyalari:</label><input type="text" id="newChildAllergies" class="custom-input" placeholder="Tuxumga allergiya yoki Yo'q"></div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('addChildModal')">Bekor qilish</button>
-          <button type="submit" class="btn btn-primary">Saqlash va Telegramga ulash</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addChildModal')" data-i18n="common.cancel">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary" data-i18n="modal.addChild.submit">Saqlash va Telegramga ulash</button>
         </div>
       </form>
     </div>
@@ -818,18 +842,18 @@
   <div class="modal-overlay" id="editHealthModal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">Соғлиги / Salomatligini tahrirlash</h3>
+        <h3 class="modal-title" data-i18n="modal.editHealth.title">Соғлиги / Salomatligini tahrirlash</h3>
         <button class="modal-close" onclick="closeModal('editHealthModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <form id="editHealthForm" onsubmit="handleHealthSubmit(event)">
         <div class="modal-body">
           <input type="hidden" id="editHealthChildId">
-          <div class="form-group"><label>Bola:</label><input type="text" id="editHealthChildName" class="custom-input" disabled></div>
-          <div class="form-group"><label>Соғлиги / Salomatlik holati:</label><input type="text" id="editHealthValue" required class="custom-input" placeholder="Masalan: Sog'lom yoki Tuxumga allergiya"></div>
+          <div class="form-group"><label data-i18n="modal.editHealth.childLabel">Bola:</label><input type="text" id="editHealthChildName" class="custom-input" disabled></div>
+          <div class="form-group"><label data-i18n="modal.editHealth.valueLabel">Соғлиги / Salomatlik holati:</label><input type="text" id="editHealthValue" required class="custom-input" placeholder="Masalan: Sog'lom yoki Tuxumga allergiya" data-i18n-placeholder="modal.editHealth.placeholder"></div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('editHealthModal')">Bekor qilish</button>
-          <button type="submit" class="btn btn-primary">Saqlash</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('editHealthModal')" data-i18n="common.cancel">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary" data-i18n="common.save">Saqlash</button>
         </div>
       </form>
     </div>
@@ -841,32 +865,32 @@
   <div class="modal-overlay" id="editPricingModal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">Скидка / Изох / Нархи tahrirlash</h3>
+        <h3 class="modal-title" data-i18n="modal.editPricing.title">Скидка / Изох / Нархи tahrirlash</h3>
         <button class="modal-close" onclick="closeModal('editPricingModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <form id="editPricingForm" onsubmit="handlePricingSubmit(event)">
         <div class="modal-body">
           <input type="hidden" id="editPricingChildId">
-          <div class="form-group"><label>Bola:</label><input type="text" id="editPricingChildName" class="custom-input" disabled></div>
+          <div class="form-group"><label data-i18n="modal.editPricing.childLabel">Bola:</label><input type="text" id="editPricingChildName" class="custom-input" disabled></div>
 
           <div class="alert-box alert-info mb-4" style="padding: 12px 16px;">
             <div style="width:100%;">
-              <b>Chegirma kalkulyatori</b>
+              <b data-i18n="modal.editPricing.calcTitle">Chegirma kalkulyatori</b>
               <div class="form-row mt-2">
-                <div class="form-group"><label>Asl narx (bazaviy):</label><input type="number" step="1000" id="editPricingBasePrice" class="custom-input" placeholder="Masalan: 2800000" oninput="calcPricingDiscount()"></div>
-                <div class="form-group"><label>Chegirma foizi (%):</label><input type="number" step="1" min="0" max="100" id="editPricingDiscountPercent" class="custom-input" placeholder="Masalan: 30" oninput="calcPricingDiscount()"></div>
+                <div class="form-group"><label data-i18n="modal.editPricing.basePrice">Asl narx (bazaviy):</label><input type="number" step="1000" id="editPricingBasePrice" class="custom-input" placeholder="Masalan: 2800000" oninput="calcPricingDiscount()"></div>
+                <div class="form-group"><label data-i18n="modal.editPricing.discountPercent">Chegirma foizi (%):</label><input type="number" step="1" min="0" max="100" id="editPricingDiscountPercent" class="custom-input" placeholder="Masalan: 30" oninput="calcPricingDiscount()"></div>
               </div>
-              <small id="editPricingCalcResult" style="color: var(--text-muted);">Asl narx va foizni kiriting: Нархи avtomatik hisoblanadi.</small>
+              <small id="editPricingCalcResult" style="color: var(--text-muted);" data-i18n="modal.editPricing.calcHint">Asl narx va foizni kiriting: Нархи avtomatik hisoblanadi.</small>
             </div>
           </div>
 
-          <div class="form-group"><label>Скидка:</label><input type="text" id="editPricingDiscount" class="custom-input" placeholder="Masalan: 50% yoki Транспорт"></div>
-          <div class="form-group"><label>Изох:</label><input type="text" id="editPricingNote" class="custom-input" placeholder="Masalan: ходим yoki 2 та фарзанд"></div>
-          <div class="form-group"><label>Нархи (yakuniy, UZS):</label><input type="number" step="1000" id="editPricingPrice" class="custom-input" placeholder="Masalan: 2800000"></div>
+          <div class="form-group"><label data-i18n="modal.editPricing.discount">Скидка:</label><input type="text" id="editPricingDiscount" class="custom-input" placeholder="Masalan: 50% yoki Транспорт"></div>
+          <div class="form-group"><label data-i18n="modal.editPricing.note">Изох:</label><input type="text" id="editPricingNote" class="custom-input" placeholder="Masalan: ходим yoki 2 та фарзанд"></div>
+          <div class="form-group"><label data-i18n="modal.editPricing.price">Нархи (yakuniy, UZS):</label><input type="number" step="1000" id="editPricingPrice" class="custom-input" placeholder="Masalan: 2800000"></div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('editPricingModal')">Bekor qilish</button>
-          <button type="submit" class="btn btn-primary">Saqlash</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('editPricingModal')" data-i18n="common.cancel">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary" data-i18n="common.save">Saqlash</button>
         </div>
       </form>
     </div>
@@ -878,25 +902,25 @@
   <div class="modal-overlay" id="addGroupModal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title" id="groupModalTitle">Yangi guruh qo'shish</h3>
+        <h3 class="modal-title" id="groupModalTitle" data-i18n="modal.addGroup.titleNew">Yangi guruh qo'shish</h3>
         <button class="modal-close" onclick="closeModal('addGroupModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <form id="addGroupForm" onsubmit="handleAddGroupSubmit(event)">
         <div class="modal-body">
-          <div class="form-group"><label for="newGroupName">Guruh nomi</label><input type="text" id="newGroupName" required class="custom-input" placeholder="Masalan: Zukko"></div>
+          <div class="form-group"><label for="newGroupName" data-i18n="modal.addGroup.name">Guruh nomi</label><input type="text" id="newGroupName" required class="custom-input" placeholder="Masalan: Zukko"></div>
           <div class="form-row">
-            <div class="form-group"><label for="newGroupAge">Yosh toifasi</label><input type="text" id="newGroupAge" required class="custom-input" placeholder="Masalan: 4-5 yosh"></div>
-            <div class="form-group"><label for="newGroupCapacity">Sig'imi</label><input type="number" min="1" id="newGroupCapacity" required class="custom-input" value="25"></div>
+            <div class="form-group"><label for="newGroupAge" data-i18n="modal.addGroup.age">Yosh toifasi</label><input type="text" id="newGroupAge" required class="custom-input" placeholder="Masalan: 4-5 yosh"></div>
+            <div class="form-group"><label for="newGroupCapacity" data-i18n="modal.addGroup.capacity">Sig'imi</label><input type="number" min="1" id="newGroupCapacity" required class="custom-input" value="25"></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label for="newGroupTeacher">1-tarbiyachi</label><input type="text" id="newGroupTeacher" required class="custom-input" placeholder="Masalan: Gulbahor Karimova"></div>
-            <div class="form-group"><label for="newGroupTeacher2">2-tarbiyachi (ixtiyoriy)</label><input type="text" id="newGroupTeacher2" class="custom-input" placeholder="Masalan: Nargiza Olimova"></div>
+            <div class="form-group"><label for="newGroupTeacher" data-i18n="modal.addGroup.teacher1">1-tarbiyachi</label><input type="text" id="newGroupTeacher" required class="custom-input" placeholder="Masalan: Gulbahor Karimova"></div>
+            <div class="form-group"><label for="newGroupTeacher2" data-i18n="modal.addGroup.teacher2">2-tarbiyachi (ixtiyoriy)</label><input type="text" id="newGroupTeacher2" class="custom-input" placeholder="Masalan: Nargiza Olimova"></div>
           </div>
-          <div class="form-group"><label for="newGroupFee">Oylik bazaviy to'lov (UZS)</label><input type="number" min="0" step="any" id="newGroupFee" required class="custom-input" placeholder="Masalan: 2800000"></div>
+          <div class="form-group"><label for="newGroupFee" data-i18n="modal.addGroup.fee">Oylik bazaviy to'lov (UZS)</label><input type="number" min="0" step="any" id="newGroupFee" required class="custom-input" placeholder="Masalan: 2800000"></div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('addGroupModal')">Bekor qilish</button>
-          <button type="submit" class="btn btn-primary" id="groupModalSubmit">Guruh qo'shish</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('addGroupModal')" data-i18n="common.cancel">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary" id="groupModalSubmit" data-i18n="modal.addGroup.submitNew">Guruh qo'shish</button>
         </div>
       </form>
     </div>
@@ -908,16 +932,16 @@
   <div class="modal-overlay" id="recordPaymentModal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title" id="paymentChildName">To'lov qabul qilish</h3>
+        <h3 class="modal-title" id="paymentChildName" data-i18n="modal.payment.title">To'lov qabul qilish</h3>
         <button class="modal-close" onclick="closeModal('recordPaymentModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <form id="recordPaymentForm" onsubmit="handleRecordPayment(event)">
         <div class="modal-body pay-body">
           <input type="hidden" id="paymentChildId">
-          <div class="pay-status" id="paymentStatus" data-state="">Yuklanmoqda…</div>
+          <div class="pay-status" id="paymentStatus" data-state="" data-i18n="common.loading">Yuklanmoqda…</div>
 
           <div class="pay-month">
-            <span>Qaysi oy uchun</span>
+            <span data-i18n="billing.payMonthLabel">Qaysi oy uchun</span>
             <div class="pay-month-picker">
               <button type="button" class="icon-button" onclick="shiftPaymentMonth(-1)" aria-label="Oldingi oy"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
               <b id="paymentMonthLabel">…</b>
@@ -926,29 +950,29 @@
           </div>
 
           <div class="form-group">
-            <label for="paymentAmount">Summa (UZS)</label>
+            <label for="paymentAmount" data-i18n="billing.payAmountLabel">Summa (UZS)</label>
             <input type="number" id="paymentAmount" required min="1" step="any" class="custom-input pay-amount" inputmode="numeric">
             <small class="pay-hint" id="paymentHint"></small>
           </div>
 
           <fieldset class="pay-methods">
-            <legend>Pul qanday keldi?</legend>
-            <label><input type="radio" name="paymentMethod" value="CASH"><span>Naqd</span></label>
-            <label><input type="radio" name="paymentMethod" value="CLICK"><span>Click</span></label>
-            <label><input type="radio" name="paymentMethod" value="PAYME"><span>Payme</span></label>
-            <label><input type="radio" name="paymentMethod" value="CARD"><span>Karta</span></label>
-            <label><input type="radio" name="paymentMethod" value="TRANSFER"><span>O'tkazma</span></label>
-            <label><input type="radio" name="paymentMethod" value="APP"><span>Ilova</span></label>
+            <legend data-i18n="billing.payMethodsLegend">Pul qanday keldi?</legend>
+            <label><input type="radio" name="paymentMethod" value="CASH"><span data-i18n="billing.payMethod.cash">Naqd</span></label>
+            <label><input type="radio" name="paymentMethod" value="CLICK"><span data-i18n="billing.payMethod.click">Click</span></label>
+            <label><input type="radio" name="paymentMethod" value="PAYME"><span data-i18n="billing.payMethod.payme">Payme</span></label>
+            <label><input type="radio" name="paymentMethod" value="CARD"><span data-i18n="billing.payMethod.card">Karta</span></label>
+            <label><input type="radio" name="paymentMethod" value="TRANSFER"><span data-i18n="billing.payMethod.transfer">O'tkazma</span></label>
+            <label><input type="radio" name="paymentMethod" value="APP"><span data-i18n="billing.payMethod.app">Ilova</span></label>
           </fieldset>
 
           <div class="form-group">
-            <label for="paymentNote">Izoh (ixtiyoriy)</label>
-            <input type="text" id="paymentNote" class="custom-input" maxlength="300" placeholder="Masalan: buvisi to'ladi">
+            <label for="paymentNote" data-i18n="billing.payNoteLabel">Izoh (ixtiyoriy)</label>
+            <input type="text" id="paymentNote" class="custom-input" maxlength="300" placeholder="Masalan: buvisi to'ladi" data-i18n-placeholder="billing.payNotePlaceholder">
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('recordPaymentModal')">Bekor qilish</button>
-          <button type="submit" class="btn btn-primary" id="paymentSubmit" disabled>Usulni tanlang</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('recordPaymentModal')" data-i18n="common.cancel">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary" id="paymentSubmit" disabled data-i18n="billing.payChooseMethod">Usulni tanlang</button>
         </div>
       </form>
     </div>
@@ -960,7 +984,7 @@
   <div class="modal-overlay" id="contractViewModal">
     <div class="modal-box contract-modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">Davlat Standartidagi Ikki Tomonlama Shartnoma</h3>
+        <h3 class="modal-title" data-i18n="contracts.viewModal.title">Davlat Standartidagi Ikki Tomonlama Shartnoma</h3>
         <button class="modal-close" onclick="closeModal('contractViewModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <div class="modal-body">
@@ -994,8 +1018,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="window.print()">Chop etish / PDF</button>
-        <button class="btn btn-primary" onclick="closeModal('contractViewModal')">Yopish</button>
+        <button class="btn btn-secondary" onclick="window.print()" data-i18n="modal.contract.print">Chop etish / PDF</button>
+        <button class="btn btn-primary" onclick="closeModal('contractViewModal')" data-i18n="common.close">Yopish</button>
       </div>
     </div>
   </div>
@@ -1006,37 +1030,37 @@
   <div class="modal-overlay" id="receiptModal">
     <div class="modal-box receipt-box">
       <div class="modal-header">
-        <h3 class="modal-title">To'lov Kvitansiyasi</h3>
+        <h3 class="modal-title" data-i18n="modal.receipt.title">To'lov Kvitansiyasi</h3>
         <button class="modal-close" onclick="closeModal('receiptModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="receipt-print-area">
           <div class="receipt-header">
-            <h4>SMART KIDS ACADEMY MCHJ</h4>
-            <p>Bog'cha to'lovi uchun rasmiy kvitansiya</p>
+            <h4 id="receiptOrgName">EXKLUZIV DELUXE</h4>
+            <p data-i18n="modal.receipt.brandLine">Bog'cha to'lovi uchun rasmiy kvitansiya</p>
             <span class="receipt-code" id="receiptInvoiceCode">INV-2026-10-C1</span>
           </div>
           <div class="receipt-divider"></div>
           <div class="receipt-details">
-            <div class="receipt-row"><span>Tarbiyalanuvchi:</span> <strong id="receiptChildName">Imron Rahimov</strong></div>
-            <div class="receipt-row"><span>Guruh:</span> <span id="receiptGroupName">Yulduzcha</span></div>
-            <div class="receipt-row"><span>To'lov davri:</span> <span>Oktabr, 2026</span></div>
-            <div class="receipt-row"><span>To'lov usuli:</span> <span>Click / Payme</span></div>
-            <div class="receipt-row"><span>Sana:</span> <span>02.10.2026</span></div>
+            <div class="receipt-row"><span data-i18n="modal.receipt.child">Tarbiyalanuvchi:</span> <strong id="receiptChildName">Imron Rahimov</strong></div>
+            <div class="receipt-row"><span data-i18n="modal.receipt.group">Guruh:</span> <span id="receiptGroupName">Yulduzcha</span></div>
+            <div class="receipt-row"><span data-i18n="modal.receipt.period">To'lov davri:</span> <span>Oktabr, 2026</span></div>
+            <div class="receipt-row"><span data-i18n="modal.receipt.method">To'lov usuli:</span> <span>Click / Payme</span></div>
+            <div class="receipt-row"><span data-i18n="modal.receipt.date">Sana:</span> <span>02.10.2026</span></div>
             <div class="receipt-divider"></div>
-            <div class="receipt-row total-row"><span>Jami to'langan summa:</span> <strong class="text-emerald" id="receiptAmount">1,800,000 UZS</strong></div>
+            <div class="receipt-row total-row"><span data-i18n="modal.receipt.totalPaid">Jami to'langan summa:</span> <strong class="text-emerald" id="receiptAmount">1,800,000 UZS</strong></div>
           </div>
           <div class="receipt-qr">
             <div class="fake-qr-code">
               <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="6" height="6" x="2" y="2"/><rect width="6" height="6" x="16" y="2"/><rect width="6" height="6" x="2" y="16"/><path d="M10 2h4"/><path d="M10 6h4"/><path d="M2 10h8"/><path d="M14 10h8"/><path d="M10 14h4"/><path d="M10 18h4"/><path d="M14 18h8"/><path d="M18 14h4"/></svg>
             </div>
-            <small>Davlat soliq qo'mitasi fiskal moduli orqali tasdiqlangan</small>
+            <small data-i18n="modal.receipt.fiscalNote">Davlat soliq qo'mitasi fiskal moduli orqali tasdiqlangan</small>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="window.print()">Chop etish</button>
-        <button class="btn btn-primary" onclick="closeModal('receiptModal')">Yopish</button>
+        <button class="btn btn-secondary" onclick="window.print()" data-i18n="common.print">Chop etish</button>
+        <button class="btn btn-primary" onclick="closeModal('receiptModal')" data-i18n="common.close">Yopish</button>
       </div>
     </div>
   </div>
@@ -1045,21 +1069,21 @@
   <div class="modal-overlay" id="telegramLinkModal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="modal-title">Ota-onani Telegramga ulash</h3>
+        <h3 class="modal-title" data-i18n="modal.telegramLink.title">Ota-onani Telegramga ulash</h3>
         <button class="modal-close" onclick="closeModal('telegramLinkModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <div class="modal-body">
         <p class="tg-child" id="tgLinkChild"></p>
         <p class="tg-status" id="tgLinkStatus"></p>
-        <p class="tg-help">Ushbu havolani ota-onaga yuboring (Telegram, SMS yoki WhatsApp orqali). Ota-ona havolani ochib <b>Start</b> tugmasini bossa, farzandi kelgan-kelmagani haqida avtomatik xabar oladi.</p>
+        <p class="tg-help" data-i18n="modal.telegramLink.help" data-i18n-html="true">Ushbu havolani ota-onaga yuboring (Telegram, SMS yoki WhatsApp orqali). Ota-ona havolani ochib <b>Start</b> tugmasini bossa, farzandi kelgan-kelmagani haqida avtomatik xabar oladi.</p>
         <div class="form-group">
-          <label for="tgLinkUrl">Shaxsiy havola</label>
+          <label for="tgLinkUrl" data-i18n="modal.telegramLink.urlLabel">Shaxsiy havola</label>
           <input type="text" id="tgLinkUrl" class="custom-input" readonly>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="closeModal('telegramLinkModal')">Yopish</button>
-        <button type="button" class="btn btn-primary" onclick="copyTelegramLink()">Havolani nusxalash</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('telegramLinkModal')" data-i18n="common.close">Yopish</button>
+        <button type="button" class="btn btn-primary" onclick="copyTelegramLink()" data-i18n="modal.telegramLink.copyBtn">Havolani nusxalash</button>
       </div>
     </div>
   </div>
@@ -1067,31 +1091,31 @@
   <div class="modal-overlay" id="kitchenFormModal">
     <div class="modal-box kitchen-modal">
       <div class="modal-header">
-        <h3 class="modal-title" id="kitchenFormTitle">Yangi haftalik hisobot</h3>
+        <h3 class="modal-title" id="kitchenFormTitle" data-i18n="kitchen.form.newTitle">Yangi haftalik hisobot</h3>
         <button class="modal-close" onclick="closeModal('kitchenFormModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <form id="kitchenForm">
         <div class="modal-body">
           <div class="form-row">
-            <div class="form-group"><label for="kitchenWeekStart">Hafta boshi</label><input type="date" id="kitchenWeekStart" required class="custom-input"></div>
-            <div class="form-group"><label for="kitchenWeekEnd">Hafta oxiri</label><input type="date" id="kitchenWeekEnd" required class="custom-input"></div>
+            <div class="form-group"><label for="kitchenWeekStart" data-i18n="kitchen.weekStart">Hafta boshi</label><input type="date" id="kitchenWeekStart" required class="custom-input"></div>
+            <div class="form-group"><label for="kitchenWeekEnd" data-i18n="kitchen.weekEnd">Hafta oxiri</label><input type="date" id="kitchenWeekEnd" required class="custom-input"></div>
           </div>
-          <div class="form-group"><label for="kitchenChildCount">Haftalik bola soni</label><input type="number" id="kitchenChildCount" required min="1" class="custom-input" placeholder="Masalan: 90"></div>
+          <div class="form-group"><label for="kitchenChildCount" data-i18n="kitchen.childCount">Haftalik bola soni</label><input type="number" id="kitchenChildCount" required min="1" class="custom-input" placeholder="Masalan: 90"></div>
 
           <div class="kitchen-items-head">
-            <span>Mahsulot nomi</span><span>Miqdori</span><span>Narxi (so'm)</span><span>Jami</span><span></span>
+            <span data-i18n="kitchen.item.name">Mahsulot nomi</span><span data-i18n="kitchen.item.quantity">Miqdori</span><span data-i18n="kitchen.item.price">Narxi (so'm)</span><span data-i18n="kitchen.item.total">Jami</span><span></span>
           </div>
           <div class="kitchen-items" id="kitchenItemRows"></div>
-          <button type="button" class="btn btn-secondary btn-sm" id="kitchenAddRow">+ Mahsulot qo'shish</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="kitchenAddRow" data-i18n="kitchen.addItem">+ Mahsulot qo'shish</button>
 
           <div class="kitchen-totals">
-            <span>Jami: <b id="kitchenTotalAmount">0 so'm</b></span>
-            <span>Bitta bolaga: <b id="kitchenPerChild">0 so'm</b></span>
+            <span><span data-i18n="kitchen.totalLabel">Jami:</span> <b id="kitchenTotalAmount">0 so'm</b></span>
+            <span><span data-i18n="kitchen.perChildLabel">Bitta bolaga:</span> <b id="kitchenPerChild">0 so'm</b></span>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('kitchenFormModal')">Bekor qilish</button>
-          <button type="submit" class="btn btn-primary" id="kitchenSubmitBtn">Saqlash</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('kitchenFormModal')" data-i18n="common.cancel">Bekor qilish</button>
+          <button type="submit" class="btn btn-primary" id="kitchenSubmitBtn" data-i18n="common.save">Saqlash</button>
         </div>
       </form>
     </div>
@@ -1100,26 +1124,27 @@
   <div class="modal-overlay" id="kitchenDetailModal">
     <div class="modal-box kitchen-modal">
       <div class="modal-header">
-        <h3 class="modal-title" id="kitchenDetailTitle">Hisobot</h3>
+        <h3 class="modal-title" id="kitchenDetailTitle" data-i18n="kitchen.detailTitle">Hisobot</h3>
         <button class="modal-close" onclick="closeModal('kitchenDetailModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <div class="modal-body">
         <p class="kitchen-detail-summary" id="kitchenDetailSummary"></p>
         <table class="data-table">
-          <thead><tr><th>№</th><th>Mahsulot</th><th>Miqdori</th><th>Narxi</th><th class="text-right">Jami</th></tr></thead>
+          <thead><tr><th>№</th><th data-i18n="kitchen.item.product">Mahsulot</th><th data-i18n="kitchen.item.quantity">Miqdori</th><th data-i18n="children.th.price">Narxi</th><th class="text-right" data-i18n="kitchen.item.total">Jami</th></tr></thead>
           <tbody id="kitchenDetailItems"></tbody>
         </table>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" id="kitchenDeleteBtn" data-perm-action="kitchen.manage">O'chirish</button>
-        <button type="button" class="btn btn-secondary" id="kitchenEditBtn" data-perm-action="kitchen.manage">Tahrirlash</button>
-        <button type="button" class="btn btn-secondary" onclick="closeModal('kitchenDetailModal')">Yopish</button>
+        <button type="button" class="btn btn-danger" id="kitchenDeleteBtn" data-perm-action="kitchen.manage" data-i18n="kitchen.delete">O'chirish</button>
+        <button type="button" class="btn btn-secondary" id="kitchenEditBtn" data-perm-action="kitchen.manage" data-i18n="kitchen.edit">Tahrirlash</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('kitchenDetailModal')" data-i18n="common.close">Yopish</button>
       </div>
     </div>
   </div>
 
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="app.js?v=20261027c"></script>
+  <script src="i18n.js?v=20261027d"></script>
+  <script src="app.js?v=20261027d"></script>
 </body>
 </html>

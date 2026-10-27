@@ -270,6 +270,24 @@ def init_db():
         message TEXT NOT NULL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- 13. Audit Trail — who changed a sensitive field (price, discount, a
+    -- deletion, ...) and when. Separate from activity_logs above, which is
+    -- a general feed shown to all staff; this is management-only (see
+    -- PERMISSIONS["audit.view"]) and keeps the before/after values.
+    CREATE TABLE IF NOT EXISTS audit_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        org_id TEXT NOT NULL,
+        actor_id TEXT NOT NULL,
+        actor_name TEXT NOT NULL,
+        actor_role TEXT NOT NULL,
+        action TEXT NOT NULL,
+        target_type TEXT NOT NULL,
+        target_id TEXT,
+        target_label TEXT,
+        changes TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
     """)
 
     # Seed Default Data if empty or missing new tables

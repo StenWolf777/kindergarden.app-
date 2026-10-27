@@ -17,7 +17,8 @@ const STATE = {
   activities: [],
   staffPayroll: [],
   tabelData: [],
-  financeStats: null
+  financeStats: null,
+  auditLog: []
 };
 
 // ============================================================================
@@ -25,6 +26,8 @@ const STATE = {
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+  applyTranslations(document);
+  initLang();
   initTheme();
   initNavigation();
   initMobileNav();
@@ -104,6 +107,7 @@ async function syncWithBackend() {
     renderStaffPayroll();
     renderContractsTable();
     updateTmaSimulator();
+    if (can('audit.view')) loadAuditLog();
 
     console.log("[Bog'chaOS] Barcha 7 ta modul ma'lumotlar bazasi bilan sinxronlandi!");
   } catch (err) {
@@ -115,13 +119,9 @@ async function syncWithBackend() {
 // 1. Role-Based Access Control (Rollar Boshqaruvi)
 // ============================================================================
 
-const ROLE_TITLES = {
-  director: 'Boshqaruvchi (Direktor)',
-  teacher: 'Tarbiyachi',
-  accountant: 'Buxgalter',
-  super_admin: 'Super Admin',
-  nurse: 'Hamshira',
-};
+function roleTitle(role) {
+  return t(`role.${role}`);
+}
 
 // Permissions come from the server (/auth/me), which also enforces them on every request.
 // Hiding things here is only a convenience; it is not what protects the data.
@@ -146,7 +146,7 @@ function apiFetch(url, options = {}) {
 function applyRoleAccess(role) {
   STATE.currentRole = role;
 
-  const title = ROLE_TITLES[role] || role;
+  const title = roleTitle(role);
   document.getElementById('currentUserRole').innerText = title;
   const badge = document.getElementById('currentRoleBadge');
   if (badge) badge.innerText = title;
@@ -192,15 +192,17 @@ async function initUserSession() {
     document.getElementById('currentUserName').innerText = user.name;
     document.getElementById('currentUserAvatar').innerText = user.avatar || user.name.split(' ').map(n => n[0]).join('');
     const greet = document.getElementById('dashboardGreeting');
-    if (greet) greet.innerText = `Salom, ${user.name}!`;
+    if (greet) greet.innerText = t('dash.greeting', { name: user.name });
     if (user.org) {
       STATE.org = user.org;
       const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
       setText('tenantAvatar', user.org.avatar);
       setText('tenantName', user.org.name);
-      setText('tenantPlan', `${user.org.plan_tier} Tarif`);
+      setText('tenantPlan', `${user.org.plan_tier} ${t('settings.tarif')}`);
       setText('contractOrgName', user.org.name.toUpperCase());
       setText('contractOrgName2', user.org.name);
+      setText('receiptOrgName', user.org.name.toUpperCase());
+      setText('tmaAppTitle', `${user.org.name} TMA`);
       const orgName = document.getElementById('settingsOrgName');
       if (orgName) orgName.value = user.org.name;
       const orgPhone = document.getElementById('settingsOrgPhone');
@@ -210,14 +212,14 @@ async function initUserSession() {
     }
     return true;
   } catch (e) {
-    showToast("Server bilan ulanib bo'lmadi. Sahifani yangilang.", 'warning');
+    showToast(t('toast.sessionExpired'), 'warning');
     return false;
   }
 }
 
 function logoutUser() {
   try { localStorage.removeItem('bogcha_user'); localStorage.removeItem('bogcha_token'); } catch (e) {}
-  showToast("Tizimdan chiqildi", "info");
+  showToast(t('toast.loggedOut'), "info");
   setTimeout(() => {
     window.location.href = `login.html?t=${Date.now()}`;
   }, 400);
@@ -240,11 +242,11 @@ function renderTabelGrid() {
   const isWeekend = d => [0, 6].includes(new Date(YEAR, MONTH, d).getDay());
   const LETTER_STATUS = { P: 'PRESENT', E: 'EXCUSED', A: 'ABSENT', L: 'LATE' };
 
-  let headerHtml = '<tr><th>Tarbiyalanuvchi</th>';
+  let headerHtml = `<tr><th>${t('tabel.col.child')}</th>`;
   for (let d = 1; d <= daysInMonth; d++) {
     headerHtml += `<th class="${isWeekend(d) ? 'is-weekend' : ''}${d === todayNum && isCurrentMonth ? ' is-today' : ''}">${d}</th>`;
   }
-  headerHtml += '<th>Kelgan</th><th>Sababli</th><th>Kompensatsiya</th></tr>';
+  headerHtml += `<th>${t('tabel.col.present')}</th><th>${t('tabel.col.excused')}</th><th>${t('tabel.col.compensation')}</th></tr>`;
   header.innerHTML = headerHtml;
 
   const STATUS_CELL = { PRESENT: 'p-cell', EXCUSED: 'e-cell', ABSENT: 'a-cell', LATE: 'l-cell' };
@@ -266,7 +268,7 @@ function renderTabelGrid() {
     let excusedLeft = Object.keys(days).length ? 0 : (row.days_excused || 0);
     let daysCells = '';
     for (let d = 1; d <= daysInMonth; d++) {
-      if (isWeekend(d)) { daysCells += `<td class="is-weekend"><span class="tabel-day-cell w-cell" title="Dam olish kuni">–</span></td>`; continue; }
+      if (isWeekend(d)) { daysCells += `<td class="is-weekend"><span class="tabel-day-cell w-cell" title="${t('tabel.legend.weekend')}">–</span></td>`; continue; }
       if (d > todayNum) { daysCells += '<td></td>'; continue; }
       let status;
       if (d === todayNum && isCurrentMonth) {
@@ -288,8 +290,8 @@ function renderTabelGrid() {
       <tr>
         <td><b>${escapeHtml(row.name)}</b></td>
         ${daysCells}
-        <td><b class="text-emerald">${row.days_present} kun</b></td>
-        <td><b class="text-amber">${row.days_excused} kun</b></td>
+        <td><b class="text-emerald">${row.days_present} ${t('common.days')}</b></td>
+        <td><b class="text-amber">${row.days_excused} ${t('common.days')}</b></td>
         <td>${compDisplay}</td>
       </tr>
     `;
@@ -297,11 +299,11 @@ function renderTabelGrid() {
 }
 
 function applyCompensationToInvoices() {
-  showToast(`Oylik tabel tasdiqlandi: Sababli kelmagan kunlar uchun oziq-ovqat kompensatsiyasi keyingi oy kvitansiyasiga chegirildi!`, 'success');
+  showToast(t('tabel.approved'), 'success');
 }
 
 function exportTabelExcel() {
-  showToast(`Oktabr oyi to'liq davomat tabeli Excel formatida shakllantirildi.`, 'info');
+  showToast(t('tabel.exported'), 'info');
 }
 
 // ============================================================================
@@ -336,14 +338,14 @@ function renderStaffPayroll() {
         <td class="${p.advance_paid ? 'text-rose' : ''}">${signedMoney(-p.advance_paid)}</td>
         <td><b style="font-size: 1rem;">${formatMoney(toPay)}</b></td>
         <td>
-          ${p.status === 'PAID' 
-            ? `<span class="badge badge-emerald">To'langan</span>` 
-            : `<span class="badge badge-amber">Kutilmoqda</span>`}
+          ${p.status === 'PAID'
+            ? `<span class="badge badge-emerald">${t('status.paid')}</span>`
+            : `<span class="badge badge-amber">${t('status.pending')}</span>`}
         </td>
         <td class="text-right">
-          ${p.status === 'PAID' 
-            ? `<button class="btn btn-sm btn-secondary" disabled>To'landi</button>` 
-            : `<button class="btn btn-sm btn-success" onclick="payStaffSalary('${p.id}', ${toPay})">Maosh to'lash</button>`}
+          ${p.status === 'PAID'
+            ? `<button class="btn btn-sm btn-secondary" disabled>${t('staff.paid')}</button>`
+            : `<button class="btn btn-sm btn-success" onclick="payStaffSalary('${p.id}', ${toPay})">${t('staff.payBtn')}</button>`}
         </td>
       </tr>
     `;
@@ -357,9 +359,9 @@ function payStaffSalary(payrollId, amount) {
     body: JSON.stringify({ payroll_id: payrollId, amount: amount })
   }).then(r => r.json()).then(() => {
     syncWithBackend();
-    showToast(`Xodimga oylik maosh muvaffaqiyatli to'landi!`, 'success');
+    showToast(t('staff.paySuccess'), 'success');
   }).catch(() => {
-    showToast(`Maosh to'lovi saqlandi!`, 'success');
+    showToast(t('staff.paySaved'), 'success');
   });
 }
 
@@ -383,10 +385,10 @@ function renderContractsTable() {
         <small style="color: #6366f1;">${c.parentPhone}</small>
       </td>
       <td>01.09.2025</td>
-      <td><span class="badge badge-emerald">Barcha emlashlar bor</span></td>
-      <td><span class="badge badge-emerald">Spravka mavjud</span></td>
+      <td><span class="badge badge-emerald">${t('contracts.allVaccinations')}</span></td>
+      <td><span class="badge badge-emerald">${t('contracts.certAvailable')}</span></td>
       <td class="text-right">
-        <button class="btn btn-sm btn-secondary" onclick="viewChildContract('${c.id}')">Shartnoma</button>
+        <button class="btn btn-sm btn-secondary" onclick="viewChildContract('${c.id}')">${t('contracts.th.contract')}</button>
       </td>
     </tr>
   `).join('');
@@ -434,7 +436,7 @@ function renderGroupFilterTabs() {
   if (!container) return;
   const currentActive = container.querySelector('.filter-tab.active')?.getAttribute('data-group') || 'ALL';
 
-  const tabsHtml = ['<button class="filter-tab" data-group="ALL">Barchasi</button>']
+  const tabsHtml = [`<button class="filter-tab" data-group="ALL">${t('common.all')}</button>`]
     .concat(STATE.groups.map(g => `<button class="filter-tab" data-group="${g.name}">${g.name}</button>`))
     .join('');
   container.innerHTML = tabsHtml;
@@ -451,8 +453,8 @@ function renderGroupFilterTabs() {
 
 function setGroupModalMode(group) {
   STATE.editingGroupId = group ? group.id : null;
-  document.getElementById('groupModalTitle').textContent = group ? `${group.name}: tahrirlash` : "Yangi guruh qo'shish";
-  document.getElementById('groupModalSubmit').textContent = group ? 'Saqlash' : "Guruh qo'shish";
+  document.getElementById('groupModalTitle').textContent = group ? t('modal.addGroup.titleEdit', { name: group.name }) : t('modal.addGroup.titleNew');
+  document.getElementById('groupModalSubmit').textContent = group ? t('common.save') : t('modal.addGroup.submitNew');
   document.getElementById('newGroupName').disabled = !!group;
 }
 
@@ -495,14 +497,14 @@ function handleAddGroupSubmit(e) {
     body: JSON.stringify(editing ? body : { name, ...body })
   }).then(async r => {
     const data = await r.json();
-    if (!r.ok) throw new Error(data.detail || 'Xatolik yuz berdi');
+    if (!r.ok) throw new Error(data.detail || t('toast.genericError'));
     return data;
   }).then(() => {
     closeModal('addGroupModal');
     syncWithBackend();
-    showToast(editing ? `"${name}" guruhi yangilandi.` : `"${name}" guruhi qo'shildi.`, 'success');
+    showToast(editing ? t('modal.addGroup.updated', { name }) : t('modal.addGroup.added', { name }), 'success');
   }).catch(err => {
-    showToast(err.message || 'Xatolik yuz berdi', 'warning');
+    showToast(err.message || t('toast.genericError'), 'warning');
   });
 }
 
@@ -512,14 +514,14 @@ function calcPricingDiscount() {
   const resultLabel = document.getElementById('editPricingCalcResult');
 
   if (isNaN(base) || isNaN(percent) || percent < 0 || percent > 100) {
-    resultLabel.innerText = 'Asl narx va foizni kiriting: Нархи avtomatik hisoblanadi.';
+    resultLabel.innerText = t('modal.editPricing.calcHint');
     return;
   }
 
   const final = Math.round(base * (1 - percent / 100) / 1000) * 1000;
   document.getElementById('editPricingPrice').value = final;
   document.getElementById('editPricingDiscount').value = `${percent}%`;
-  resultLabel.innerHTML = `<b style="color: var(--color-emerald);">${formatMoney(final)}</b> (${formatMoney(base)} dan ${percent}% chegirma)`;
+  resultLabel.innerHTML = t('modal.editPricing.calcResult', { final: `<b style="color: var(--color-emerald);">${formatMoney(final)}</b>`, base: formatMoney(base), percent });
 }
 
 // ============================================================================
@@ -537,6 +539,27 @@ function initTheme() {
   });
 }
 
+function updateLangToggleLabel() {
+  const label = document.getElementById('langToggleLabel');
+  if (label) label.textContent = getLang() === 'uz' ? 'RU' : 'UZ';
+}
+
+function initLang() {
+  updateLangToggleLabel();
+  document.getElementById('langToggle')?.addEventListener('click', () => {
+    setLang(getLang() === 'uz' ? 'ru' : 'uz');
+    applyTranslations(document);
+    updateLangToggleLabel();
+    // Re-render everything built dynamically in JS so it picks up the new language too.
+    if (STATE.currentRole) applyRoleAccess(STATE.currentRole);
+    syncWithBackend();
+    if (can('photos.send')) loadPhotoStatus();
+    if (can('billing.remind')) loadReminders();
+    if (can('staff.view')) loadStaffAttendance();
+    if (can('kitchen.view')) loadKitchenReports();
+  });
+}
+
 function initNavigation() {
   document.querySelectorAll('.sidebar-nav .nav-item').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -551,7 +574,7 @@ function setMobileNav(open) {
   const toggle = document.getElementById('menuToggle');
   if (toggle) {
     toggle.setAttribute('aria-expanded', String(open));
-    toggle.setAttribute('aria-label', open ? 'Menyuni yopish' : 'Menyuni ochish');
+    toggle.setAttribute('aria-label', open ? t('common.closeMenu') : t('common.openMenu'));
   }
 }
 
@@ -577,19 +600,28 @@ function initLiveClock() {
   if (!container) return;
   setInterval(() => {
     const now = new Date();
-    const months = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
     container.innerHTML = `
-      <span class="clock-date">${now.getDate()} ${months[now.getMonth()]}, ${now.getFullYear()}</span>
+      <span class="clock-date">${now.getDate()} ${monthName(now.getMonth() + 1)}, ${now.getFullYear()}</span>
       <span class="clock-time">${now.toLocaleTimeString('uz-UZ', { hour12: false })}</span>
     `;
   }, 1000);
 }
 
-const MONTH_NAMES = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+function monthName(monthNumber1to12) {
+  return t(`month.${monthNumber1to12}`);
+}
+
+// Russian needs the genitive case and no dash ("27 октября"); Uzbek has no
+// case agreement and uses a dash ("27-oktabr").
+function formatDayMonth(day, monthNumber1to12) {
+  return getLang() === 'ru'
+    ? `${day} ${t(`monthgen.${monthNumber1to12}`)}`
+    : `${day}-${monthName(monthNumber1to12).toLowerCase()}`;
+}
 
 function periodLabel(period) {
   const [y, m] = period.split('-').map(Number);
-  return `${MONTH_NAMES[m - 1]} ${y}`;
+  return `${monthName(m)} ${y}`;
 }
 
 function shortMoney(amount) {
@@ -602,16 +634,16 @@ function renderDashboard() {
   const d = STATE.dashboard;
   if (!d) return;
   const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-  set('kpiTotalChildren', `${d.total_children} nafar`);
-  set('kpiChildrenNote', `${STATE.groups.length} ta guruh`);
+  set('kpiTotalChildren', `${d.total_children}`);
+  set('kpiChildrenNote', t('dash.groupsCountNote', { n: STATE.groups.length }));
   set('kpiAttendanceRate', `${d.present_today} / ${d.total_children}`);
-  set('kpiAttendanceNote', `${d.absent_today} kelmadi · ${d.unmarked_today} belgilanmagan`);
+  set('kpiAttendanceNote', t('dash.attendanceNote', { absent: d.absent_today, unmarked: d.unmarked_today }));
   set('kpiStaff', `${d.staff_present} / ${d.staff_total}`);
-  set('kpiStaffNote', d.staff_marked ? `${d.staff_total - d.staff_marked} ta belgilanmagan` : 'Davomat hali belgilanmagan');
+  set('kpiStaffNote', d.staff_marked ? `${d.staff_total - d.staff_marked} ${t('att.staffMarkedSuffix')}` : t('dash.staffNote.unmarked'));
   set('kpiRevenue', formatMoney(d.monthly_revenue));
-  set('kpiRevenueNote', d.monthly_revenue ? `Oy rejasining ${d.collection.percent}% yig'ildi` : "Bu oy hali to'lov qabul qilinmagan");
+  set('kpiRevenueNote', d.monthly_revenue ? t('dash.revenueNote', { percent: d.collection.percent }) : t('dash.revenueNote.empty'));
   set('kpiDebts', formatMoney(d.total_debts));
-  set('kpiDebtsNote', d.collection.overdue_count ? `${d.collection.overdue_count} ta hisobning muddati o'tgan` : "Muddati o'tgan qarz yo'q");
+  set('kpiDebtsNote', d.collection.overdue_count ? t('dash.debtsNote', { count: d.collection.overdue_count }) : t('dash.debtsNote.empty'));
 
   const list = document.getElementById('attentionList');
   if (list) {
@@ -622,7 +654,7 @@ function renderDashboard() {
           <span class="todo-count">${a.count}</span>
           <svg class="todo-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
         </button></li>`).join('')
-      : `<li class="todo-empty">Hammasi joyida. Bugun bajarilishi kerak bo'lgan ish yo'q.</li>`;
+      : `<li class="todo-empty">${t('dash.todo.empty')}</li>`;
   }
 
   const debtors = document.getElementById('topDebtorsList');
@@ -632,19 +664,19 @@ function renderDashboard() {
       ? rows.map(r => `
         <li><button type="button" class="debtor-item" onclick="openRecordPaymentModal('${escapeHtml(r.child_id)}')">
           <span class="child-avatar" aria-hidden="true">${escapeHtml(r.name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2))}</span>
-          <span class="debtor-text"><b>${escapeHtml(r.name)}</b><small>${escapeHtml(r.group)}${r.overdue ? " · muddati o'tgan" : ''}</small></span>
+          <span class="debtor-text"><b>${escapeHtml(r.name)}</b><small>${escapeHtml(r.group)}${r.overdue ? t('dash.debtorOverdueSuffix') : ''}</small></span>
           <span class="debtor-amount ${r.overdue ? 'is-overdue' : ''}">${shortMoney(r.debt)}</span>
         </button></li>`).join('')
-      : `<li class="todo-empty">Qarzdor oilalar yo'q.</li>`;
+      : `<li class="todo-empty">${t('dash.debtors.empty')}</li>`;
   }
 
   const c = d.collection;
   const block = document.getElementById('collectionBlock');
   if (block) {
     block.innerHTML = `
-      <div class="collection-head"><span>${periodLabel(c.period)} — yig'ildi</span><b>${c.percent}%</b></div>
+      <div class="collection-head"><span>${periodLabel(c.period)}</span><b>${c.percent}%</b></div>
       <div class="collection-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${c.percent}"><span style="width:${Math.min(100, c.percent)}%"></span></div>
-      <p class="collection-note">${formatMoney(c.due)} dan ${formatMoney(c.collected)} yig'ildi · qoldi ${formatMoney(c.left)}</p>`;
+      <p class="collection-note">${t('dash.collectionNote', { due: formatMoney(c.due), collected: formatMoney(c.collected), left: formatMoney(c.left) })}</p>`;
   }
   renderWeeklyChart();
 }
@@ -666,7 +698,7 @@ function renderWeeklyChart() {
   const history = STATE.dashboard?.income_history || [];
   const max = Math.max(0, ...history.map(h => h.amount));
   if (!max) {
-    container.innerHTML = `<p class="chart-empty">Oxirgi 6 oyda to'lov qabul qilinmagan</p>` + history.map(h => `
+    container.innerHTML = `<p class="chart-empty">${t('dash.income.empty')}</p>` + history.map(h => `
       <div class="bar-column"><div class="bar-pill is-empty"></div><span class="bar-label">${h.label}</span></div>`).join('');
     return;
   }
@@ -681,6 +713,9 @@ function renderActivities() {
   const feed = document.getElementById('activityFeed');
   if (!feed) return;
   // Register marks are reserved for attendance; other events get a plain ink dot.
+  // Activity text comes from the server's own Uzbek-language log messages
+  // (always Uzbek regardless of UI language, like the Telegram messages),
+  // so this match is intentionally against the fixed Uzbek words.
   const markFor = text => {
     if (/kech keldi/i.test(text)) return 'LATE';
     if (/sababli/i.test(text)) return 'EXCUSED';
@@ -706,16 +741,16 @@ function renderGroupsMiniGrid() {
   const container = document.getElementById('groupsMiniGrid');
   if (!container) return;
   const badge = document.getElementById('groupsCountBadge');
-  if (badge) badge.textContent = `${STATE.groups.length} ta guruh`;
+  if (badge) badge.textContent = t('dash.groupsCountNote', { n: STATE.groups.length });
   const R = 26, CIRC = 2 * Math.PI * R;
   container.innerHTML = STATE.groups.map(g => {
     const ratio = g.capacity ? g.count / g.capacity : 0;
     const state = g.count > g.capacity ? 'over' : g.count === g.capacity ? 'full' : 'open';
-    const note = state === 'over' ? `Sig'imdan ${g.count - g.capacity} ta ortiq`
-      : state === 'full' ? "To'lgan" : `${g.capacity - g.count} ta bo'sh o'rin`;
+    const note = state === 'over' ? t('dash.group.overCapacity', { n: g.count - g.capacity })
+      : state === 'full' ? t('dash.group.full') : t('dash.group.openSpots', { n: g.capacity - g.count });
     const teachers = (g.teachers || []).length
-      ? g.teachers.map(t => `<span class="teacher-chip">${escapeHtml(t)}</span>`).join('')
-      : '<span class="teacher-chip is-missing">Tarbiyachi belgilanmagan</span>';
+      ? g.teachers.map(name => `<span class="teacher-chip">${escapeHtml(name)}</span>`).join('')
+      : `<span class="teacher-chip is-missing">${t('modal.addGroup.teacherMissing')}</span>`;
     return `
       <div class="group-card" data-state="${state}">
         <div class="group-ring" aria-label="${g.count} / ${g.capacity}">
@@ -763,7 +798,7 @@ function renderChildrenTable() {
     const initials = child.name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2);
     const healthy = /^\s*(yo'?q|sog'?lom|соғлом|согл?ом|здоров|нет|-|—)?\s*$/i.test(child.allergies || '');
     const healthDisplay = healthy
-      ? `<span class="text-emerald">Sog'lom</span>`
+      ? `<span class="text-emerald">${t('status.healthy')}</span>`
       : `<span class="text-rose" style="font-weight: 600;">${escapeHtml(child.allergies)}</span>`;
     return `
       <tr>
@@ -781,29 +816,29 @@ function renderChildrenTable() {
         <td>
           <div><b>${escapeHtml(child.parentName)}</b></div>
           <small style="color: var(--color-primary);">${escapeHtml(child.parentPhone)}</small>
-          ${can('parents.invite') ? `<div><button class="btn btn-sm btn-secondary tg-btn" onclick="openTelegramLink('${escapeHtml(child.id)}')">Telegram</button></div>` : ''}
+          ${can('parents.invite') ? `<div><button class="btn btn-sm btn-secondary tg-btn" onclick="openTelegramLink('${escapeHtml(child.id)}')">${t('children.telegramBtn')}</button></div>` : ''}
         </td>
         <td>
           ${healthDisplay}
-          ${canEditHealth ? `<button class="btn btn-sm btn-secondary" style="margin-left:6px;" onclick="openEditHealthModal('${child.id}', '${child.name.replace(/'/g, "\\'")}', '${(child.allergies || '').replace(/'/g, "\\'")}')" title="Tahrirlash" aria-label="Tahrirlash">${PENCIL_ICON}</button>` : ''}
+          ${canEditHealth ? `<button class="btn btn-sm btn-secondary" style="margin-left:6px;" onclick="openEditHealthModal('${child.id}', '${child.name.replace(/'/g, "\\'")}', '${(child.allergies || '').replace(/'/g, "\\'")}')" title="${t('common.edit')}" aria-label="${t('common.edit')}">${PENCIL_ICON}</button>` : ''}
         </td>
         ${hideRestrictedColumns ? '' : `<td>${child.discount ? `<span class="badge badge-amber">${escapeHtml(child.discount)}</span>` : '—'}</td>
         <td>${child.note ? escapeHtml(child.note) : '—'}</td>
         <td>
-          ${child.listedPrice != null ? formatMoney(child.listedPrice) : '<span style="color: var(--text-muted);">Belgilanmagan</span>'}
-          ${canEditPricing ? `<button class="btn btn-sm btn-secondary" style="margin-left:6px;" onclick="openEditPricingModal('${child.id}', '${child.name.replace(/'/g, "\\'")}', '${(child.discount || '').replace(/'/g, "\\'")}', '${(child.note || '').replace(/'/g, "\\'")}', ${child.listedPrice != null ? child.listedPrice : 'null'})" title="Tahrirlash" aria-label="Tahrirlash">${PENCIL_ICON}</button>` : ''}
+          ${child.listedPrice != null ? formatMoney(child.listedPrice) : `<span style="color: var(--text-muted);">${t('children.priceUnset')}</span>`}
+          ${canEditPricing ? `<button class="btn btn-sm btn-secondary" style="margin-left:6px;" onclick="openEditPricingModal('${child.id}', '${child.name.replace(/'/g, "\\'")}', '${(child.discount || '').replace(/'/g, "\\'")}', '${(child.note || '').replace(/'/g, "\\'")}', ${child.listedPrice != null ? child.listedPrice : 'null'})" title="${t('common.edit')}" aria-label="${t('common.edit')}">${PENCIL_ICON}</button>` : ''}
         </td>`}
         ${hideRestrictedColumns ? '' : `
         <td>
-          ${child.paymentStatus === 'PAID' ? `<span class="badge badge-emerald">To'langan</span>` : `<span class="badge badge-rose">Qarzdor (${formatMoney(child.debt)})</span>`}
+          ${child.paymentStatus === 'PAID' ? `<span class="badge badge-emerald">${t('status.paid')}</span>` : `<span class="badge badge-rose">${t('status.debt')} (${formatMoney(child.debt)})</span>`}
         </td>
         <td class="text-right">
-          <button class="btn btn-sm btn-secondary" onclick="viewChildReceipt('${child.id}')">Chek</button>
-          <button class="btn btn-sm btn-secondary" onclick="viewChildContract('${child.id}')">Shartnoma</button>
+          <button class="btn btn-sm btn-secondary" onclick="viewChildReceipt('${child.id}')">${t('children.receiptBtn')}</button>
+          <button class="btn btn-sm btn-secondary" onclick="viewChildContract('${child.id}')">${t('children.contractBtn')}</button>
         </td>`}
         ${canDelete ? `
         <td class="text-right col-actions">
-          <button class="btn btn-sm btn-danger" onclick="handleDeleteChild('${child.id}', '${child.name.replace(/'/g, "\\'")}')">O'chirish</button>
+          <button class="btn btn-sm btn-danger" onclick="handleDeleteChild('${child.id}', '${child.name.replace(/'/g, "\\'")}')">${t('common.delete')}</button>
         </td>` : ''}
       </tr>
     `;
@@ -825,8 +860,8 @@ function initPhotos() {
     const files = [...input.files].filter(f => /^image\/(jpeg|png)$/.test(f.type));
     input.value = '';
     for (const file of files) {
-      if (PHOTOS.items.length >= PHOTO_MAX) { showToast(`Bir martada ${PHOTO_MAX} tagacha rasm yuborish mumkin.`, 'warning'); break; }
-      try { PHOTOS.items.push(await resizeImage(file)); } catch (e) { showToast(`${file.name}: rasmni o'qib bo'lmadi.`, 'warning'); }
+      if (PHOTOS.items.length >= PHOTO_MAX) { showToast(t('toast.photoLimit', { max: PHOTO_MAX }), 'warning'); break; }
+      try { PHOTOS.items.push(await resizeImage(file)); } catch (e) { showToast(t('toast.photoReadFailed', { name: file.name }), 'warning'); }
     }
     renderPhotoPreviews();
   });
@@ -864,7 +899,7 @@ function resizeImage(file) {
 function renderPhotoPreviews() {
   document.getElementById('photoPreviews').innerHTML = PHOTOS.items.map((src, i) => `
     <figure class="photo-thumb">
-      <img src="${src}" alt="Tanlangan rasm ${i + 1}">
+      <img src="${src}" alt="${i + 1}">
       <button type="button" class="photo-remove" data-remove="${i}" aria-label="Rasmni olib tashlash"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </figure>`).join('');
   updatePhotoForm();
@@ -874,7 +909,7 @@ function populatePhotoChildren() {
   const select = document.getElementById('photoChildSelect');
   if (!select || !STATE.children.length) return;
   const prev = select.value;
-  select.innerHTML = '<option value="">Bolani tanlang…</option>' +
+  select.innerHTML = `<option value="">${t('photos.selectChild')}</option>` +
     STATE.children.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.name)} (${escapeHtml(c.group)})</option>`).join('');
   if ([...select.options].some(o => o.value === prev)) select.value = prev;
 }
@@ -885,7 +920,7 @@ function updatePhotoForm() {
   select.hidden = target !== 'child';
   if (target === 'child') populatePhotoChildren();
   const n = PHOTOS.items.length;
-  document.getElementById('photoCount').textContent = n ? `${n} ta rasm tanlandi` : 'Rasm tanlanmagan';
+  document.getElementById('photoCount').textContent = n ? t('photos.selectedCount', { n }) : t('photos.noneSelected');
   const ready = n > 0 && !PHOTOS.sending && (target === 'channel' ? PHOTOS.channelLinked : !!select.value);
   document.getElementById('photoSendBtn').disabled = !ready;
 }
@@ -895,17 +930,17 @@ async function loadPhotoStatus() {
   try {
     const res = await apiFetch(`${API_BASE}/telegram/status`);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
     const ch = data.channel;
     PHOTOS.channelLinked = ch.linked;
     status.dataset.state = ch.linked ? 'linked' : 'pending';
     status.innerHTML = ch.linked
-      ? `Kanal ulangan: <b>${escapeHtml(ch.title)}</b>${ch.username ? ` (@${escapeHtml(ch.username)})` : ''}. Rasmlar ${escapeHtml(data.bot || 'bot')} orqali yuboriladi.`
-      : `Telegram kanal hali ulanmagan.${data.can_manage ? '' : ' Direktordan kanalni ulashni so\'rang.'}`;
+      ? `${t('photos.linkedPrefix')} <b>${escapeHtml(ch.title)}</b>${ch.username ? ` (@${escapeHtml(ch.username)})` : ''}. ${escapeHtml(data.bot || 'bot')} ${t('photos.viaBot')}`
+      : `${t('photos.notLinked')}${data.can_manage ? '' : t('photos.askDirector')}`;
     document.getElementById('photoPublicWarning').hidden = !(ch.linked && ch.public);
     document.getElementById('photoConnectForm').hidden = !data.can_manage;
   } catch (err) {
-    status.textContent = err.message || "Holatni olib bo'lmadi.";
+    status.textContent = err.message || t('common.error');
     status.dataset.state = 'error';
   }
   updatePhotoForm();
@@ -920,8 +955,8 @@ async function connectPhotoChannel(e) {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik');
-    showToast(`"${data.title}" ulandi.`, 'success');
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
+    showToast(t('modal.telegramLink.channelConnected', { title: data.title }), 'success');
     document.getElementById('photoChannelInput').value = '';
     loadPhotoStatus();
   } catch (err) {
@@ -935,7 +970,7 @@ async function sendPhotos(e) {
   const childId = document.getElementById('photoChildSelect').value;
   const btn = document.getElementById('photoSendBtn');
   PHOTOS.sending = true;
-  btn.textContent = 'Yuborilmoqda…';
+  btn.textContent = t('common.sending');
   updatePhotoForm();
   try {
     const res = await apiFetch(`${API_BASE}/telegram/photos`, {
@@ -944,16 +979,16 @@ async function sendPhotos(e) {
       body: JSON.stringify({ target, child_id: target === 'child' ? childId : null, caption: document.getElementById('photoCaption').value, images: PHOTOS.items })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik');
-    showToast(`${data.sent} ta rasm yuborildi: ${data.to}.`, 'success');
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
+    showToast(t('toast.photosSent', { sent: data.sent, to: data.to }), 'success');
     PHOTOS.items = [];
     document.getElementById('photoCaption').value = '';
     renderPhotoPreviews();
   } catch (err) {
-    showToast(err.message || "Rasmlarni yuborib bo'lmadi.", 'warning');
+    showToast(err.message || t('toast.photosSendFailed'), 'warning');
   } finally {
     PHOTOS.sending = false;
-    btn.textContent = 'Yuborish';
+    btn.textContent = t('common.send');
     updatePhotoForm();
   }
 }
@@ -962,22 +997,22 @@ async function openTelegramLink(childId) {
   const status = document.getElementById('tgLinkStatus');
   const input = document.getElementById('tgLinkUrl');
   document.getElementById('tgLinkChild').textContent = '';
-  status.textContent = 'Yuklanmoqda…';
+  status.textContent = t('common.loading');
   status.dataset.state = '';
   input.value = '';
   openModal('telegramLinkModal');
   try {
     const res = await apiFetch(`${API_BASE}/children/${encodeURIComponent(childId)}/telegram-link`);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
     document.getElementById('tgLinkChild').textContent = data.child;
     status.textContent = data.linked
-      ? `Ota-ona ${data.bot} botiga ulangan, xabarlar yuborilmoqda.`
-      : `Ota-ona hali ${data.bot} botiga ulanmagan.`;
+      ? t('modal.telegramLink.connected', { bot: data.bot })
+      : t('modal.telegramLink.notConnected', { bot: data.bot });
     status.dataset.state = data.linked ? 'linked' : 'pending';
     input.value = data.url;
   } catch (err) {
-    status.textContent = err.message || "Havolani olib bo'lmadi.";
+    status.textContent = err.message || t('modal.telegramLink.loadFailed');
     status.dataset.state = 'error';
   }
 }
@@ -991,21 +1026,21 @@ async function copyTelegramLink() {
     input.select();
     document.execCommand('copy');
   }
-  showToast('Havola nusxalandi. Uni ota-onaga yuboring.', 'success');
+  showToast(t('modal.telegramLink.copied'), 'success');
 }
 
 function handleDeleteChild(childId, childName) {
-  if (!confirm(`"${childName}" ni ro'yxatdan butunlay o'chirmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.`)) {
+  if (!confirm(t('confirm.deleteChild', { name: childName }))) {
     return;
   }
   apiFetch(`${API_BASE}/children/${childId}`, { method: 'DELETE' })
     .then(r => r.json())
     .then(() => {
       syncWithBackend();
-      showToast(`${childName} ro'yxatdan o'chirildi.`, 'warning');
+      showToast(t('modal.addChild.deleted', { name: childName }), 'warning');
     })
     .catch(() => {
-      showToast(`Xatolik yuz berdi`, 'warning');
+      showToast(t('toast.genericError'), 'warning');
     });
 }
 
@@ -1028,9 +1063,9 @@ function handleHealthSubmit(e) {
   }).then(r => r.json()).then(() => {
     closeModal('editHealthModal');
     syncWithBackend();
-    showToast(`Sog'liq holati yangilandi.`, 'success');
+    showToast(t('modal.editHealth.saved'), 'success');
   }).catch(() => {
-    showToast(`Xatolik yuz berdi`, 'warning');
+    showToast(t('toast.genericError'), 'warning');
   });
 }
 
@@ -1042,7 +1077,7 @@ function openEditPricingModal(childId, childName, discount, note, listedPrice) {
   document.getElementById('editPricingPrice').value = listedPrice != null ? listedPrice : '';
   document.getElementById('editPricingBasePrice').value = listedPrice != null ? listedPrice : '';
   document.getElementById('editPricingDiscountPercent').value = '';
-  document.getElementById('editPricingCalcResult').innerText = 'Asl narx va foizni kiriting: Нархи avtomatik hisoblanadi.';
+  document.getElementById('editPricingCalcResult').innerText = t('modal.editPricing.calcHint');
   openModal('editPricingModal');
 }
 
@@ -1061,9 +1096,9 @@ function handlePricingSubmit(e) {
   }).then(r => r.json()).then(() => {
     closeModal('editPricingModal');
     syncWithBackend();
-    showToast(`Narx, chegirma va izoh yangilandi.`, 'success');
+    showToast(t('modal.editPricing.saved'), 'success');
   }).catch(() => {
-    showToast(`Xatolik yuz berdi`, 'warning');
+    showToast(t('toast.genericError'), 'warning');
   });
 }
 
@@ -1072,12 +1107,16 @@ function handlePricingSubmit(e) {
 // Marks wait ATT_UNDO_MS before saving, because saving "Keldi" messages the parent.
 // ============================================================================
 
-const ATT_STATUSES = [
-  { key: 'PRESENT', label: 'Keldi', cls: 'present' },
-  { key: 'ABSENT', label: 'Kelmadi', cls: 'absent' },
-  { key: 'EXCUSED', label: 'Sababli', cls: 'excused' },
-  { key: 'LATE', label: 'Kech keldi', cls: 'late' },
+const ATT_STATUS_KEYS = [
+  { key: 'PRESENT', i18n: 'att.status.present', cls: 'present' },
+  { key: 'ABSENT', i18n: 'att.status.absent', cls: 'absent' },
+  { key: 'EXCUSED', i18n: 'att.status.excused', cls: 'excused' },
+  { key: 'LATE', i18n: 'att.status.late', cls: 'late' },
 ];
+
+function attStatuses() {
+  return ATT_STATUS_KEYS.map(s => ({ ...s, label: t(s.i18n) }));
+}
 const ATT_UNDO_MS = 5000;
 
 const ATT = {
@@ -1107,7 +1146,7 @@ function todayISO() {
 }
 
 function attStatusMeta(key) {
-  return ATT_STATUSES.find(s => s.key === key);
+  return attStatuses().find(s => s.key === key);
 }
 
 function attIsEditable() {
@@ -1182,19 +1221,19 @@ function renderAttendanceRow(row, editable) {
   const failed = ATT.failed.has(row.id);
   const initials = row.name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2);
 
-  let metaText = meta ? meta.label : 'Belgilanmagan';
+  let metaText = meta ? meta.label : t('att.unmarkedLabel');
   if (meta && row.time && !isPending && (status === 'PRESENT' || status === 'LATE')) metaText += ` · ${row.time}`;
 
   let sync = '';
   if (isPending) {
-    sync = `<span class="att-sync">Saqlanadi… <button type="button" class="att-link" data-undo>Bekor qilish</button></span>`;
+    sync = `<span class="att-sync">${t('att.saving')} <button type="button" class="att-link" data-undo>${t('att.undo')}</button></span>`;
   } else if (isSaving) {
-    sync = `<span class="att-sync">Saqlanmoqda…</span>`;
+    sync = `<span class="att-sync">${t('att.savingNow')}</span>`;
   } else if (failed) {
-    sync = `<span class="att-sync is-error">Saqlanmadi <button type="button" class="att-link" data-retry>Qayta urinish</button></span>`;
+    sync = `<span class="att-sync is-error">${t('att.saveFailed')} <button type="button" class="att-link" data-retry>${t('common.retry')}</button></span>`;
   }
 
-  const buttons = ATT_STATUSES.map(s => `
+  const buttons = attStatuses().map(s => `
     <button type="button" class="att-btn" data-status="${s.key}" aria-pressed="${status === s.key}" ${editable && !isSaving ? '' : 'disabled'}>${attMarkSvg(s.key)}${s.label}</button>
   `).join('');
 
@@ -1207,9 +1246,9 @@ function renderAttendanceRow(row, editable) {
           <span class="att-meta">${metaText}</span>
         </div>
         ${sync}
-        <span class="att-mark" title="${meta ? meta.label : 'Belgilanmagan'}">${meta ? attMarkSvg(status) : ''}</span>
+        <span class="att-mark" title="${meta ? meta.label : t('att.unmarkedLabel')}">${meta ? attMarkSvg(status) : ''}</span>
       </div>
-      <div class="att-choices" role="group" aria-label="${escapeHtml(row.name)}: davomat">${buttons}</div>
+      <div class="att-choices" role="group" aria-label="${escapeHtml(row.name)}: ${t('att.ariaLabel')}">${buttons}</div>
     </article>
   `;
 }
@@ -1220,11 +1259,11 @@ function renderAttendanceGrid() {
   const editable = attIsEditable();
 
   if (ATT.loading && !ATT.rows.length) {
-    grid.innerHTML = `<p class="att-empty">Yuklanmoqda…</p>`;
+    grid.innerHTML = `<p class="att-empty">${t('att.loading')}</p>`;
   } else if (ATT.error) {
-    grid.innerHTML = `<div class="att-empty"><p>Davomatni yuklab bo'lmadi. Internet yoki server ulanishini tekshiring.</p><button type="button" class="btn btn-secondary" data-reload>Qayta yuklash</button></div>`;
+    grid.innerHTML = `<div class="att-empty"><p>${t('att.loadError')}</p><button type="button" class="btn btn-secondary" data-reload>${t('att.reload')}</button></div>`;
   } else if (!ATT.rows.length) {
-    grid.innerHTML = `<p class="att-empty">Bu guruhda hali bola yo'q.</p>`;
+    grid.innerHTML = `<p class="att-empty">${t('att.noChildren')}</p>`;
   } else {
     grid.innerHTML = ATT.rows.map(r => renderAttendanceRow(r, editable)).join('');
   }
@@ -1233,9 +1272,8 @@ function renderAttendanceGrid() {
   const title = document.getElementById('attTitle');
   const group = document.getElementById('attendanceGroupSelect')?.value;
   if (title && group && ATT.date) {
-    const months = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
     const [y, m, d] = ATT.date.split('-').map(Number);
-    title.textContent = `${group} · ${d}-${months[m - 1]}, ${y}`;
+    title.textContent = `${group} · ${formatDayMonth(d, m)}, ${y}`;
   }
 
   const counts = { PRESENT: 0, ABSENT: 0, EXCUSED: 0, LATE: 0 };
@@ -1256,16 +1294,16 @@ function renderAttendanceGrid() {
   if (note) {
     note.hidden = editable || ATT.error || !ATT.rows.length;
     note.textContent = can('attendance.mark')
-      ? "Bu o'tgan kun, faqat ko'rish mumkin. Davomat faqat bugungi kun uchun belgilanadi."
-      : "Siz davomatni faqat ko'ra olasiz. Belgilashni tarbiyachi yoki direktor qiladi.";
+      ? t('att.readonlyNote.viewOnly')
+      : t('att.readonlyNote.noMarkPerm');
   }
 
   const bar = document.getElementById('attActionBar');
   if (bar) bar.hidden = !editable || unmarked === 0;
   const label = document.getElementById('btnMarkRestLabel');
   if (label) label.innerText = unmarked === ATT.rows.length
-    ? `Hammasini "Keldi" qilish (${unmarked})`
-    : `Qolgan ${unmarked} nafarni "Keldi" qilish`;
+    ? t('att.markRest.all', { count: unmarked })
+    : t('att.markRest.some', { count: unmarked });
 }
 
 function setAttendance(childId, status) {
@@ -1316,8 +1354,8 @@ function markAllPresent() {
   renderAttendanceGrid();
 
   showActionToast(
-    `${ids.length} nafar "Keldi" deb belgilandi. ${ATT_UNDO_MS / 1000} soniyadan keyin saqlanadi va ota-onalarga xabar boradi.`,
-    'Bekor qilish',
+    t('toast.attendanceMarkedPending', { count: ids.length, seconds: ATT_UNDO_MS / 1000 }),
+    t('att.undo'),
     () => {
       clearTimeout(timer);
       ids.forEach(id => { if (ATT.pending.get(id)?.timer === timer) ATT.pending.delete(id); });
@@ -1369,17 +1407,17 @@ async function commitAttendance(ids) {
   const notified = saved.filter(r => r.notified);
   const unlinked = saved.length - notified.length;
   if (failed.length) {
-    const who = failed.length === 1 ? failed[0].name : `${failed.length} nafar bola`;
-    showToast(`${who}: davomat saqlanmadi. "Qayta urinish" tugmasini bosing.`, 'warning');
+    const who = failed.length === 1 ? failed[0].name : `${failed.length} ${t('common.child')}`;
+    showToast(t('toast.attendanceSaveFailed', { who }), 'warning');
   }
   if (saved.length === 1) {
     showToast(notified.length
-      ? `${saved[0].name}: saqlandi, ota-onaga Telegram xabar yuborildi.`
-      : `${saved[0].name}: saqlandi. Ota-ona Telegram botga ulanmagan, xabar yuborilmadi.`,
+      ? t('toast.attendanceSavedNotified', { name: saved[0].name })
+      : t('toast.attendanceSavedNotNotified', { name: saved[0].name }),
       notified.length ? 'success' : 'info');
   } else if (saved.length > 1) {
-    showToast(`${saved.length} nafar saqlandi. Telegram xabar: ${notified.length} ta yuborildi` +
-      (unlinked ? `, ${unlinked} ta ota-ona botga ulanmagan.` : '.'), 'success');
+    showToast(t('toast.attendanceSavedBatch', { count: saved.length, notified: notified.length }) +
+      (unlinked ? t('toast.attendanceSavedBatchUnlinked', { n: unlinked }) : '.'), 'success');
   }
 }
 
@@ -1395,8 +1433,8 @@ function renderInvoicesTable() {
       <td class="${c.debt > 0 ? '' : 'text-amber'}">${signedMoney(c.debt > 0 ? 0 : -50000)}</td>
       <td class="text-emerald">${formatMoney(c.paid)}</td>
       <td class="${c.debt > 0 ? 'text-rose' : ''}"><b>${formatMoney(c.debt)}</b></td>
-      <td>${c.debt === 0 ? `<span class="badge badge-emerald">To'langan</span>` : `<span class="badge badge-rose">Qarz</span>`}</td>
-      <td class="text-right col-actions"><button class="btn btn-sm ${c.debt > 0 ? 'btn-primary' : 'btn-secondary'}" onclick="openRecordPaymentModal('${escapeHtml(c.id)}')">To'lov</button> <button class="btn btn-sm btn-secondary" onclick="viewChildReceipt('${escapeHtml(c.id)}')">Kvitansiya</button></td>
+      <td>${c.debt === 0 ? `<span class="badge badge-emerald">${t('status.paid')}</span>` : `<span class="badge badge-rose">${t('billing.debtBadge')}</span>`}</td>
+      <td class="text-right col-actions"><button class="btn btn-sm ${c.debt > 0 ? 'btn-primary' : 'btn-secondary'}" onclick="openRecordPaymentModal('${escapeHtml(c.id)}')">${t('billing.payBtn')}</button> <button class="btn btn-sm btn-secondary" onclick="viewChildReceipt('${escapeHtml(c.id)}')">${t('billing.receiptBtn')}</button></td>
     </tr>
   `).join('');
 }
@@ -1431,35 +1469,35 @@ function shiftPaymentMonth(delta) {
 async function loadPaymentInfo() {
   const status = document.getElementById('paymentStatus');
   document.getElementById('paymentMonthLabel').textContent = periodLabel(PAYMENT.period);
-  status.textContent = 'Yuklanmoqda…';
+  status.textContent = t('common.loading');
   status.dataset.state = '';
   try {
     const res = await apiFetch(`${API_BASE}/billing/child/${encodeURIComponent(PAYMENT.childId)}?period=${PAYMENT.period}`);
     const info = await res.json();
-    if (!res.ok) throw new Error(info.detail || 'Xatolik');
+    if (!res.ok) throw new Error(info.detail || t('common.error'));
     PAYMENT.info = info;
     document.getElementById('paymentChildName').textContent = info.child;
     if (info.debt > 0) {
       status.dataset.state = info.overdue ? 'overdue' : 'debt';
       const [, dm, dd] = info.due_date.split('-').map(Number);
-      const due = `${dd}-${MONTH_NAMES[dm - 1].toLowerCase()}`;
-      status.textContent = `${periodLabel(info.period)}: qarz ${formatMoney(info.debt)}` +
-        (info.overdue ? ` · muddati o'tgan (${due})` : ` · muddati ${due}`);
+      const due = formatDayMonth(dd, dm);
+      status.textContent = `${periodLabel(info.period)}: ${t('status.debt').toLowerCase()} ${formatMoney(info.debt)}` +
+        (info.overdue ? ` · ${t('billing.overdueSince', { date: due })}` : ` · ${t('billing.dueOn', { date: due })}`);
     } else {
       status.dataset.state = 'ok';
-      status.textContent = `${periodLabel(info.period)}: qarz yo'q ✓`;
+      status.textContent = `${periodLabel(info.period)}: ${t('billing.noDebt')} ✓`;
     }
     const amount = info.debt > 0 ? info.debt : info.fee;
     document.getElementById('paymentAmount').value = amount || '';
     document.getElementById('paymentHint').textContent = info.debt > 0
-      ? `Qarz uchun yoziladi: ${periodLabel(info.period)}`
-      : (info.has_invoice ? `To'langan. Qo'shimcha summa ${periodLabel(info.period)} uchun yoziladi.` : `Qarz yo'q — to'lov oldindan yoziladi: ${periodLabel(info.period)}`);
+      ? t('billing.willBeBilled', { period: periodLabel(info.period) })
+      : (info.has_invoice ? t('billing.alreadyPaidExtra', { period: periodLabel(info.period) }) : t('billing.advanceBilled', { period: periodLabel(info.period) }));
     if (info.total_debt > info.debt) {
-      document.getElementById('paymentHint').textContent += ` · Boshqa oylar qarzi: ${formatMoney(info.total_debt - info.debt)}`;
+      document.getElementById('paymentHint').textContent += t('billing.otherMonthsDebt', { amount: formatMoney(info.total_debt - info.debt) });
     }
   } catch (err) {
     status.dataset.state = 'error';
-    status.textContent = err.message || "Ma'lumotni olib bo'lmadi.";
+    status.textContent = err.message || t('common.error');
   }
   updatePaymentSubmit();
 }
@@ -1469,7 +1507,7 @@ function updatePaymentSubmit() {
   const method = document.querySelector('input[name="paymentMethod"]:checked');
   const amount = parseFloat(document.getElementById('paymentAmount').value);
   btn.disabled = PAYMENT.saving || !method || !(amount > 0) || !PAYMENT.info;
-  btn.textContent = PAYMENT.saving ? 'Saqlanmoqda…' : !method ? 'Usulni tanlang' : "To'lovni qabul qilish";
+  btn.textContent = PAYMENT.saving ? t('common.saving') : !method ? t('billing.payChooseMethod') : t('billing.paySubmit');
 }
 
 document.addEventListener('change', e => {
@@ -1496,12 +1534,12 @@ async function handleRecordPayment(e) {
       })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik yuz berdi');
+    if (!res.ok) throw new Error(data.detail || t('toast.genericError'));
     closeModal('recordPaymentModal');
     syncWithBackend();
-    showToast(`To'lov qabul qilindi: ${formatMoney(amount)} (${periodLabel(data.period)}${data.advance ? ', oldindan' : ''}).`, 'success');
+    showToast(t('billing.payReceived', { amount: formatMoney(amount), period: periodLabel(data.period), advance: data.advance ? t('billing.advanceSuffix') : '' }), 'success');
   } catch (err) {
-    showToast(err.message || 'Xatolik yuz berdi', 'warning');
+    showToast(err.message || t('toast.genericError'), 'warning');
   } finally {
     PAYMENT.saving = false;
     updatePaymentSubmit();
@@ -1515,9 +1553,9 @@ function renderFinanceStats() {
   if (!s) { container.innerHTML = ''; return; }
 
   const rows = [
-    { label: 'Bugungi Daromad', income: s.income.daily, expense: s.expenses.daily, net: s.net.daily, icon: 'color-emerald' },
-    { label: 'Oylik Daromad', income: s.income.monthly, expense: s.expenses.monthly, net: s.net.monthly, icon: 'color-indigo' },
-    { label: 'Yillik Daromad', income: s.income.yearly, expense: s.expenses.yearly, net: s.net.yearly, icon: 'color-amber' },
+    { label: t('billing.incomeLabel.daily'), income: s.income.daily, expense: s.expenses.daily, net: s.net.daily, icon: 'color-emerald' },
+    { label: t('billing.incomeLabel.monthly'), income: s.income.monthly, expense: s.expenses.monthly, net: s.net.monthly, icon: 'color-indigo' },
+    { label: t('billing.incomeLabel.yearly'), income: s.income.yearly, expense: s.expenses.yearly, net: s.net.yearly, icon: 'color-amber' },
   ];
 
   container.innerHTML = rows.map(r => `
@@ -1525,8 +1563,8 @@ function renderFinanceStats() {
       <div class="stat-info">
         <span class="stat-label">${r.label}</span>
         <p class="stat-value ${r.income ? 'text-emerald' : ''}">${signedMoney(r.income)}</p>
-        <span class="stat-trend ${r.expense ? 'negative' : ''}">Chiqim: ${signedMoney(-r.expense)}</span>
-        <span class="stat-trend ${r.net > 0 ? 'positive' : r.net < 0 ? 'negative' : ''}">Sof: ${signedMoney(r.net)}</span>
+        <span class="stat-trend ${r.expense ? 'negative' : ''}">${t('billing.expenseLabel')} ${signedMoney(-r.expense)}</span>
+        <span class="stat-trend ${r.net > 0 ? 'positive' : r.net < 0 ? 'negative' : ''}">${t('billing.netLabel')} ${signedMoney(r.net)}</span>
       </div>
     </div>
   `).join('');
@@ -1537,7 +1575,11 @@ function renderFinanceStats() {
 // ============================================================================
 
 const STAFF_ATT = { rows: [], editable: false, saving: new Set() };
-const STAFF_ROLE_LABELS = { TARBIYACHI: 'Tarbiyachi', ENAGA: 'Enaga', OSHPAZ: 'Oshpaz', HAMSHIRA: 'Hamshira' };
+const STAFF_ROLE_I18N = { TARBIYACHI: 'staff.role.tarbiyachi', ENAGA: 'staff.role.enaga', OSHPAZ: 'staff.role.oshpaz', HAMSHIRA: 'staff.role.hamshira' };
+
+function staffRoleLabel(role) {
+  return STAFF_ROLE_I18N[role] ? t(STAFF_ROLE_I18N[role]) : role.charAt(0) + role.slice(1).toLowerCase();
+}
 
 function initStaffAttendance() {
   document.getElementById('staffAttList')?.addEventListener('click', e => {
@@ -1551,12 +1593,12 @@ async function loadStaffAttendance() {
   try {
     const res = await apiFetch(`${API_BASE}/staff/attendance`);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
     STAFF_ATT.rows = data.staff;
     STAFF_ATT.editable = data.editable;
     renderStaffAttendance();
   } catch (err) {
-    document.getElementById('staffAttSummary').textContent = err.message || "Davomatni yuklab bo'lmadi.";
+    document.getElementById('staffAttSummary').textContent = err.message || t('att.loadError');
   }
 }
 
@@ -1566,21 +1608,21 @@ function renderStaffAttendance() {
   const present = STAFF_ATT.rows.filter(r => r.status === 'PRESENT' || r.status === 'LATE').length;
   const unmarked = STAFF_ATT.rows.filter(r => !r.status).length;
   document.getElementById('staffAttSummary').textContent =
-    `${present} / ${STAFF_ATT.rows.length} ishda` + (unmarked ? ` · ${unmarked} ta belgilanmagan` : '');
+    `${present} / ${STAFF_ATT.rows.length} ${t('att.staffInShift')}` + (unmarked ? ` · ${unmarked} ${t('att.staffMarkedSuffix')}` : '');
   list.innerHTML = STAFF_ATT.rows.length ? STAFF_ATT.rows.map(r => {
     const meta = attStatusMeta(r.status);
-    const role = STAFF_ROLE_LABELS[r.role] || r.role.charAt(0) + r.role.slice(1).toLowerCase();
+    const role = staffRoleLabel(r.role);
     return `
       <div class="staff-att-row" data-id="${escapeHtml(r.id)}" data-status="${meta ? meta.cls : 'unmarked'}">
         <div class="staff-att-info">
           <b>${escapeHtml(r.name)}</b>
           <small>${escapeHtml(role)}${meta ? ` · ${meta.label}${r.check_in_time ? ' ' + r.check_in_time : ''}` : ''}</small>
         </div>
-        <div class="staff-att-buttons" role="group" aria-label="${escapeHtml(r.name)}: davomat">
-          ${ATT_STATUSES.map(s => `<button type="button" class="att-btn" data-status="${s.key}" aria-pressed="${r.status === s.key}" ${STAFF_ATT.editable && !STAFF_ATT.saving.has(r.id) ? '' : 'disabled'}>${attMarkSvg(s.key)}<span>${s.label}</span></button>`).join('')}
+        <div class="staff-att-buttons" role="group" aria-label="${escapeHtml(r.name)}: ${t('att.ariaLabel')}">
+          ${attStatuses().map(s => `<button type="button" class="att-btn" data-status="${s.key}" aria-pressed="${r.status === s.key}" ${STAFF_ATT.editable && !STAFF_ATT.saving.has(r.id) ? '' : 'disabled'}>${attMarkSvg(s.key)}<span>${s.label}</span></button>`).join('')}
         </div>
       </div>`;
-  }).join('') : '<p class="att-empty">Faol xodimlar yo\'q.</p>';
+  }).join('') : `<p class="att-empty">${t('att.staffEmpty')}</p>`;
 }
 
 async function markStaffAttendance(staffId, status) {
@@ -1595,12 +1637,12 @@ async function markStaffAttendance(staffId, status) {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ staff_id: staffId, status })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
     row.check_in_time = data.check_in_time;
   } catch (err) {
     row.status = prev.status;
     row.check_in_time = prev.time;
-    showToast(`${row.name}: saqlanmadi. ${err.message || ''}`, 'warning');
+    showToast(t('toast.staffAttSaveFailed', { name: row.name, error: err.message || '' }), 'warning');
   } finally {
     STAFF_ATT.saving.delete(staffId);
     renderStaffAttendance();
@@ -1646,7 +1688,7 @@ function addKitchenRow(name = '', quantity = '', price = '') {
     <input type="number" class="custom-input kitchen-qty" min="0" step="any" placeholder="0" value="${quantity}">
     <input type="number" class="custom-input kitchen-price" min="0" step="any" placeholder="0" value="${price}">
     <span class="kitchen-row-total">0</span>
-    <button type="button" class="icon-button" data-remove-row aria-label="Qatorni o'chirish">
+    <button type="button" class="icon-button" data-remove-row aria-label="${t('common.delete')}">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>`;
   wrap.appendChild(row);
@@ -1673,8 +1715,8 @@ function updateKitchenTotals() {
 
 function openKitchenForm(report = null) {
   KITCHEN.editingId = report ? report.id : null;
-  document.getElementById('kitchenFormTitle').textContent = report ? "Hisobotni tahrirlash" : "Yangi haftalik hisobot";
-  document.getElementById('kitchenSubmitBtn').textContent = report ? 'Saqlash' : 'Saqlash';
+  document.getElementById('kitchenFormTitle').textContent = report ? t('kitchen.form.editTitle') : t('kitchen.form.newTitle');
+  document.getElementById('kitchenSubmitBtn').textContent = t('common.save');
   document.getElementById('kitchenForm').reset();
   document.getElementById('kitchenItemRows').innerHTML = '';
   if (report) {
@@ -1693,7 +1735,7 @@ async function editKitchenReport() {
   if (!KITCHEN.openId) return;
   const res = await apiFetch(`${API_BASE}/kitchen/reports/${encodeURIComponent(KITCHEN.openId)}`);
   const data = await res.json();
-  if (!res.ok) return showToast(data.detail || "Hisobotni yuklab bo'lmadi.", 'warning');
+  if (!res.ok) return showToast(data.detail || t('kitchen.loadFailed'), 'warning');
   closeModal('kitchenDetailModal');
   openKitchenForm(data);
 }
@@ -1710,7 +1752,7 @@ async function submitKitchenReport(e) {
     }))
     .filter(it => it.name && it.quantity > 0 && !isNaN(it.unit_price));
 
-  if (!items.length) return showToast('Kamida bitta mahsulot kiriting.', 'warning');
+  if (!items.length) return showToast(t('kitchen.atLeastOneItem'), 'warning');
 
   const body = {
     week_start: document.getElementById('kitchenWeekStart').value,
@@ -1726,9 +1768,9 @@ async function submitKitchenReport(e) {
       method: editingId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(Array.isArray(data.detail) ? "Ma'lumotlar to'liq emas." : (data.detail || 'Xatolik'));
+    if (!res.ok) throw new Error(Array.isArray(data.detail) ? t('kitchen.incompleteData') : (data.detail || t('common.error')));
     closeModal('kitchenFormModal');
-    showToast(`Hisobot saqlandi: ${formatMoney(data.total_amount)}, bitta bolaga ${formatMoney(data.cost_per_child)}.`, 'success');
+    showToast(t('kitchen.saved', { total: formatMoney(data.total_amount), perChild: formatMoney(data.cost_per_child) }), 'success');
     loadKitchenReports();
   } catch (err) {
     showToast(err.message, 'warning');
@@ -1737,30 +1779,112 @@ async function submitKitchenReport(e) {
   }
 }
 
+// ============================================================================
+// Sozlamalar (Settings): tashkilot ma'lumotlarini saqlash
+// ============================================================================
+async function saveOrgSettings() {
+  const body = {
+    name: document.getElementById('settingsOrgName').value.trim(),
+    phone: document.getElementById('settingsOrgPhone').value.trim(),
+    address: document.getElementById('settingsOrgAddress').value.trim() || null,
+  };
+  if (!body.name) return showToast(t('settings.orgNameRequired'), 'warning');
+
+  try {
+    const res = await apiFetch(`${API_BASE}/settings/org`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(Array.isArray(data.detail) ? t('kitchen.incompleteData') : (data.detail || t('common.error')));
+    showToast(t('settings.saved'), 'success');
+    await initUserSession();
+    if (can('audit.view')) loadAuditLog();
+  } catch (err) {
+    showToast(err.message, 'warning');
+  }
+}
+
+// ============================================================================
+// Sozlamalar (Settings): O'zgarishlar tarixi (audit trail) — faqat boshqaruv
+// ============================================================================
+const AUDIT_FIELD_LABELS = {
+  monthly_fee: 'audit.field.monthlyFee', discount: 'audit.field.discount', note: 'audit.field.note',
+  allergies: 'audit.field.allergies', week_start: 'audit.field.weekStart', week_end: 'audit.field.weekEnd',
+  child_count: 'audit.field.childCount', total_amount: 'audit.field.totalAmount', amount: 'audit.field.amount',
+  status: 'audit.field.status', name: 'settings.orgName', phone: 'settings.orgPhone', address: 'settings.orgAddress',
+};
+
+function formatAuditValue(value) {
+  if (value === null || value === undefined || value === '') return '—';
+  if (typeof value === 'number') return formatMoney(value);
+  return escapeHtml(String(value));
+}
+
+function renderAuditChanges(changes) {
+  if (!changes || !Object.keys(changes).length) return '—';
+  return `<ul class="audit-changes-list">${Object.entries(changes).map(([field, { old, new: next }]) => {
+    const label = AUDIT_FIELD_LABELS[field] ? t(AUDIT_FIELD_LABELS[field]) : escapeHtml(field);
+    return `<li><b>${label}:</b> ${formatAuditValue(old)} → ${formatAuditValue(next)}</li>`;
+  }).join('')}</ul>`;
+}
+
+function formatAuditWhen(createdAt) {
+  // SQLite's CURRENT_TIMESTAMP: "YYYY-MM-DD HH:MM:SS"
+  const [datePart, timePart] = (createdAt || '').split(' ');
+  const [y, m, d] = (datePart || '').split('-').map(Number);
+  if (!y || !m || !d) return createdAt || '—';
+  return `${formatDayMonth(d, m)}, ${(timePart || '').slice(0, 5)}`;
+}
+
+async function loadAuditLog() {
+  try {
+    const res = await apiFetch(`${API_BASE}/audit/log?limit=100`);
+    if (!res.ok) return;
+    STATE.auditLog = await res.json();
+    renderAuditLog();
+  } catch (e) {}
+}
+
+function renderAuditLog() {
+  const body = document.getElementById('auditLogBody');
+  if (!body) return;
+  const rows = STATE.auditLog || [];
+  document.getElementById('auditLogEmpty').style.display = rows.length ? 'none' : 'block';
+  body.innerHTML = rows.map(entry => `
+    <tr>
+      <td>${formatAuditWhen(entry.created_at)}</td>
+      <td>${escapeHtml(entry.actor_name)} <span class="text-muted">(${roleTitle(entry.actor_role)})</span></td>
+      <td>${t(`audit.action.${entry.action}`) === `audit.action.${entry.action}` ? escapeHtml(entry.action) : t(`audit.action.${entry.action}`)}</td>
+      <td>${escapeHtml(entry.target_label || entry.target_id || '—')}</td>
+      <td>${renderAuditChanges(entry.changes)}</td>
+    </tr>
+  `).join('');
+}
+
 function formatDateUz(iso) {
   const [y, m, d] = iso.split('-').map(Number);
-  return `${d}-${MONTH_NAMES[m - 1].toLowerCase()}`;
+  return formatDayMonth(d, m);
 }
 
 async function loadKitchenReports() {
   const list = document.getElementById('kitchenList');
   if (!list) return;
-  list.innerHTML = `<p class="att-empty">Yuklanmoqda…</p>`;
+  list.innerHTML = `<p class="att-empty">${t('common.loading')}</p>`;
   try {
     const res = await apiFetch(`${API_BASE}/kitchen/reports`);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
     KITCHEN.reports = data;
     renderKitchenList();
   } catch (err) {
-    list.innerHTML = `<div class="att-empty"><p>${escapeHtml(err.message || "Hisobotlarni yuklab bo'lmadi.")}</p></div>`;
+    list.innerHTML = `<div class="att-empty"><p>${escapeHtml(err.message || t('kitchen.loadFailed'))}</p></div>`;
   }
 }
 
 function renderKitchenList() {
   const list = document.getElementById('kitchenList');
   if (!KITCHEN.reports.length) {
-    list.innerHTML = `<p class="att-empty">Hali hisobot kiritilmagan. "Yangi hisobot" tugmasini bosing.</p>`;
+    list.innerHTML = `<p class="att-empty">${t('kitchen.empty')}</p>`;
     return;
   }
   const latest = KITCHEN.reports[0];
@@ -1768,16 +1892,16 @@ function renderKitchenList() {
   const trend = prev ? latest.cost_per_child - prev.cost_per_child : null;
   list.innerHTML = `
     <div class="kitchen-summary">
-      <div><span>So'nggi hafta</span><b>${escapeHtml(formatDateUz(latest.week_start))} – ${escapeHtml(formatDateUz(latest.week_end))}</b></div>
-      <div><span>Bitta bolaga</span><b>${formatMoney(latest.cost_per_child)}</b>${trend !== null ? `<small class="${trend > 0 ? 'text-rose' : trend < 0 ? 'text-emerald' : ''}">${trend > 0 ? '+' : ''}${formatMoney(trend)} o'tgan haftaga nisbatan</small>` : ''}</div>
-      <div><span>Jami xarajat</span><b>${formatMoney(latest.total_amount)}</b></div>
+      <div><span>${t('kitchen.lastWeek')}</span><b>${escapeHtml(formatDateUz(latest.week_start))} – ${escapeHtml(formatDateUz(latest.week_end))}</b></div>
+      <div><span>${t('kitchen.perChild')}</span><b>${formatMoney(latest.cost_per_child)}</b>${trend !== null ? `<small class="${trend > 0 ? 'text-rose' : trend < 0 ? 'text-emerald' : ''}">${trend > 0 ? '+' : ''}${formatMoney(trend)} ${t('kitchen.vsLastWeek')}</small>` : ''}</div>
+      <div><span>${t('kitchen.totalExpense')}</span><b>${formatMoney(latest.total_amount)}</b></div>
     </div>
     <div class="kitchen-history">${KITCHEN.reports.map(r => `
       <button type="button" class="kitchen-history-row" onclick="openKitchenDetail('${escapeHtml(r.id)}')">
         <span class="kitchen-history-week">${escapeHtml(formatDateUz(r.week_start))} – ${escapeHtml(formatDateUz(r.week_end))}</span>
-        <span class="kitchen-history-count">${r.child_count} bola</span>
+        <span class="kitchen-history-count">${r.child_count} ${t('common.child')}</span>
         <span class="kitchen-history-total">${formatMoney(r.total_amount)}</span>
-        <span class="kitchen-history-per">${formatMoney(r.cost_per_child)} / bola</span>
+        <span class="kitchen-history-per">${formatMoney(r.cost_per_child)} ${t('kitchen.perChildSuffix')}</span>
         <svg class="todo-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
       </button>`).join('')}</div>`;
 }
@@ -1785,32 +1909,32 @@ function renderKitchenList() {
 async function openKitchenDetail(reportId) {
   KITCHEN.openId = reportId;
   document.getElementById('kitchenDetailItems').innerHTML = '';
-  document.getElementById('kitchenDetailSummary').textContent = 'Yuklanmoqda…';
+  document.getElementById('kitchenDetailSummary').textContent = t('common.loading');
   openModal('kitchenDetailModal');
   try {
     const res = await apiFetch(`${API_BASE}/kitchen/reports/${encodeURIComponent(reportId)}`);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
     document.getElementById('kitchenDetailTitle').textContent = `${formatDateUz(data.week_start)} – ${formatDateUz(data.week_end)}`;
     document.getElementById('kitchenDetailSummary').textContent =
-      `${data.child_count} bola · Jami ${formatMoney(data.total_amount)} · Bitta bolaga ${formatMoney(data.cost_per_child)}`;
+      `${data.child_count} ${t('common.child')} · ${t('kitchen.totalExpense')} ${formatMoney(data.total_amount)} · ${t('kitchen.perChild')} ${formatMoney(data.cost_per_child)}`;
     document.getElementById('kitchenDetailItems').innerHTML = data.items.map((it, i) => `
       <tr><td>${i + 1}</td><td>${escapeHtml(it.name)}</td><td>${it.quantity}</td><td>${formatMoney(it.unit_price)}</td><td class="text-right">${formatMoney(it.line_total)}</td></tr>
     `).join('');
   } catch (err) {
-    document.getElementById('kitchenDetailSummary').textContent = err.message || "Yuklab bo'lmadi.";
+    document.getElementById('kitchenDetailSummary').textContent = err.message || t('kitchen.loadFailed');
   }
 }
 
 async function deleteKitchenReport() {
   if (!KITCHEN.openId) return;
-  if (!confirm("Bu haftalik hisobotni butunlay o'chirmoqchimisiz?")) return;
+  if (!confirm(t('confirm.deleteKitchen'))) return;
   try {
     const res = await apiFetch(`${API_BASE}/kitchen/reports/${encodeURIComponent(KITCHEN.openId)}`, { method: 'DELETE' });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
     closeModal('kitchenDetailModal');
-    showToast("Hisobot o'chirildi.", 'info');
+    showToast(t('kitchen.deleted'), 'info');
     loadKitchenReports();
   } catch (err) {
     showToast(err.message, 'warning');
@@ -1823,7 +1947,10 @@ async function deleteKitchenReport() {
 
 const REMINDERS = { settings: null, maxTimes: 6, fields: [] };
 const REMINDER_SAMPLE = { childName: 'Imron Rahimov', parentName: 'Xurshid aka', amount: "1 850 000 so'm", dueDate: '10-noyabr', group: 'Yulduzcha' };
-const REMINDER_FIELD_LABELS = { childName: 'Bola ismi', parentName: 'Ota-ona ismi', amount: 'Summa', dueDate: 'Muddat', group: 'Guruh' };
+
+function reminderFieldLabel(field) {
+  return t(`reminder.field.${field}`);
+}
 
 function initReminders() {
   const form = document.getElementById('reminderForm');
@@ -1858,8 +1985,8 @@ function initReminders() {
     const value = document.getElementById('remTimeInput').value;
     const times = REMINDERS.settings.times;
     if (!value) return;
-    if (times.includes(value)) return showToast('Bu vaqt allaqachon qo\'shilgan.', 'info');
-    if (times.length >= REMINDERS.maxTimes) return showToast(`Kuniga ${REMINDERS.maxTimes} martagacha.`, 'warning');
+    if (times.includes(value)) return showToast(t('billing.addTimeExists'), 'info');
+    if (times.length >= REMINDERS.maxTimes) return showToast(t('billing.addTimeLimit', { max: REMINDERS.maxTimes }), 'warning');
     times.push(value);
     times.sort();
     renderReminderTimes();
@@ -1873,7 +2000,7 @@ async function loadReminders() {
   try {
     const res = await apiFetch(`${API_BASE}/billing/reminders`);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
     REMINDERS.settings = { ...data.settings, times: [...data.settings.times] };
     REMINDERS.maxTimes = data.max_times;
     REMINDERS.fields = data.fields;
@@ -1882,13 +2009,13 @@ async function loadReminders() {
     document.getElementById('remAfter').textContent = data.settings.days_after;
     document.getElementById('remTemplate').value = data.settings.template;
     document.getElementById('remFields').innerHTML = data.fields.map(f =>
-      `<button type="button" class="field-chip" data-field="${f}">+ ${REMINDER_FIELD_LABELS[f] || f}</button>`).join('');
+      `<button type="button" class="field-chip" data-field="${f}">+ ${reminderFieldLabel(f)}</button>`).join('');
     renderReminderStats(data.stats);
     renderReminderTimes();
     renderReminderPreview();
     updateReminderWindow();
   } catch (err) {
-    showToast(err.message || "Eslatma sozlamalarini olib bo'lmadi.", 'warning');
+    showToast(err.message || t('billing.statLoadFailed'), 'warning');
   }
 }
 
@@ -1902,22 +2029,22 @@ function renderReminderStats(stats) {
 function updateReminderWindow() {
   const on = document.getElementById('remEnabled').checked;
   const status = document.getElementById('remStatus');
-  status.textContent = on ? 'Yoqilgan' : "O'chirilgan";
+  status.textContent = on ? t('status.enabled') : t('status.disabled');
   status.className = on ? 'text-emerald' : '';
   document.getElementById('remWindow').textContent =
-    `${document.getElementById('remBefore').textContent} kun oldin · ${document.getElementById('remAfter').textContent} kun keyin`;
+    `${document.getElementById('remBefore').textContent} ${t('billing.stepper.before').toLowerCase()} · ${document.getElementById('remAfter').textContent} ${t('billing.stepper.after').toLowerCase()}`;
 }
 
 function renderReminderTimes() {
-  document.getElementById('remTimes').innerHTML = REMINDERS.settings.times.map(t => `
-    <span class="time-chip">${t}<button type="button" data-remove-time="${t}" aria-label="${t} vaqtini olib tashlash"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>`).join('')
-    || '<span class="reminder-help">Vaqt qo\'shing.</span>';
+  document.getElementById('remTimes').innerHTML = REMINDERS.settings.times.map(time => `
+    <span class="time-chip">${time}<button type="button" data-remove-time="${time}" aria-label="${time}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>`).join('')
+    || `<span class="reminder-help">${t('billing.noTimes')}</span>`;
 }
 
 function renderReminderPreview() {
   let text = document.getElementById('remTemplate').value;
   Object.entries(REMINDER_SAMPLE).forEach(([k, v]) => { text = text.split(`{${k}}`).join(v); });
-  document.getElementById('remPreview').textContent = text ? `Namuna: ${text}` : '';
+  document.getElementById('remPreview').textContent = text ? t('billing.preview', { text }) : '';
 }
 
 async function saveReminders(e) {
@@ -1934,27 +2061,27 @@ async function saveReminders(e) {
       method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(Array.isArray(data.detail) ? "Ma'lumotlar noto'g'ri to'ldirilgan." : (data.detail || 'Xatolik'));
+    if (!res.ok) throw new Error(Array.isArray(data.detail) ? t('kitchen.incompleteData') : (data.detail || t('common.error')));
     REMINDERS.settings = { ...data.settings, times: [...data.settings.times] };
     renderReminderStats(data.stats);
     renderReminderTimes();
-    showToast(body.enabled ? 'Eslatma sozlamalari saqlandi va yoqildi.' : 'Eslatma sozlamalari saqlandi (o\'chirilgan).', 'success');
+    showToast(body.enabled ? t('billing.settingsSaved.on') : t('billing.settingsSaved.off'), 'success');
   } catch (err) {
     showToast(err.message, 'warning');
   }
 }
 
 async function sendDebtReminders() {
-  if (!confirm("Hozirgi eslatma oynasidagi barcha ulangan ota-onalarga eslatma yuborilsinmi?")) return;
+  if (!confirm(t('confirm.sendReminders'))) return;
   try {
     const res = await apiFetch(`${API_BASE}/billing/remind-debtors`, { method: 'POST' });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Xatolik');
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
     showToast(data.targets
-      ? `${data.sent} ta ota-onaga yuborildi.${data.unlinked ? ` ${data.unlinked} tasi Telegramga ulanmagan.` : ''}`
-      : "Hozir eslatma oynasida qarzdor yo'q.", data.sent ? 'success' : 'info');
+      ? t('billing.sentToParents', { sent: data.sent }) + (data.unlinked ? t('billing.someUnlinked', { n: data.unlinked }) : '')
+      : t('billing.noDebtorsNow'), data.sent ? 'success' : 'info');
   } catch (err) {
-    showToast(err.message || "Eslatmani yuborib bo'lmadi.", 'warning');
+    showToast(err.message || t('billing.remindFailed'), 'warning');
   }
 }
 
@@ -1967,8 +2094,8 @@ function updateTmaSimulator() {
 
   document.getElementById('tmaChildAvatar').innerText = child.name.split(' ').map(n => n[0]).join('');
   document.getElementById('tmaChildName').innerText = child.name;
-  document.getElementById('tmaChildGroup').innerText = `${child.group} guruhi`;
-  document.getElementById('tmaCheckInTime').innerText = child.checkInTime ? `${child.checkInTime} da` : "Hali kelmagan";
+  document.getElementById('tmaChildGroup').innerText = `${child.group} ${t('tma.groupSuffix')}`;
+  document.getElementById('tmaCheckInTime').innerText = child.checkInTime ? `${child.checkInTime} ${t('tma.atSuffix')}`.trim() : t('tma.notArrived');
   document.getElementById('tmaPaymentAmount').innerText = formatMoney(child.fee);
 }
 
@@ -1976,7 +2103,7 @@ function triggerSimulatedTelegramAlert() {
   const select = document.getElementById('tmaChildSelect');
   const index = parseInt(select.value) || 0;
   const child = STATE.children[index] || STATE.children[0];
-  showToast(`Telegram: "${child.parentName}" uchun sinov xabarnomasi yuborildi!`, 'success');
+  showToast(t('tma.testAlertSent', { parent: child.parentName }), 'success');
 }
 
 function openModal(id) { document.getElementById(id)?.classList.add('open'); }
@@ -2000,6 +2127,7 @@ function handleChildSubmit(e) {
   const group = document.getElementById('newChildGroup').value;
   const parentName = document.getElementById('newChildParentName').value.trim();
   const parentPhone = document.getElementById('newChildParentPhone').value.trim();
+  // Stored data stays Uzbek regardless of UI language, like the rest of the database's content.
   const allergies = document.getElementById('newChildAllergies').value.trim() || 'Yo\'q';
 
   apiFetch(`${API_BASE}/children`, {
@@ -2017,11 +2145,11 @@ function handleChildSubmit(e) {
   }).then(r => r.json()).then(() => {
     closeModal('addChildModal');
     syncWithBackend();
-    showToast(`${firstName} ${lastName} bazaga saqlandi va Telegram botga ulandi!`, 'success');
+    showToast(t('modal.addChild.saved', { name: `${firstName} ${lastName}` }), 'success');
   }).catch(() => {
     closeModal('addChildModal');
     syncWithBackend();
-    showToast(`Bola qo'shildi!`, 'success');
+    showToast(t('modal.addChild.savedFallback'), 'success');
   });
 }
 

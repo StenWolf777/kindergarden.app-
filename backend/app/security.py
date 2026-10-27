@@ -65,6 +65,8 @@ PERMISSIONS: dict[str, set[str]] = {
     "contracts.view": MANAGEMENT,
     "tma.view": {"super_admin"},
     "settings.view": MANAGEMENT,
+    "settings.manage": MANAGEMENT,
+    "audit.view": MANAGEMENT,
 }
 
 

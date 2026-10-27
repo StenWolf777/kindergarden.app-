@@ -4,6 +4,7 @@ from typing import Optional
 from datetime import date, datetime
 from app.database import get_connection
 from app.security import require
+from app import audit
 
 router = APIRouter(prefix="/api/v1/staff", tags=["Xodimlar va Ish Haqi"])
 
@@ -152,6 +153,8 @@ def pay_salary(data: PaySalarySchema, user: dict = Depends(require("staff.pay"))
 
     c.execute("INSERT INTO activity_logs (org_id, icon, message) VALUES (?, '💵', ?)",
               (org, f"{row['name']} ({row['role']}) uchun oylik maosh to'landi."))
+    audit.record(conn, user, "staff.pay", "payroll", data.payroll_id, row["name"],
+                 {"amount": {"old": None, "new": data.amount}, "status": {"old": row["status"], "new": "PAID"}})
 
     conn.commit()
     conn.close()

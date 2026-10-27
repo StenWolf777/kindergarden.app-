@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 
 from app.database import get_connection
 from app.security import require
+from app import audit
 
 router = APIRouter(prefix="/api/v1/kitchen", tags=["Ошхона"])
 
@@ -138,7 +139,8 @@ def update_report(report_id: str, data: ExpenseReportSchema, user: dict = Depend
     org = user["org"]
     conn = get_connection()
     report = conn.execute(
-        "SELECT week_start FROM food_expense_reports WHERE id = ? AND org_id = ?", (report_id, org)
+        "SELECT week_start, week_end, child_count, total_amount FROM food_expense_reports WHERE id = ? AND org_id = ?",
+        (report_id, org),
     ).fetchone()
     if not report:
         conn.close()
@@ -169,6 +171,13 @@ def update_report(report_id: str, data: ExpenseReportSchema, user: dict = Depend
 
     conn.execute("INSERT INTO activity_logs (org_id, icon, message) VALUES (?, '✏️', ?)",
                  (org, f"Ошхона харажати tahrirlandi: {data.week_start} – {data.week_end}, {total:,.0f} so'm.".replace(",", " ")))
+    label = f"{data.week_start} – {data.week_end}"
+    changes = audit.diff(
+        dict(report),
+        {"week_start": data.week_start, "week_end": data.week_end, "child_count": data.child_count, "total_amount": total},
+    )
+    if changes:
+        audit.record(conn, user, "kitchen.manage.update", "food_expense_report", report_id, label, changes)
     conn.commit()
     conn.close()
     return {"success": True, "id": report_id, "total_amount": total,
@@ -179,7 +188,7 @@ def update_report(report_id: str, data: ExpenseReportSchema, user: dict = Depend
 def delete_report(report_id: str, user: dict = Depends(require("kitchen.manage"))):
     conn = get_connection()
     report = conn.execute(
-        "SELECT week_start, week_end FROM food_expense_reports WHERE id = ? AND org_id = ?",
+        "SELECT week_start, week_end, total_amount FROM food_expense_reports WHERE id = ? AND org_id = ?",
         (report_id, user["org"]),
     ).fetchone()
     if not report:
@@ -187,8 +196,11 @@ def delete_report(report_id: str, user: dict = Depends(require("kitchen.manage")
         raise HTTPException(status_code=404, detail="Hisobot topilmadi")
     conn.execute("DELETE FROM food_expense_items WHERE report_id = ?", (report_id,))
     conn.execute("DELETE FROM food_expense_reports WHERE id = ?", (report_id,))
+    label = f"{report['week_start']} – {report['week_end']}"
     conn.execute("INSERT INTO activity_logs (org_id, icon, message) VALUES (?, '🗑️', ?)",
-                 (user["org"], f"Ошхона харажати o'chirildi: {report['week_start']} – {report['week_end']}."))
+                 (user["org"], f"Ошхона харажати o'chirildi: {label}."))
+    audit.record(conn, user, "kitchen.manage.delete", "food_expense_report", report_id, label,
+                 {"total_amount": {"old": report["total_amount"], "new": None}})
     conn.commit()
     conn.close()
     return {"success": True}

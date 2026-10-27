@@ -4,6 +4,7 @@ from typing import Optional
 import secrets
 from app.database import get_connection
 from app.security import require
+from app import audit
 
 router = APIRouter(prefix="/api/v1", tags=["Bolalar va Guruhlar"])
 
@@ -245,6 +246,7 @@ def delete_child(child_id: str, user: dict = Depends(require("children.delete"))
 
     c.execute("INSERT INTO activity_logs (org_id, icon, message) VALUES (?, '🗑️', ?)",
               (org, f"{child['name']} ro'yxatdan o'chirildi."))
+    audit.record(conn, user, "children.delete", "child", child_id, child["name"])
 
     conn.commit()
     conn.close()
@@ -279,10 +281,16 @@ def update_child_health(child_id: str, data: HealthUpdateSchema,
     conn = get_connection()
     c = conn.cursor()
     child = _child_in_org(c, child_id, org)
+    old_health = conn.execute(
+        "SELECT allergies FROM children WHERE id = ? AND org_id = ?", (child_id, org)
+    ).fetchone()["allergies"]
 
     c.execute("UPDATE children SET allergies = ? WHERE id = ? AND org_id = ?", (data.health, child_id, org))
     c.execute("INSERT INTO activity_logs (org_id, icon, message) VALUES (?, '🩺', ?)",
               (org, f"{child['name']} uchun sog'liq holati yangilandi: {data.health}"))
+    if old_health != data.health:
+        audit.record(conn, user, "children.health.edit", "child", child_id, child["name"],
+                      {"allergies": {"old": old_health, "new": data.health}})
 
     conn.commit()
     conn.close()
@@ -296,6 +304,9 @@ def update_child_pricing(child_id: str, data: PricingUpdateSchema,
     conn = get_connection()
     c = conn.cursor()
     child = _child_in_org(c, child_id, org)
+    before = conn.execute(
+        "SELECT discount, note, monthly_fee FROM children WHERE id = ? AND org_id = ?", (child_id, org)
+    ).fetchone()
 
     c.execute("UPDATE children SET discount = ?, note = ?, monthly_fee = ? WHERE id = ? AND org_id = ?",
               (data.discount, data.note, data.monthly_fee, child_id, org))
@@ -318,6 +329,12 @@ def update_child_pricing(child_id: str, data: PricingUpdateSchema,
 
     c.execute("INSERT INTO activity_logs (org_id, icon, message) VALUES (?, '✏️', ?)",
               (org, f"{child['name']} uchun narx/chegirma/izoh yangilandi."))
+    changes = audit.diff(
+        dict(before),
+        {"discount": data.discount, "note": data.note, "monthly_fee": data.monthly_fee},
+    )
+    if changes:
+        audit.record(conn, user, "children.pricing.edit", "child", child_id, child["name"], changes)
 
     conn.commit()
     conn.close()
