@@ -29,10 +29,17 @@ def test_unknown_child_is_rejected(client, auth_headers):
     assert res.status_code == 404
 
 
-def test_accountant_can_view_but_not_mark(client, auth_headers):
+def test_accountant_can_view_and_mark(client, auth_headers):
     assert client.get("/api/v1/attendance", headers=auth_headers("accountant")).status_code == 200
     res = client.post("/api/v1/attendance/mark", json={"child_id": "c1", "status": "PRESENT"},
                        headers=auth_headers("accountant"))
+    assert res.status_code == 200
+
+
+def test_nurse_can_view_but_not_mark(client, auth_headers):
+    assert client.get("/api/v1/attendance", headers=auth_headers("nurse")).status_code == 200
+    res = client.post("/api/v1/attendance/mark", json={"child_id": "c1", "status": "PRESENT"},
+                       headers=auth_headers("nurse"))
     assert res.status_code == 403
 
 

@@ -54,7 +54,7 @@ PERMISSIONS: dict[str, set[str]] = {
     "kitchen.manage": {"super_admin", "accountant"},
     "groups.manage": MANAGEMENT,
     "attendance.view": ALL_STAFF,
-    "attendance.mark": MANAGEMENT | {"teacher"},
+    "attendance.mark": MANAGEMENT | {"teacher", "accountant"},
     "tabel.view": FINANCE,
     "billing.view": FINANCE,
     "billing.record": FINANCE,
