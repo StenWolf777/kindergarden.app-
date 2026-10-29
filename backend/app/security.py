@@ -43,7 +43,7 @@ PERMISSIONS: dict[str, set[str]] = {
     "dashboard.view": FINANCE,
     "children.view": ALL_STAFF,
     "children.create": FINANCE,
-    "children.delete": MANAGEMENT,
+    "children.delete": MANAGEMENT | {"accountant"},
     "children.finance": FINANCE,
     "children.health.edit": MANAGEMENT | {"nurse"},
     "children.pricing.edit": FINANCE,
