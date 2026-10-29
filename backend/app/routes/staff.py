@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import date, datetime
 from app.database import get_connection
 from app.security import require
-from app import audit
+from app import audit, payroll
 
 router = APIRouter(prefix="/api/v1/staff", tags=["Xodimlar va Ish Haqi"])
 
@@ -17,6 +17,7 @@ class PaySalarySchema(BaseModel):
 class StaffAttendanceSchema(BaseModel):
     staff_id: str
     status: str
+    date: Optional[str] = None
 
 class StaffCreateSchema(BaseModel):
     name: str = Field(min_length=1, max_length=120)
@@ -26,6 +27,28 @@ class StaffCreateSchema(BaseModel):
     hire_date: Optional[str] = None
 
 STAFF_STATUSES = {"PRESENT", "ABSENT", "EXCUSED", "LATE"}
+
+
+def _parse_day(value: Optional[str]) -> str:
+    if not value:
+        return date.today().isoformat()
+    try:
+        return date.fromisoformat(value).isoformat()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Sana noto'g'ri formatda")
+
+
+def _parse_month(value: Optional[str]) -> tuple[int, int]:
+    if not value:
+        today = date.today()
+        return today.year, today.month
+    try:
+        y, m = value.split("-")
+        year, month = int(y), int(m)
+        date(year, month, 1)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Oy noto'g'ri formatda (YYYY-MM)")
+    return year, month
 
 
 @router.post("")
@@ -45,11 +68,8 @@ def create_staff(data: StaffCreateSchema, user: dict = Depends(require("staff.ma
         VALUES (?, ?, ?, ?, ?, ?, ?, 'ACTIVE')
     """, (staff_id, org, name, role, phone, data.base_salary, hire_date))
 
-    # The payroll table is what the Staff tab lists, so a new person needs a
-    # row for the month currently on screen or they'd be invisible.
-    month = conn.execute(
-        "SELECT MAX(month) FROM staff_payroll WHERE org_id = ?", (org,)
-    ).fetchone()[0] or date.today().strftime("%Y-%m")
+    # The payroll table is what the Staff tab lists, so a new person needs a row straight away.
+    month = max(date.today(), date.fromisoformat(hire_date)).strftime("%Y-%m")
     conn.execute("""
         INSERT INTO staff_payroll (id, org_id, staff_id, month, base_salary, bonus, advance_paid, final_paid, status)
         VALUES (?, ?, ?, ?, ?, 0, 0, 0, 'PENDING')
@@ -90,7 +110,7 @@ def delete_staff(staff_id: str, user: dict = Depends(require("staff.manage"))):
 
 @router.get("/attendance")
 def staff_attendance(att_date: Optional[str] = None, user: dict = Depends(require("staff.view"))):
-    target = att_date or date.today().isoformat()
+    target = _parse_day(att_date)
     conn = get_connection()
     rows = conn.execute("""
     SELECT s.id, s.name, s.role, sa.status, sa.check_in_time
@@ -102,10 +122,42 @@ def staff_attendance(att_date: Optional[str] = None, user: dict = Depends(requir
     conn.close()
     return {
         "date": target,
-        "editable": target == date.today().isoformat() and "staff.attendance.mark" in user["permissions"],
+        # Past days stay editable so a forgotten mark can be fixed before salaries are paid.
+        "editable": target <= date.today().isoformat() and "staff.attendance.mark" in user["permissions"],
         "staff": [
             {"id": r["id"], "name": r["name"], "role": r["role"], "status": r["status"], "check_in_time": r["check_in_time"]}
             for r in rows
+        ],
+    }
+
+
+@router.get("/attendance/month")
+def staff_attendance_month(month: Optional[str] = None, user: dict = Depends(require("staff.view"))):
+    year, mon = _parse_month(month)
+    org = user["org"]
+    conn = get_connection()
+    ctx = payroll.month_context(conn, org, year, mon)
+    staff = conn.execute("""
+    SELECT id, name, role, base_salary, hire_date FROM staff
+    WHERE org_id = ? AND (status = 'ACTIVE'
+          OR EXISTS (SELECT 1 FROM staff_attendance sa WHERE sa.staff_id = staff.id AND sa.date BETWEEN ? AND ?))
+    ORDER BY role ASC, name ASC
+    """, (org, ctx["start"], ctx["end"])).fetchall()
+    conn.close()
+    _, _, last = payroll.month_bounds(year, mon)
+    return {
+        "month": f"{year:04d}-{mon:02d}",
+        "days_in_month": last,
+        "holidays": sorted(ctx["holidays"]),
+        "working_days": len(ctx["work"]),
+        "rules": ctx["rules"],
+        "staff": [
+            {
+                "id": s["id"], "name": s["name"], "role": s["role"],
+                "days": {str(int(d[8:])): st for d, st in sorted(ctx["marks"].get(s["id"], {}).items())},
+                **payroll.staff_breakdown(ctx, s["id"], s["base_salary"], s["hire_date"]),
+            }
+            for s in staff
         ],
     }
 
@@ -114,22 +166,39 @@ def staff_attendance(att_date: Optional[str] = None, user: dict = Depends(requir
 def mark_staff_attendance(data: StaffAttendanceSchema, user: dict = Depends(require("staff.attendance.mark"))):
     if data.status not in STAFF_STATUSES:
         raise HTTPException(status_code=400, detail="Noma'lum davomat holati")
+    day = _parse_day(data.date)
+    today = date.today().isoformat()
+    if day > today:
+        raise HTTPException(status_code=400, detail="Kelajakdagi kun uchun davomat belgilab bo'lmaydi")
     org = user["org"]
     conn = get_connection()
     staff = conn.execute("SELECT name FROM staff WHERE id = ? AND org_id = ?", (data.staff_id, org)).fetchone()
     if not staff:
         conn.close()
         raise HTTPException(status_code=404, detail="Xodim topilmadi")
-    today = date.today().isoformat()
-    now_time = datetime.now().strftime("%H:%M") if data.status in ("PRESENT", "LATE") else None
+    paid = conn.execute(
+        "SELECT 1 FROM staff_payroll WHERE staff_id = ? AND org_id = ? AND month = ? AND status = 'PAID'",
+        (data.staff_id, org, day[:7]),
+    ).fetchone()
+    if paid:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Bu oy uchun maosh allaqachon to'langan, davomatni o'zgartirib bo'lmaydi")
+    before = conn.execute("SELECT status FROM staff_attendance WHERE staff_id = ? AND date = ?",
+                          (data.staff_id, day)).fetchone()
+    now_time = datetime.now().strftime("%H:%M") if day == today and data.status in ("PRESENT", "LATE") else None
     conn.execute("""
     INSERT INTO staff_attendance (id, org_id, staff_id, date, status, check_in_time)
     VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(staff_id, date) DO UPDATE SET status = excluded.status, check_in_time = excluded.check_in_time
-    """, (f"sa_{data.staff_id}_{today}", org, data.staff_id, today, data.status, now_time))
+    """, (f"sa_{data.staff_id}_{day}", org, data.staff_id, day, data.status, now_time))
+    old_status = before["status"] if before else None
+    # Same-day check-ins are routine; anything after the fact changes pay, so it is audited.
+    if day != today and old_status != data.status:
+        audit.record(conn, user, "staff.attendance.edit", "staff", data.staff_id, f"{staff['name']} ({day})",
+                     {"status": {"old": old_status, "new": data.status}})
     conn.commit()
     conn.close()
-    return {"success": True, "staff_id": data.staff_id, "status": data.status, "check_in_time": now_time}
+    return {"success": True, "staff_id": data.staff_id, "date": day, "status": data.status, "check_in_time": now_time}
 
 @router.get("")
 def get_staff_list(user: dict = Depends(require("staff.view"))):
@@ -157,23 +226,46 @@ def get_staff_list(user: dict = Depends(require("staff.view"))):
         for r in rows
     ]
 
+def _ensure_payroll_rows(conn, org: str, month: str):
+    conn.execute("""
+    INSERT INTO staff_payroll (id, org_id, staff_id, month, base_salary, bonus, advance_paid, final_paid, status)
+    SELECT 'pr_' || lower(hex(randomblob(4))), s.org_id, s.id, ?, s.base_salary, 0, 0, 0, 'PENDING'
+    FROM staff s
+    WHERE s.org_id = ? AND s.status = 'ACTIVE'
+      AND NOT EXISTS (SELECT 1 FROM staff_payroll p WHERE p.staff_id = s.id AND p.month = ?)
+      AND (s.hire_date IS NULL OR s.hire_date = '' OR substr(s.hire_date, 1, 7) <= ?)
+    """, (month, org, month, month))
+
+
 @router.get("/payroll")
-def get_payroll(month: str = "2026-10", user: dict = Depends(require("staff.view"))):
+def get_payroll(month: Optional[str] = None, user: dict = Depends(require("staff.view"))):
+    year, mon = _parse_month(month)
+    key = f"{year:04d}-{mon:02d}"
+    org = user["org"]
     conn = get_connection()
-    c = conn.cursor()
-    c.execute("""
-    SELECT pr.id, pr.staff_id, pr.month, pr.base_salary, pr.bonus, pr.advance_paid, pr.final_paid,
-           pr.status, pr.paid_date, s.name as staff_name, s.role, s.phone
+    if key <= date.today().strftime("%Y-%m"):
+        _ensure_payroll_rows(conn, org, key)
+        conn.commit()
+    ctx = payroll.month_context(conn, org, year, mon)
+    rows = conn.execute("""
+    SELECT pr.*, s.name as staff_name, s.role, s.phone, s.hire_date
     FROM staff_payroll pr
     JOIN staff s ON pr.staff_id = s.id
-    WHERE pr.month = ? AND pr.org_id = ? AND s.status = 'ACTIVE'
+    WHERE pr.month = ? AND pr.org_id = ? AND (s.status = 'ACTIVE' OR pr.status = 'PAID')
     ORDER BY pr.status DESC, s.name ASC
-    """, (month, user["org"]))
-    rows = c.fetchall()
+    """, (key, org)).fetchall()
     conn.close()
 
-    return [
-        {
+    result = []
+    for r in rows:
+        calc = payroll.staff_breakdown(ctx, r["staff_id"], r["base_salary"], r["hire_date"])
+        if r["status"] == "PAID" and r["absence_deduction"] is not None:
+            # A paid month is history: show what was actually deducted at payment time.
+            calc.update(absent_days=r["absent_days"], late_days=r["late_days"],
+                        absence_deduction=r["absence_deduction"], late_deduction=r["late_deduction"])
+        total = max(0, r["base_salary"] + r["bonus"] - r["advance_paid"]
+                    - calc["absence_deduction"] - calc["late_deduction"])
+        result.append({
             "id": r["id"],
             "staff_id": r["staff_id"],
             "staff_name": r["staff_name"],
@@ -186,10 +278,11 @@ def get_payroll(month: str = "2026-10", user: dict = Depends(require("staff.view
             "final_paid": r["final_paid"],
             "status": r["status"],
             "paid_date": r["paid_date"],
-            "total_to_pay": r["base_salary"] + r["bonus"] - r["advance_paid"]
-        }
-        for r in rows
-    ]
+            **calc,
+            "total_to_pay": total,
+        })
+    return {"month": key, "working_days": len(ctx["work"]), "rules": ctx["rules"], "rows": result}
+
 
 @router.post("/pay")
 def pay_salary(data: PaySalarySchema, user: dict = Depends(require("staff.pay"))):
@@ -201,7 +294,7 @@ def pay_salary(data: PaySalarySchema, user: dict = Depends(require("staff.pay"))
     c = conn.cursor()
 
     c.execute("""
-    SELECT pr.status, s.name, s.role FROM staff_payroll pr
+    SELECT pr.status, pr.month, pr.staff_id, pr.base_salary, s.name, s.role, s.hire_date FROM staff_payroll pr
     JOIN staff s ON pr.staff_id = s.id
     WHERE pr.id = ? AND pr.org_id = ?
     """, (data.payroll_id, org))
@@ -213,17 +306,24 @@ def pay_salary(data: PaySalarySchema, user: dict = Depends(require("staff.pay"))
         conn.close()
         raise HTTPException(status_code=400, detail="Bu oylik allaqachon to'langan")
 
+    year, mon = (int(x) for x in row["month"].split("-"))
+    calc = payroll.staff_breakdown(payroll.month_context(conn, org, year, mon),
+                                   row["staff_id"], row["base_salary"], row["hire_date"])
+
     today = date.today().isoformat()
     c.execute("""
     UPDATE staff_payroll
-    SET status = 'PAID', paid_date = ?, final_paid = ?
+    SET status = 'PAID', paid_date = ?, final_paid = ?,
+        absent_days = ?, late_days = ?, absence_deduction = ?, late_deduction = ?
     WHERE id = ? AND org_id = ?
-    """, (today, data.amount, data.payroll_id, org))
+    """, (today, data.amount, calc["absent_days"], calc["late_days"],
+          calc["absence_deduction"], calc["late_deduction"], data.payroll_id, org))
 
     c.execute("INSERT INTO activity_logs (org_id, icon, message) VALUES (?, '💵', ?)",
               (org, f"{row['name']} ({row['role']}) uchun oylik maosh to'landi."))
     audit.record(conn, user, "staff.pay", "payroll", data.payroll_id, row["name"],
-                 {"amount": {"old": None, "new": data.amount}, "status": {"old": row["status"], "new": "PAID"}})
+                 {"amount": {"old": None, "new": data.amount}, "status": {"old": row["status"], "new": "PAID"},
+                  "deduction": {"old": None, "new": calc["absence_deduction"] + calc["late_deduction"]}})
 
     conn.commit()
     conn.close()

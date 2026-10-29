@@ -17,6 +17,7 @@ const TABS = {
   kitchen: [...MANAGEMENT, 'accountant', 'nurse'],
   tabel: FINANCE,
   billing: FINANCE,
+  reports: ['super_admin', 'accountant'],
   staff: FINANCE,
   contracts: MANAGEMENT,
   'telegram-simulator': ['super_admin'],

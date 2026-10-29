@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>try { const t = localStorage.getItem('bogcha_theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}</script>
-  <link rel="stylesheet" href="styles.css?v=20261029b">
+  <link rel="stylesheet" href="styles.css?v=20261029e">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -81,6 +81,11 @@
         <button class="nav-item" data-tab="billing" data-perm="billing.view">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
           <span data-i18n="nav.billing">Moliya & To'lovlar</span>
+        </button>
+
+        <button class="nav-item" data-tab="reports" data-perm="finance.reports">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+          <span data-i18n="nav.reports">Moliyaviy hisobotlar</span>
         </button>
 
         <button class="nav-item" data-tab="staff" data-perm="staff.view">
@@ -463,7 +468,7 @@
           <div class="panel-header">
             <div>
               <h1 class="panel-title" data-i18n="tabel.title">Oylik Davomat Tabeli & Kompensatsiya</h1>
-              <p class="panel-subtitle" data-i18n="tabel.subtitle">31 kunlik to'liq tabel. Sababli kelmagan kunlar oziq-ovqat normasiga ko'ra keyingi oydan chegiriladi.</p>
+              <p class="panel-subtitle" data-i18n="tabel.subtitle">Istalgan yil va oy uchun kunlik davomat tabeli. Sababli kelmagan kunlar oziq-ovqat normasiga ko'ra keyingi oydan chegiriladi.</p>
             </div>
             <div class="header-actions">
               <button class="btn btn-secondary" onclick="exportTabelExcel()">
@@ -476,6 +481,26 @@
               </button>
             </div>
           </div>
+
+          <div class="att-controls tabel-controls">
+            <label class="att-field">
+              <span data-i18n="tabel.field.year">Yil</span>
+              <select id="tabelYearSelect" class="custom-select" onchange="loadTabel()"></select>
+            </label>
+            <label class="att-field">
+              <span data-i18n="tabel.field.month">Oy</span>
+              <select id="tabelMonthSelect" class="custom-select" onchange="loadTabel()"></select>
+            </label>
+            <label class="att-field">
+              <span data-i18n="att.field.group">Guruh</span>
+              <select id="tabelGroupSelect" class="custom-select" onchange="loadTabel()"></select>
+            </label>
+            <div class="tabel-period-nav">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="shiftTabelMonth(-1)" data-i18n-title="tabel.prevMonth" title="Oldingi oy" aria-label="Oldingi oy">&lsaquo;</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="shiftTabelMonth(1)" data-i18n-title="tabel.nextMonth" title="Keyingi oy" aria-label="Keyingi oy">&rsaquo;</button>
+            </div>
+          </div>
+          <p class="tabel-period-label" id="tabelPeriodLabel"></p>
 
           <!-- Tabel Explanation Card -->
           <div class="tabel-legend-card glass-card mb-4">
@@ -597,6 +622,89 @@
             </div>
           </div>
         </section>
+        <section class="tab-panel" id="tab-reports">
+          <div class="panel-header">
+            <div>
+              <h1 class="panel-title" data-i18n="reports.title">Moliyaviy hisobotlar</h1>
+              <p class="panel-subtitle" data-i18n="reports.subtitle">Oylik tushum, o'tgan davrlar bo'yicha qarzdorlik va har bir bolaning to'lov tarixi.</p>
+            </div>
+          </div>
+
+          <section class="card glass-card mb-4">
+            <div class="card-header reports-card-header">
+              <div>
+                <h2 class="card-title" data-i18n="reports.revenueTitle">Oylik tushum</h2>
+                <span class="card-subtitle" data-i18n="reports.revenueSubtitle">Tushum — o'sha oyda qabul qilingan pul. Hisoblangan va qarz — o'sha oy uchun yozilgan to'lovlar bo'yicha.</span>
+              </div>
+              <label class="att-field reports-year-field">
+                <span data-i18n="tabel.field.year">Yil</span>
+                <select id="reportsYearSelect" class="custom-select"></select>
+              </label>
+            </div>
+            <div class="reports-kpis" id="reportsYearKpis"></div>
+            <div class="table-responsive">
+              <table class="data-table reports-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="reports.th.month">Oy</th>
+                    <th data-i18n="reports.th.received">Tushum</th>
+                    <th data-i18n="reports.th.billed">Hisoblangan</th>
+                    <th data-i18n="reports.th.billedPaid">Shu oy uchun to'langan</th>
+                    <th data-i18n="reports.th.debt">Qolgan qarz</th>
+                    <th data-i18n="reports.th.collection">Yig'ilish</th>
+                    <th class="text-right" data-i18n="reports.th.details">Batafsil</th>
+                  </tr>
+                </thead>
+                <tbody id="reportsRevenueBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card glass-card" id="reportsPeriodCard">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title" data-i18n="reports.periodTitle">Davr bo'yicha to'lovlar va qarzlar</h2>
+                <span class="card-subtitle" data-i18n="reports.periodSubtitle">Tanlangan oy uchun har bir bolaning hisobi. Ismni bosing — to'liq to'lov tarixi.</span>
+              </div>
+            </div>
+            <div class="att-controls reports-controls">
+              <label class="att-field">
+                <span data-i18n="staff.payrollMonth">Hisob oyi</span>
+                <input type="month" id="reportsPeriodInput" class="custom-input">
+              </label>
+              <label class="att-field">
+                <span data-i18n="att.field.group">Guruh</span>
+                <select id="reportsGroupSelect" class="custom-select"></select>
+              </label>
+              <label class="att-field">
+                <span data-i18n="reports.search">Qidirish</span>
+                <input type="search" id="reportsSearch" class="custom-input" data-i18n-placeholder="reports.searchPlaceholder" placeholder="Bola yoki ota-ona ismi">
+              </label>
+              <label class="switch-row reports-debtors-toggle">
+                <span><b data-i18n="reports.onlyDebtors">Faqat qarzdorlar</b></span>
+                <input type="checkbox" id="reportsOnlyDebtors" class="switch">
+              </label>
+            </div>
+            <div class="reports-kpis" id="reportsPeriodKpis"></div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="billing.th.childGroup">Bola & Guruhi</th>
+                    <th data-i18n="billing.th.parent">Ota-onasi</th>
+                    <th data-i18n="reports.th.due">Hisoblangan</th>
+                    <th data-i18n="billing.th.paid">To'langan</th>
+                    <th data-i18n="reports.th.debt">Qolgan qarz</th>
+                    <th data-i18n="reports.th.lastPayment">Oxirgi to'lov</th>
+                    <th data-i18n="billing.th.status">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="reportsPeriodBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
 
         <!-- ========================================== -->
         <!-- TAB 9: XODIMLAR & OYLIK MAOSH (PAYROLL) -->
@@ -618,11 +726,39 @@
           <section class="card staff-att-card">
             <div class="card-header">
               <div>
-                <h2 class="card-title" data-i18n="staff.attendanceTitle">Bugungi xodimlar davomati</h2>
+                <h2 class="card-title" data-i18n="staff.attendanceTitle">Xodimlar davomati</h2>
                 <span class="card-subtitle" id="staffAttSummary" data-i18n="common.loading">Yuklanmoqda…</span>
               </div>
+              <label class="att-field staff-att-date">
+                <span data-i18n="att.field.date">Sana</span>
+                <input type="date" id="staffAttDate" class="custom-input">
+              </label>
             </div>
+            <p class="staff-att-note" id="staffAttPastNote" hidden data-i18n="staff.pastEditNote">O'tgan kun tahrirlanmoqda: o'zgarish maoshga ta'sir qiladi va tarixga yoziladi.</p>
             <div class="staff-att-list" id="staffAttList"></div>
+          </section>
+
+          <div class="att-controls staff-month-controls">
+            <label class="att-field">
+              <span data-i18n="staff.payrollMonth">Hisob oyi</span>
+              <input type="month" id="staffMonthInput" class="custom-input">
+            </label>
+            <p class="staff-rules-summary" id="staffRulesSummary"></p>
+          </div>
+
+          <section class="card glass-card no-padding mb-4">
+            <div class="card-header staff-sheet-header">
+              <div>
+                <h2 class="card-title" data-i18n="staff.sheetTitle">Xodimlar oylik davomat tabeli</h2>
+                <span class="card-subtitle" data-i18n="staff.sheetSubtitle">Kunni bosing: o'sha kun davomatini tahrirlash.</span>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table tabel-grid-table">
+                <thead id="staffSheetHead"></thead>
+                <tbody id="staffSheetBody"></tbody>
+              </table>
+            </div>
           </section>
 
           <div class="card glass-card no-padding">
@@ -635,6 +771,7 @@
                     <th data-i18n="staff.th.baseSalary">Asosiy Oklad</th>
                     <th data-i18n="staff.th.bonus">KPI / Bonus</th>
                     <th data-i18n="staff.th.advance">To'langan Avans</th>
+                    <th data-i18n="staff.th.deduction">Davomat chegirmasi</th>
                     <th data-i18n="staff.th.remaining">To'lanadigan Qoldiq</th>
                     <th data-i18n="staff.th.status">Holat</th>
                     <th class="text-right" data-i18n="staff.th.action">Amal</th>
@@ -768,7 +905,7 @@
               <div class="form-group mt-4"><label for="settingsOrgName" data-i18n="settings.orgName">Bog'cha nomi:</label><input type="text" id="settingsOrgName" class="custom-input" value=""></div>
               <div class="form-group"><label for="settingsOrgPhone" data-i18n="settings.orgPhone">Telefon raqam:</label><input type="text" id="settingsOrgPhone" class="custom-input" value=""></div>
               <div class="form-group"><label for="settingsOrgAddress" data-i18n="settings.orgAddress">Manzil:</label><input type="text" id="settingsOrgAddress" class="custom-input" value=""></div>
-              <button class="btn btn-primary" data-perm-action="settings.manage" onclick="saveOrgSettings()" data-i18n="common.save">Saqlash</button>
+              <button class="btn btn-primary" id="saveOrgSettingsBtn" data-perm-action="settings.manage" onclick="saveOrgSettings()" data-i18n="common.save">Saqlash</button>
             </div>
 
             <div class="card glass-card">
@@ -778,6 +915,29 @@
                 <p data-i18n="settings.planDesc">150 tagacha bolalar, Cheksiz Telegram xabarnomalar, Kvitansiyalar, Omborxona va Oylik Tabel.</p>
                 <div class="plan-expiry"><span data-i18n="settings.nextPayment">Keyingi to'lov:</span> <b>25 Oktabr, 2026</b></div>
               </div>
+            </div>
+
+            <div class="card glass-card span-2">
+              <h2 class="card-title" data-i18n="settings.payrollTitle">Maosh va davomat qoidalari</h2>
+              <p class="panel-subtitle" data-i18n="settings.payrollSubtitle">Kunlik maosh = oklad ÷ oydagi ish kunlari (Du–Ju, bayramlarsiz). Sababsiz kelmagan va belgilanmagan ish kunlari ushlab qolinadi, sababli kunlar to'lanadi.</p>
+              <div class="settings-payroll-grid mt-4">
+                <div class="form-group">
+                  <label for="settingsLatePct" data-i18n="settings.latePct">Kechikish uchun chegirma (kunlik maoshdan %):</label>
+                  <input type="number" id="settingsLatePct" class="custom-input" min="0" max="100" step="1">
+                </div>
+                <div class="form-group">
+                  <label for="settingsDeductionStart" data-i18n="settings.deductionStart">Chegirmalar boshlanish sanasi:</label>
+                  <input type="date" id="settingsDeductionStart" class="custom-input">
+                </div>
+              </div>
+              <h3 class="settings-subhead" data-i18n="settings.holidays">Bayram va dam olish kunlari</h3>
+              <div id="settingsHolidayList" class="holiday-list"></div>
+              <div class="holiday-add">
+                <input type="date" id="settingsHolidayDate" class="custom-input" data-i18n-title="settings.holidayDate" title="Sana">
+                <input type="text" id="settingsHolidayName" class="custom-input" maxlength="120" data-i18n-placeholder="settings.holidayName" placeholder="Nomi (masalan, Ramazon hayiti)">
+                <button type="button" class="btn btn-secondary" onclick="addPayrollHoliday()" data-i18n="settings.holidayAdd">Qo'shish</button>
+              </div>
+              <button class="btn btn-primary mt-4" id="savePayrollRulesBtn" data-perm-action="settings.manage" onclick="savePayrollRules()" data-i18n="common.save">Saqlash</button>
             </div>
 
             <div class="card glass-card span-2" data-perm-action="audit.view">
@@ -809,6 +969,16 @@
   <!-- ========================================== -->
   <!-- MODAL: YANGI XODIM QO'SHISH (super admin / buxgalter) -->
   <!-- ========================================== -->
+  <div class="modal-overlay" id="childHistoryModal">
+    <div class="modal-box modal-wide">
+      <div class="modal-header">
+        <h3 class="modal-title" id="childHistoryTitle" data-i18n="reports.historyTitle">To'lov tarixi</h3>
+        <button class="modal-close" onclick="closeModal('childHistoryModal')" aria-label="Yopish"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="modal-body" id="childHistoryBody"></div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="addStaffModal">
     <div class="modal-box">
       <div class="modal-header">
@@ -1179,7 +1349,7 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="i18n.js?v=20261029b"></script>
-  <script src="app.js?v=20261029b"></script>
+  <script src="i18n.js?v=20261029e"></script>
+  <script src="app.js?v=20261029e"></script>
 </body>
 </html>

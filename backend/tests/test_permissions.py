@@ -51,6 +51,10 @@ ROUTE_CASES = [
     ("POST", "/api/v1/kitchen/reports", "kitchen.manage", {"week_start": "2099-01-01", "week_end": "2099-01-01", "child_count": 1, "items": [{"name": "x", "quantity": 1, "unit_price": 1}]}),
     ("POST", "/api/v1/attendance/mark", "attendance.mark", {"child_id": "c1", "status": "PRESENT"}),
     ("GET", "/api/v1/attendance", "attendance.view", None),
+    ("GET", "/api/v1/reports/revenue", "finance.reports", None),
+    ("GET", "/api/v1/reports/period?period=2025-01", "finance.reports", None),
+    ("GET", "/api/v1/reports/child/c1", "finance.reports", None),
+    ("GET", "/api/v1/reports/years", "finance.reports", None),
 ]
 
 ALL_ROLES = ["super_admin", "director", "accountant", "teacher", "nurse"]

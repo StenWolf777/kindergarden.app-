@@ -322,6 +322,40 @@ def migrate(cursor):
         if column not in org_columns:
             cursor.execute(f"ALTER TABLE organizations ADD COLUMN {column} TEXT")
 
+    for column, ddl in (("staff_late_penalty_pct", "REAL"), ("staff_deduction_start", "TEXT")):
+        if column not in org_columns:
+            cursor.execute(f"ALTER TABLE organizations ADD COLUMN {column} {ddl}")
+    # Deductions treat unmarked working days as absences, so they must not reach back
+    # into months that were never tracked: start from the next full month by default.
+    today = date.today()
+    next_month = date(today.year + (today.month == 12), today.month % 12 + 1, 1).isoformat()
+    cursor.execute("UPDATE organizations SET staff_late_penalty_pct = 25 WHERE staff_late_penalty_pct IS NULL")
+    cursor.execute("UPDATE organizations SET staff_deduction_start = ? WHERE staff_deduction_start IS NULL", (next_month,))
+
+    payroll_columns = {r[1] for r in cursor.execute("PRAGMA table_info(staff_payroll)")}
+    for column, ddl in (("absent_days", "INTEGER"), ("late_days", "INTEGER"),
+                        ("absence_deduction", "REAL"), ("late_deduction", "REAL")):
+        if column not in payroll_columns:
+            cursor.execute(f"ALTER TABLE staff_payroll ADD COLUMN {column} {ddl}")
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS org_holidays (
+        org_id TEXT NOT NULL,
+        date TEXT NOT NULL,
+        name TEXT,
+        PRIMARY KEY (org_id, date)
+    )""")
+    # Fixed-date public holidays of Uzbekistan; movable ones (Ramazon/Qurbon hayit) are added in Settings.
+    for (org_id,) in cursor.execute("SELECT id FROM organizations").fetchall():
+        if cursor.execute("SELECT 1 FROM org_holidays WHERE org_id = ? LIMIT 1", (org_id,)).fetchone():
+            continue
+        for year in (today.year, today.year + 1):
+            for md, name in (("01-01", "Yangi yil"), ("03-08", "Xotin-qizlar kuni"), ("03-21", "Navro'z"),
+                             ("05-09", "Xotira va qadrlash kuni"), ("09-01", "Mustaqillik kuni"),
+                             ("10-01", "O'qituvchi va murabbiylar kuni"), ("12-08", "Konstitutsiya kuni")):
+                cursor.execute("INSERT OR IGNORE INTO org_holidays (org_id, date, name) VALUES (?, ?, ?)",
+                               (org_id, f"{year}-{md}", name))
+
     # Older databases stored passwords as plain text; hash them in place (the password itself is unchanged).
     for user_id, stored in cursor.execute("SELECT id, password_hash FROM users").fetchall():
         if not is_hashed(stored):

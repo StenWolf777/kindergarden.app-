@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import init_db
 from app import finance, telegram_bot
-from app.routes import dashboard, children, attendance, billing, tabel, staff, auth, telegram, kitchen, audit, settings
+from app.routes import dashboard, children, attendance, billing, tabel, staff, auth, telegram, kitchen, audit, settings, reports
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -64,6 +64,7 @@ app.include_router(telegram.router)
 app.include_router(kitchen.router)
 app.include_router(audit.router)
 app.include_router(settings.router)
+app.include_router(reports.router)
 
 @app.get("/")
 def root():

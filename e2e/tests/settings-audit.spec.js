@@ -15,7 +15,7 @@ test('saving organization settings persists, updates the UI, and is audited', as
   await page.locator('#settingsOrgName').fill(newName);
   await page.locator('#settingsOrgPhone').fill('+998901112233');
   await page.locator('#settingsOrgAddress').fill('Toshkent, Yakkasaroy');
-  await page.locator('[data-perm-action="settings.manage"]').click();
+  await page.locator('#saveOrgSettingsBtn').click();
 
   await expect(page.locator('.toast-success')).toBeVisible();
   // The topbar brand name re-renders from a fresh /auth/me call after saving.

@@ -16,7 +16,8 @@ const STATE = {
   children: [],
   activities: [],
   staffPayroll: [],
-  tabelData: [],
+  payrollMeta: null,
+  tabelData: null,
   financeStats: null,
   auditLog: []
 };
@@ -65,12 +66,11 @@ async function syncWithBackend() {
   try {
     // Only request what this role may see; the server enforces the same rules.
     const get = (perm, path) => can(perm) ? apiFetch(`${API_BASE}${path}`).catch(() => null) : Promise.resolve(null);
-    const [statsRes, groupsRes, childrenRes, staffRes, tabelRes, financeStatsRes, attTodayRes] = await Promise.all([
+    const [statsRes, groupsRes, childrenRes, staffRes, financeStatsRes, attTodayRes] = await Promise.all([
       get('dashboard.view', '/dashboard/stats'),
       get('children.view', '/groups'),
       get('children.view', '/children'),
-      get('staff.view', '/staff/payroll'),
-      get('tabel.view', '/tabel'),
+      get('staff.view', `/staff/payroll?month=${staffMonth()}`),
       get('billing.view', '/billing/stats'),
       get('attendance.view', '/attendance?group_name=ALL'),
     ]);
@@ -89,8 +89,7 @@ async function syncWithBackend() {
       const badge = document.getElementById('totalChildrenBadge');
       if (badge) badge.innerText = STATE.children.length;
     }
-    if (staffRes?.ok) STATE.staffPayroll = await staffRes.json();
-    if (tabelRes?.ok) STATE.tabelData = await tabelRes.json();
+    if (staffRes?.ok) setPayrollData(await staffRes.json());
     if (financeStatsRes?.ok) STATE.financeStats = await financeStatsRes.json();
 
     // Re-render UI
@@ -101,10 +100,13 @@ async function syncWithBackend() {
     populateSelectOptions();
     renderChildrenTable();
     loadAttendance();
-    renderTabelGrid();
+    loadTabel();
     renderInvoicesTable();
     renderFinanceStats();
     renderStaffPayroll();
+    if (can('staff.view')) loadStaffSheet();
+    if (can('settings.view')) loadPayrollRules();
+    if (can('finance.reports')) loadReports();
     renderContractsTable();
     updateTmaSimulator();
     if (can('audit.view')) loadAuditLog();
@@ -229,73 +231,189 @@ function logoutUser() {
 // 2. Oylik Tabel (Monthly Attendance Matrix & Compensation)
 // ============================================================================
 
+const TABEL_STATUS_CELL = { PRESENT: 'p-cell', EXCUSED: 'e-cell', ABSENT: 'a-cell', LATE: 'l-cell' };
+const tabelCell = status => status
+  ? `<span class="tabel-day-cell ${TABEL_STATUS_CELL[status] || ''}" title="${attStatusMeta(status).label}">${attMarkSvg(status)}</span>`
+  : '';
+let tabelYearsLoaded = false;
+let tabelRequestSeq = 0;
+
+async function populateTabelPeriodSelects() {
+  const yearSel = document.getElementById('tabelYearSelect');
+  const monthSel = document.getElementById('tabelMonthSelect');
+  const groupSel = document.getElementById('tabelGroupSelect');
+  if (!yearSel || !monthSel) return;
+  const now = new Date();
+
+  if (!tabelYearsLoaded) {
+    let years = [now.getFullYear()];
+    try {
+      const res = await apiFetch(`${API_BASE}/tabel/years`);
+      if (res.ok) years = await res.json();
+    } catch (_) { /* fall back to the current year */ }
+    yearSel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+    yearSel.value = String(now.getFullYear());
+    tabelYearsLoaded = true;
+  }
+
+  const prevMonth = monthSel.value || String(now.getMonth() + 1);
+  monthSel.innerHTML = `<option value="ALL">${t('tabel.wholeYear')}</option>` +
+    Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">${t('month.' + (i + 1))}</option>`).join('');
+  monthSel.value = prevMonth;
+
+  if (groupSel) {
+    const prevGroup = groupSel.value || 'ALL';
+    groupSel.innerHTML = `<option value="ALL">${t('common.all')}</option>` +
+      STATE.groups.map(g => `<option value="${escapeHtml(g.name)}">${escapeHtml(g.name)}</option>`).join('');
+    groupSel.value = [...groupSel.options].some(o => o.value === prevGroup) ? prevGroup : 'ALL';
+  }
+}
+
+function shiftTabelMonth(delta) {
+  const yearSel = document.getElementById('tabelYearSelect');
+  const monthSel = document.getElementById('tabelMonthSelect');
+  if (!yearSel || !monthSel) return;
+  let year = Number(yearSel.value);
+  if (monthSel.value === 'ALL') {
+    year += delta;
+  } else {
+    let month = Number(monthSel.value) + delta;
+    if (month < 1) { month = 12; year -= 1; }
+    if (month > 12) { month = 1; year += 1; }
+    monthSel.value = String(month);
+  }
+  if (![...yearSel.options].some(o => o.value === String(year))) {
+    const opts = [...yearSel.options].map(o => Number(o.value)).concat(year).sort((a, b) => b - a);
+    yearSel.innerHTML = opts.map(y => `<option value="${y}">${y}</option>`).join('');
+  }
+  yearSel.value = String(year);
+  loadTabel();
+}
+
+async function loadTabel() {
+  if (!can('tabel.view')) return;
+  await populateTabelPeriodSelects();
+  const year = document.getElementById('tabelYearSelect')?.value;
+  const month = document.getElementById('tabelMonthSelect')?.value;
+  const group = encodeURIComponent(document.getElementById('tabelGroupSelect')?.value || 'ALL');
+  const seq = ++tabelRequestSeq;
+  const url = month === 'ALL'
+    ? `${API_BASE}/tabel/year?year=${year}&group_name=${group}`
+    : `${API_BASE}/tabel?year=${year}&month=${month}&group_name=${group}`;
+  try {
+    const res = await apiFetch(url);
+    if (seq !== tabelRequestSeq) return;
+    if (!res.ok) throw new Error(res.status);
+    STATE.tabelData = await res.json();
+  } catch (_) {
+    if (seq !== tabelRequestSeq) return;
+    STATE.tabelData = null;
+    showToast(t('tabel.loadError'), 'error');
+  }
+  renderTabelGrid();
+}
+
 function renderTabelGrid() {
   const header = document.getElementById('tabelHeaderRow');
   const tbody = document.getElementById('tabelBodyRows');
   if (!header || !tbody) return;
+  const data = STATE.tabelData;
+  const label = document.getElementById('tabelPeriodLabel');
 
-  const YEAR = 2026, MONTH = 9; // October 2026, the billing period the backend serves
-  const daysInMonth = new Date(YEAR, MONTH + 1, 0).getDate();
+  if (data && data.month === undefined && data.rows) return renderTabelYear(data, header, tbody, label);
+
   const now = new Date();
-  const isCurrentMonth = now.getFullYear() === YEAR && now.getMonth() === MONTH;
-  const todayNum = isCurrentMonth ? now.getDate() : daysInMonth;
-  const isWeekend = d => [0, 6].includes(new Date(YEAR, MONTH, d).getDay());
-  const LETTER_STATUS = { P: 'PRESENT', E: 'EXCUSED', A: 'ABSENT', L: 'LATE' };
+  const year = data?.year ?? now.getFullYear();
+  const monthIdx = (data?.month ?? now.getMonth() + 1) - 1;
+  const daysInMonth = data?.days_in_month ?? new Date(year, monthIdx + 1, 0).getDate();
+  const isCurrentMonth = now.getFullYear() === year && now.getMonth() === monthIdx;
+  const todayNum = isCurrentMonth ? now.getDate() : null;
+  const isFuture = d => new Date(year, monthIdx, d) > now;
+  const isWeekend = d => [0, 6].includes(new Date(year, monthIdx, d).getDay());
+  if (label) label.textContent = `${t('month.' + (monthIdx + 1))} ${year}`;
 
   let headerHtml = `<tr><th>${t('tabel.col.child')}</th>`;
   for (let d = 1; d <= daysInMonth; d++) {
-    headerHtml += `<th class="${isWeekend(d) ? 'is-weekend' : ''}${d === todayNum && isCurrentMonth ? ' is-today' : ''}">${d}</th>`;
+    headerHtml += `<th class="${isWeekend(d) ? 'is-weekend' : ''}${d === todayNum ? ' is-today' : ''}">${d}</th>`;
   }
-  headerHtml += `<th>${t('tabel.col.present')}</th><th>${t('tabel.col.excused')}</th><th>${t('tabel.col.compensation')}</th></tr>`;
+  headerHtml += `<th>${t('tabel.col.present')}</th><th>${t('tabel.col.excused')}</th><th>${t('tabel.col.absent')}</th><th>${t('tabel.col.compensation')}</th></tr>`;
   header.innerHTML = headerHtml;
 
-  const STATUS_CELL = { PRESENT: 'p-cell', EXCUSED: 'e-cell', ABSENT: 'a-cell', LATE: 'l-cell' };
-  const cell = status => status
-    ? `<span class="tabel-day-cell ${STATUS_CELL[status]}" title="${attStatusMeta(status).label}">${attMarkSvg(status)}</span>`
-    : '';
+  const rows = data?.rows || [];
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="${daysInMonth + 5}" class="audit-empty">${t('tabel.empty')}</td></tr>`;
+    return;
+  }
 
-  const data = STATE.tabelData.length > 0 ? STATE.tabelData : [
-    { name: 'Imron Rahimov', days_present: 20, days_excused: 2, compensation: 50000 },
-    { name: 'Madina Saidova', days_present: 22, days_excused: 0, compensation: 0 },
-    { name: 'Jasur Aliyev', days_present: 17, days_excused: 5, compensation: 125000 },
-    { name: 'Fotima Zokirova', days_present: 20, days_excused: 0, compensation: 0 },
-    { name: 'Temur Mirzayev', days_present: 21, days_excused: 1, compensation: 25000 },
-    { name: 'Otabek Shokirov', days_present: 22, days_excused: 0, compensation: 0 },
-  ];
-
-  tbody.innerHTML = data.map(row => {
+  tbody.innerHTML = rows.map(row => {
     const days = row.days || {};
-    let excusedLeft = Object.keys(days).length ? 0 : (row.days_excused || 0);
     let daysCells = '';
     for (let d = 1; d <= daysInMonth; d++) {
-      if (isWeekend(d)) { daysCells += `<td class="is-weekend"><span class="tabel-day-cell w-cell" title="${t('tabel.legend.weekend')}">–</span></td>`; continue; }
-      if (d > todayNum) { daysCells += '<td></td>'; continue; }
-      let status;
-      if (d === todayNum && isCurrentMonth) {
-        status = (STATE.attToday || {})[row.child_id] || null;
-      } else {
-        const v = days[d] ?? days[String(d)];
-        status = v ? (LETTER_STATUS[v] || v) : null;
-        // Without per-day records, place the month's excused days from the summary, then present.
-        if (!status) status = excusedLeft-- > 0 ? 'EXCUSED' : 'PRESENT';
-      }
-      daysCells += `<td class="${d === todayNum && isCurrentMonth ? 'is-today' : ''}">${cell(status)}</td>`;
+      const status = days[String(d)] || null;
+      const todayCls = d === todayNum ? 'is-today' : '';
+      if (!status && isWeekend(d)) { daysCells += `<td class="is-weekend"><span class="tabel-day-cell w-cell" title="${t('tabel.legend.weekend')}">–</span></td>`; continue; }
+      if (!status && isFuture(d)) { daysCells += `<td class="${todayCls}"></td>`; continue; }
+      daysCells += `<td class="${isWeekend(d) ? 'is-weekend ' : ''}${todayCls}">${tabelCell(status)}</td>`;
     }
-
-    const compDisplay = row.compensation > 0
-      ? `<strong class="text-rose">${signedMoney(-row.compensation)}</strong>`
-      : `<span style="color: var(--text-muted);">${formatMoney(0)}</span>`;
-
     return `
       <tr>
         <td><b>${escapeHtml(row.name)}</b></td>
         ${daysCells}
         <td><b class="text-emerald">${row.days_present} ${t('common.days')}</b></td>
         <td><b class="text-amber">${row.days_excused} ${t('common.days')}</b></td>
-        <td>${compDisplay}</td>
+        <td><b class="text-rose">${row.days_absent} ${t('common.days')}</b></td>
+        <td>${tabelCompensation(row.compensation)}</td>
       </tr>
     `;
   }).join('');
+}
+
+function tabelCompensation(amount) {
+  return amount > 0
+    ? `<strong class="text-rose">${signedMoney(-amount)}</strong>`
+    : `<span style="color: var(--text-muted);">${formatMoney(0)}</span>`;
+}
+
+function renderTabelYear(data, header, tbody, label) {
+  if (label) label.textContent = `${data.year} — ${t('tabel.wholeYear')}`;
+  let headerHtml = `<tr><th>${t('tabel.col.child')}</th>`;
+  for (let m = 1; m <= 12; m++) headerHtml += `<th title="${t('month.' + m)}">${t('month.' + m).slice(0, 3)}</th>`;
+  headerHtml += `<th>${t('tabel.col.present')}</th><th>${t('tabel.col.excused')}</th><th>${t('tabel.col.absent')}</th><th>${t('tabel.col.compensation')}</th></tr>`;
+  header.innerHTML = headerHtml;
+
+  if (!data.rows.length) {
+    tbody.innerHTML = `<tr><td colspan="17" class="audit-empty">${t('tabel.empty')}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.rows.map(row => {
+    let cells = '';
+    for (let m = 1; m <= 12; m++) {
+      const s = row.months[String(m)];
+      const tip = s ? `${t('month.' + m)}: ${t('tabel.col.present')} ${s.days_present}, ${t('tabel.col.excused')} ${s.days_excused}, ${t('tabel.col.absent')} ${s.days_absent}` : '';
+      cells += s
+        ? `<td class="tabel-year-cell"><button type="button" class="tabel-year-link" onclick="openTabelMonth(${m})" title="${tip}"><b class="text-emerald">${s.days_present}</b>${s.days_excused ? `<span class="text-amber">/${s.days_excused}</span>` : ''}${s.days_absent ? `<span class="text-rose">/${s.days_absent}</span>` : ''}</button></td>`
+        : '<td class="text-muted">–</td>';
+    }
+    const tot = row.totals;
+    return `
+      <tr>
+        <td><b>${escapeHtml(row.name)}</b></td>
+        ${cells}
+        <td><b class="text-emerald">${tot.days_present} ${t('common.days')}</b></td>
+        <td><b class="text-amber">${tot.days_excused} ${t('common.days')}</b></td>
+        <td><b class="text-rose">${tot.days_absent} ${t('common.days')}</b></td>
+        <td>${tabelCompensation(tot.compensation)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function openTabelMonth(month) {
+  const monthSel = document.getElementById('tabelMonthSelect');
+  if (!monthSel) return;
+  monthSel.value = String(month);
+  loadTabel();
 }
 
 function applyCompensationToInvoices() {
@@ -310,19 +428,58 @@ function exportTabelExcel() {
 // 5. Xodimlar va Ish Haqi (Staff & Payroll)
 // ============================================================================
 
+function staffMonth() {
+  const input = document.getElementById('staffMonthInput');
+  if (input && !input.value) input.value = todayISO().slice(0, 7);
+  return input?.value || todayISO().slice(0, 7);
+}
+
+function setPayrollData(data) {
+  STATE.staffPayroll = data.rows || [];
+  STATE.payrollMeta = { month: data.month, working_days: data.working_days, rules: data.rules };
+}
+
+async function reloadPayroll() {
+  if (!can('staff.view')) return;
+  try {
+    const res = await apiFetch(`${API_BASE}/staff/payroll?month=${staffMonth()}`);
+    if (res.ok) setPayrollData(await res.json());
+  } catch (_) { /* table keeps the last good data */ }
+  renderStaffPayroll();
+}
+
+function renderStaffRulesSummary() {
+  const el = document.getElementById('staffRulesSummary');
+  const meta = STATE.payrollMeta;
+  if (!el || !meta) return;
+  const start = meta.rules.deduction_start;
+  el.textContent = t('staff.rulesSummary', { days: meta.working_days, pct: meta.rules.late_penalty_pct, start: start || '—' });
+}
+
+function staffDeductionCell(p) {
+  const total = (p.absence_deduction || 0) + (p.late_deduction || 0);
+  const parts = [];
+  if (p.absent_days) parts.push(t('staff.deduct.absent', { n: p.absent_days }));
+  if (p.late_days) parts.push(t('staff.deduct.late', { n: p.late_days }));
+  const detail = parts.length ? `<br><small class="text-muted">${parts.join(' · ')}</small>` : '';
+  const tip = t('staff.deduct.tip', { rate: formatMoney(p.day_rate), days: p.working_days });
+  return `<td class="${total ? 'text-rose' : ''}" title="${tip}">${signedMoney(-total)}${detail}</td>`;
+}
+
 function renderStaffPayroll() {
   const tbody = document.getElementById('staffPayrollTableBody');
   if (!tbody) return;
+  renderStaffRulesSummary();
 
   const list = STATE.staffPayroll;
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-muted">${t('staff.empty')}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" class="text-muted">${t('staff.empty')}</td></tr>`;
     return;
   }
   const canManage = can('staff.manage');
 
   tbody.innerHTML = list.map(p => {
-    const toPay = (p.base_salary + p.bonus) - p.advance_paid;
+    const toPay = p.status === 'PAID' ? p.final_paid : p.total_to_pay;
     return `
       <tr>
         <td>
@@ -333,6 +490,7 @@ function renderStaffPayroll() {
         <td>${formatMoney(p.base_salary)}</td>
         <td class="${p.bonus ? 'text-emerald' : ''}">${signedMoney(p.bonus)}</td>
         <td class="${p.advance_paid ? 'text-rose' : ''}">${signedMoney(-p.advance_paid)}</td>
+        ${staffDeductionCell(p)}
         <td><b style="font-size: 1rem;">${formatMoney(toPay)}</b></td>
         <td>
           ${p.status === 'PAID'
@@ -348,6 +506,154 @@ function renderStaffPayroll() {
       </tr>
     `;
   }).join('');
+}
+
+// Staff monthly attendance sheet
+const STAFF_SHEET = { data: null, seq: 0 };
+
+async function loadStaffSheet() {
+  const seq = ++STAFF_SHEET.seq;
+  try {
+    const res = await apiFetch(`${API_BASE}/staff/attendance/month?month=${staffMonth()}`);
+    if (seq !== STAFF_SHEET.seq) return;
+    STAFF_SHEET.data = res.ok ? await res.json() : null;
+  } catch (_) {
+    if (seq !== STAFF_SHEET.seq) return;
+    STAFF_SHEET.data = null;
+  }
+  renderStaffSheet();
+}
+
+function renderStaffSheet() {
+  const head = document.getElementById('staffSheetHead');
+  const body = document.getElementById('staffSheetBody');
+  const data = STAFF_SHEET.data;
+  if (!head || !body) return;
+  if (!data) { head.innerHTML = ''; body.innerHTML = `<tr><td class="text-muted">${t('att.loadError')}</td></tr>`; return; }
+
+  const [year, month] = data.month.split('-').map(Number);
+  const today = todayISO();
+  const holidays = new Set(data.holidays);
+  const start = data.rules.deduction_start || '';
+  const iso = d => `${data.month}-${String(d).padStart(2, '0')}`;
+  const isOff = d => [0, 6].includes(new Date(year, month - 1, d).getDay()) || holidays.has(iso(d));
+
+  let h = `<tr><th>${t('staff.th.name')}</th>`;
+  for (let d = 1; d <= data.days_in_month; d++) {
+    h += `<th class="${isOff(d) ? 'is-weekend' : ''}${iso(d) === today ? ' is-today' : ''}">${d}</th>`;
+  }
+  h += `<th>${t('staff.sheet.absent')}</th><th>${t('staff.sheet.late')}</th><th>${t('staff.sheet.excused')}</th></tr>`;
+  head.innerHTML = h;
+
+  if (!data.staff.length) { body.innerHTML = `<tr><td colspan="${data.days_in_month + 4}" class="text-muted">${t('att.staffEmpty')}</td></tr>`; return; }
+
+  body.innerHTML = data.staff.map(s => {
+    let cells = '';
+    for (let d = 1; d <= data.days_in_month; d++) {
+      const day = iso(d);
+      const status = s.days[String(d)] || null;
+      const todayCls = day === today ? ' is-today' : '';
+      if (!status && isOff(d)) {
+        const title = holidays.has(day) ? t('staff.sheet.holiday') : t('tabel.legend.weekend');
+        cells += `<td class="is-weekend${todayCls}"><span class="tabel-day-cell w-cell" title="${title}">–</span></td>`;
+        continue;
+      }
+      if (day > today) { cells += `<td class="${todayCls}"></td>`; continue; }
+      const counted = day >= start && day < today;
+      const inner = status
+        ? tabelCell(status)
+        : `<span class="tabel-day-cell ${counted ? 'u-cell' : ''}" title="${counted ? t('staff.sheet.unmarked') : ''}">${counted ? '?' : ''}</span>`;
+      cells += `<td class="${todayCls}"><button type="button" class="staff-sheet-day" onclick="openStaffDay('${day}')" aria-label="${escapeHtml(s.name)} ${day}">${inner}</button></td>`;
+    }
+    return `<tr>
+      <td><b>${escapeHtml(s.name)}</b></td>
+      ${cells}
+      <td><b class="${s.absent_days ? 'text-rose' : ''}">${s.absent_days}</b>${s.unmarked_days ? ` <small class="text-muted" title="${t('staff.sheet.unmarked')}">(${s.unmarked_days}?)</small>` : ''}</td>
+      <td><b class="${s.late_days ? 'text-amber' : ''}">${s.late_days}</b></td>
+      <td><b>${s.excused_days}</b></td>
+    </tr>`;
+  }).join('');
+}
+
+function openStaffDay(day) {
+  const input = document.getElementById('staffAttDate');
+  if (!input) return;
+  input.value = day;
+  loadStaffAttendance();
+  document.querySelector('.staff-att-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function onStaffMonthChange() {
+  reloadPayroll();
+  loadStaffSheet();
+}
+
+// Settings: payroll rules and holidays
+const PAYROLL_RULES = { holidays: [] };
+
+async function loadPayrollRules() {
+  try {
+    const res = await apiFetch(`${API_BASE}/settings/payroll`);
+    if (!res.ok) return;
+    const data = await res.json();
+    document.getElementById('settingsLatePct').value = data.late_penalty_pct ?? 25;
+    document.getElementById('settingsDeductionStart').value = data.deduction_start || '';
+    PAYROLL_RULES.holidays = data.holidays || [];
+    renderPayrollHolidays();
+  } catch (_) { /* leave the form as is */ }
+}
+
+function renderPayrollHolidays() {
+  const list = document.getElementById('settingsHolidayList');
+  if (!list) return;
+  const editable = can('settings.manage');
+  list.innerHTML = PAYROLL_RULES.holidays.length
+    ? PAYROLL_RULES.holidays.map((h, i) => `
+      <div class="holiday-row">
+        <span class="holiday-date">${escapeHtml(h.date)}</span>
+        <span class="holiday-name">${escapeHtml(h.name || '')}</span>
+        ${editable ? `<button type="button" class="btn btn-sm btn-secondary" onclick="removePayrollHoliday(${i})">${t('common.delete')}</button>` : ''}
+      </div>`).join('')
+    : `<p class="text-muted">${t('settings.noHolidays')}</p>`;
+}
+
+function addPayrollHoliday() {
+  const dateEl = document.getElementById('settingsHolidayDate');
+  const nameEl = document.getElementById('settingsHolidayName');
+  if (!dateEl.value) { showToast(t('settings.holidayDateRequired'), 'warning'); return; }
+  PAYROLL_RULES.holidays = PAYROLL_RULES.holidays.filter(h => h.date !== dateEl.value)
+    .concat({ date: dateEl.value, name: nameEl.value.trim() || null })
+    .sort((a, b) => a.date.localeCompare(b.date));
+  dateEl.value = '';
+  nameEl.value = '';
+  renderPayrollHolidays();
+}
+
+function removePayrollHoliday(index) {
+  PAYROLL_RULES.holidays.splice(index, 1);
+  renderPayrollHolidays();
+}
+
+async function savePayrollRules() {
+  const pct = parseFloat(document.getElementById('settingsLatePct').value);
+  const start = document.getElementById('settingsDeductionStart').value;
+  if (!(pct >= 0 && pct <= 100) || !start) { showToast(t('settings.payrollInvalid'), 'warning'); return; }
+  try {
+    const res = await apiFetch(`${API_BASE}/settings/payroll`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ late_penalty_pct: pct, deduction_start: start, holidays: PAYROLL_RULES.holidays }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(typeof data.detail === 'string' ? data.detail : t('settings.payrollInvalid'));
+    PAYROLL_RULES.holidays = data.holidays;
+    renderPayrollHolidays();
+    showToast(t('settings.payrollSaved'), 'success');
+    reloadPayroll();
+    loadStaffSheet();
+    if (can('audit.view')) loadAuditLog();
+  } catch (err) {
+    showToast(err instanceof TypeError ? t('toast.genericError') : err.message, 'warning');
+  }
 }
 
 function openAddStaffModal() {
@@ -1629,7 +1935,7 @@ function renderFinanceStats() {
 // Xodimlar davomati (staff attendance)
 // ============================================================================
 
-const STAFF_ATT = { rows: [], editable: false, saving: new Set() };
+const STAFF_ATT = { rows: [], editable: false, date: null, saving: new Set() };
 const STAFF_ROLE_I18N = { TARBIYACHI: 'staff.role.tarbiyachi', ENAGA: 'staff.role.enaga', OSHPAZ: 'staff.role.oshpaz', HAMSHIRA: 'staff.role.hamshira' };
 
 function staffRoleLabel(role) {
@@ -1637,6 +1943,13 @@ function staffRoleLabel(role) {
 }
 
 function initStaffAttendance() {
+  const dateInput = document.getElementById('staffAttDate');
+  if (dateInput) {
+    dateInput.value = todayISO();
+    dateInput.max = todayISO();
+    dateInput.addEventListener('change', loadStaffAttendance);
+  }
+  document.getElementById('staffMonthInput')?.addEventListener('change', onStaffMonthChange);
   document.getElementById('staffAttList')?.addEventListener('click', e => {
     const btn = e.target.closest('.att-btn');
     const row = e.target.closest('.staff-att-row');
@@ -1646,11 +1959,15 @@ function initStaffAttendance() {
 
 async function loadStaffAttendance() {
   try {
-    const res = await apiFetch(`${API_BASE}/staff/attendance`);
+    const day = document.getElementById('staffAttDate')?.value || todayISO();
+    const res = await apiFetch(`${API_BASE}/staff/attendance?att_date=${encodeURIComponent(day)}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || t('common.error'));
     STAFF_ATT.rows = data.staff;
     STAFF_ATT.editable = data.editable;
+    STAFF_ATT.date = data.date;
+    const note = document.getElementById('staffAttPastNote');
+    if (note) note.hidden = !(data.editable && data.date < todayISO());
     renderStaffAttendance();
   } catch (err) {
     document.getElementById('staffAttSummary').textContent = err.message || t('att.loadError');
@@ -1689,11 +2006,13 @@ async function markStaffAttendance(staffId, status) {
   renderStaffAttendance();
   try {
     const res = await apiFetch(`${API_BASE}/staff/attendance/mark`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ staff_id: staffId, status })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ staff_id: staffId, status, date: STAFF_ATT.date })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || t('common.error'));
     row.check_in_time = data.check_in_time;
+    if (STAFF_ATT.date && STAFF_ATT.date.slice(0, 7) === staffMonth()) { loadStaffSheet(); reloadPayroll(); }
   } catch (err) {
     row.status = prev.status;
     row.check_in_time = prev.time;
@@ -1867,10 +2186,13 @@ const AUDIT_FIELD_LABELS = {
   allergies: 'audit.field.allergies', week_start: 'audit.field.weekStart', week_end: 'audit.field.weekEnd',
   child_count: 'audit.field.childCount', total_amount: 'audit.field.totalAmount', amount: 'audit.field.amount',
   status: 'audit.field.status', role: 'audit.field.role', base_salary: 'audit.field.baseSalary', name: 'settings.orgName', phone: 'settings.orgPhone', address: 'settings.orgAddress',
+  late_penalty_pct: 'audit.field.latePenaltyPct', deduction_start: 'audit.field.deductionStart', holidays: 'audit.field.holidays', deduction: 'audit.field.deduction',
 };
 
-function formatAuditValue(value) {
+function formatAuditValue(value, field) {
   if (value === null || value === undefined || value === '') return '—';
+  if (field === 'late_penalty_pct') return `${value}%`;
+  if (field === 'status') return escapeHtml(attStatusMeta(value)?.label || String(value));
   if (typeof value === 'number') return formatMoney(value);
   return escapeHtml(String(value));
 }
@@ -1879,7 +2201,7 @@ function renderAuditChanges(changes) {
   if (!changes || !Object.keys(changes).length) return '—';
   return `<ul class="audit-changes-list">${Object.entries(changes).map(([field, { old, new: next }]) => {
     const label = AUDIT_FIELD_LABELS[field] ? t(AUDIT_FIELD_LABELS[field]) : escapeHtml(field);
-    return `<li><b>${label}:</b> ${formatAuditValue(old)} → ${formatAuditValue(next)}</li>`;
+    return `<li><b>${label}:</b> ${formatAuditValue(old, field)} → ${formatAuditValue(next, field)}</li>`;
   }).join('')}</ul>`;
 }
 
@@ -2265,4 +2587,277 @@ function handleGlobalSearch(query) {
       renderChildrenTable();
     }
   }
+}
+
+// ============================================================================
+// Moliyaviy hisobotlar (monthly revenue, past-period debts, payment history)
+// ============================================================================
+
+const REPORTS = { revenue: null, period: null, years: null, inited: false, periodSeq: 0 };
+
+function payMethodLabel(method) {
+  const key = `billing.payMethod.${String(method || '').toLowerCase()}`;
+  const label = t(key);
+  return label === key ? (method || '—') : label;
+}
+
+function formatPaidAt(paidAt) {
+  if (!paidAt) return '—';
+  const [datePart, timePart] = paidAt.split(' ');
+  const [y, m, d] = datePart.split('-').map(Number);
+  if (!y || !m || !d) return paidAt;
+  return `${formatDayMonth(d, m)} ${y}${timePart ? ', ' + timePart.slice(0, 5) : ''}`;
+}
+
+function periodLabel(period) {
+  const [y, m] = period.split('-').map(Number);
+  return `${t('month.' + m)} ${y}`;
+}
+
+function initReports() {
+  if (REPORTS.inited) return;
+  REPORTS.inited = true;
+  document.getElementById('reportsYearSelect')?.addEventListener('change', loadRevenueReport);
+  document.getElementById('reportsPeriodInput')?.addEventListener('change', loadPeriodReport);
+  document.getElementById('reportsGroupSelect')?.addEventListener('change', loadPeriodReport);
+  document.getElementById('reportsOnlyDebtors')?.addEventListener('change', loadPeriodReport);
+  document.getElementById('reportsSearch')?.addEventListener('input', renderPeriodReport);
+  const periodInput = document.getElementById('reportsPeriodInput');
+  if (periodInput) {
+    periodInput.value = todayISO().slice(0, 7);
+    periodInput.max = todayISO().slice(0, 7);
+  }
+}
+
+async function loadReports() {
+  if (!can('finance.reports')) return;
+  initReports();
+  const yearSel = document.getElementById('reportsYearSelect');
+  if (yearSel && !REPORTS.years) {
+    try {
+      const res = await apiFetch(`${API_BASE}/reports/years`);
+      REPORTS.years = res.ok ? await res.json() : [new Date().getFullYear()];
+    } catch (_) {
+      REPORTS.years = [new Date().getFullYear()];
+    }
+    yearSel.innerHTML = REPORTS.years.map(y => `<option value="${y}">${y}</option>`).join('');
+    yearSel.value = String(new Date().getFullYear());
+  }
+  const groupSel = document.getElementById('reportsGroupSelect');
+  if (groupSel) {
+    const prev = groupSel.value || 'ALL';
+    groupSel.innerHTML = `<option value="ALL">${t('common.all')}</option>` +
+      STATE.groups.map(g => `<option value="${escapeHtml(g.name)}">${escapeHtml(g.name)}</option>`).join('');
+    groupSel.value = [...groupSel.options].some(o => o.value === prev) ? prev : 'ALL';
+  }
+  loadRevenueReport();
+  loadPeriodReport();
+}
+
+async function loadRevenueReport() {
+  const year = document.getElementById('reportsYearSelect')?.value || new Date().getFullYear();
+  try {
+    const res = await apiFetch(`${API_BASE}/reports/revenue?year=${encodeURIComponent(year)}`);
+    if (!res.ok) throw new Error(res.status);
+    REPORTS.revenue = await res.json();
+  } catch (_) {
+    REPORTS.revenue = null;
+  }
+  renderRevenueReport();
+}
+
+function reportKpis(items) {
+  return items.map(([label, value, cls]) =>
+    `<div class="reports-kpi"><span>${label}</span><b class="${cls || ''}">${value}</b></div>`).join('');
+}
+
+function renderRevenueReport() {
+  const body = document.getElementById('reportsRevenueBody');
+  const kpis = document.getElementById('reportsYearKpis');
+  if (!body) return;
+  const data = REPORTS.revenue;
+  if (!data) {
+    body.innerHTML = `<tr><td colspan="7" class="text-muted">${t('reports.loadError')}</td></tr>`;
+    if (kpis) kpis.innerHTML = '';
+    return;
+  }
+  const tot = data.totals;
+  if (kpis) {
+    kpis.innerHTML = reportKpis([
+      [t('reports.kpi.yearReceived', { year: data.year }), formatMoney(tot.received), 'text-emerald'],
+      [t('reports.kpi.yearBilled'), formatMoney(tot.billed)],
+      [t('reports.kpi.yearDebt'), formatMoney(tot.debt), tot.debt ? 'text-rose' : ''],
+      [t('reports.kpi.payments'), String(tot.payments)],
+    ]);
+  }
+  const max = Math.max(1, ...data.months.map(m => m.received));
+  const nowPeriod = todayISO().slice(0, 7);
+  body.innerHTML = data.months.map(m => {
+    const future = m.period > nowPeriod;
+    const empty = !m.received && !m.billed;
+    const methods = Object.entries(m.methods).map(([k, v]) => `${payMethodLabel(k)}: ${formatMoney(v)}`).join('\n');
+    const pct = m.collection_percent;
+    return `
+      <tr class="${future ? 'is-future' : ''}">
+        <td><b>${t('month.' + m.month)}</b></td>
+        <td title="${escapeHtml(methods)}">
+          <div class="reports-bar-cell">
+            <span class="reports-bar" style="width:${Math.round(m.received / max * 100)}%"></span>
+            <b class="${m.received ? 'text-emerald' : 'text-muted'}">${formatMoney(m.received)}</b>
+          </div>
+          ${m.payments ? `<small class="text-muted">${t('reports.paymentsCount', { n: m.payments })}</small>` : ''}
+        </td>
+        <td>${m.billed ? formatMoney(m.billed) : '<span class="text-muted">—</span>'}</td>
+        <td>${m.billed ? formatMoney(m.billed_paid) : '<span class="text-muted">—</span>'}</td>
+        <td>${m.debt ? `<b class="text-rose">${formatMoney(m.debt)}</b><br><small class="text-muted">${t('reports.debtorsCount', { n: m.debtors })}</small>` : '<span class="text-muted">—</span>'}</td>
+        <td>${pct === null ? '<span class="text-muted">—</span>' : `<span class="badge ${pct >= 90 ? 'badge-emerald' : pct >= 60 ? 'badge-amber' : 'badge-rose'}">${pct}%</span>`}</td>
+        <td class="text-right">${empty ? '' : `<button type="button" class="btn btn-sm btn-secondary" onclick="openReportPeriod('${m.period}')">${t('reports.open')}</button>`}</td>
+      </tr>`;
+  }).join('') + `
+      <tr class="reports-total-row">
+        <td><b>${t('reports.total')}</b></td>
+        <td><b class="text-emerald">${formatMoney(tot.received)}</b></td>
+        <td><b>${formatMoney(tot.billed)}</b></td>
+        <td><b>${formatMoney(tot.billed_paid)}</b></td>
+        <td><b class="${tot.debt ? 'text-rose' : ''}">${formatMoney(tot.debt)}</b></td>
+        <td colspan="2"></td>
+      </tr>`;
+}
+
+function openReportPeriod(period) {
+  const input = document.getElementById('reportsPeriodInput');
+  if (!input) return;
+  input.value = period;
+  loadPeriodReport();
+  document.getElementById('reportsPeriodCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function loadPeriodReport() {
+  const period = document.getElementById('reportsPeriodInput')?.value || todayISO().slice(0, 7);
+  const group = encodeURIComponent(document.getElementById('reportsGroupSelect')?.value || 'ALL');
+  const onlyDebtors = document.getElementById('reportsOnlyDebtors')?.checked ? 'true' : 'false';
+  const seq = ++REPORTS.periodSeq;
+  try {
+    const res = await apiFetch(`${API_BASE}/reports/period?period=${encodeURIComponent(period)}&group_name=${group}&only_debtors=${onlyDebtors}`);
+    if (seq !== REPORTS.periodSeq) return;
+    if (!res.ok) throw new Error(res.status);
+    REPORTS.period = await res.json();
+  } catch (_) {
+    if (seq !== REPORTS.periodSeq) return;
+    REPORTS.period = null;
+  }
+  renderPeriodReport();
+}
+
+function renderPeriodReport() {
+  const body = document.getElementById('reportsPeriodBody');
+  const kpis = document.getElementById('reportsPeriodKpis');
+  if (!body) return;
+  const data = REPORTS.period;
+  if (!data) {
+    body.innerHTML = `<tr><td colspan="7" class="text-muted">${t('reports.loadError')}</td></tr>`;
+    if (kpis) kpis.innerHTML = '';
+    return;
+  }
+  const tot = data.totals;
+  if (kpis) {
+    kpis.innerHTML = reportKpis([
+      [t('reports.kpi.periodDue', { period: periodLabel(data.period) }), formatMoney(tot.due)],
+      [t('reports.kpi.periodPaid'), formatMoney(tot.paid), 'text-emerald'],
+      [t('reports.kpi.periodDebt'), formatMoney(tot.debt), tot.debt ? 'text-rose' : ''],
+      [t('reports.kpi.debtors'), `${tot.debtors} / ${tot.children}`],
+    ]);
+  }
+  const q = (document.getElementById('reportsSearch')?.value || '').trim().toLowerCase();
+  const rows = q
+    ? data.rows.filter(r => `${r.name} ${r.parent_name || ''} ${r.parent_phone || ''}`.toLowerCase().includes(q))
+    : data.rows;
+  if (!rows.length) {
+    body.innerHTML = `<tr><td colspan="7" class="text-muted">${t(data.rows.length ? 'reports.noMatch' : 'reports.noInvoices')}</td></tr>`;
+    return;
+  }
+  body.innerHTML = rows.map(r => {
+    const status = r.debt === 0
+      ? `<span class="badge badge-emerald">${t('status.paid')}</span>`
+      : r.overdue
+        ? `<span class="badge badge-rose">${t('reports.status.overdue')}</span>`
+        : `<span class="badge badge-amber">${t('reports.status.unpaid')}</span>`;
+    return `
+      <tr>
+        <td>
+          <button type="button" class="link-button" onclick="openChildHistory('${escapeHtml(r.child_id)}')"><b>${escapeHtml(r.name)}</b></button>
+          ${r.child_active ? '' : ` <span class="badge badge-slate">${t('reports.leftChild')}</span>`}
+          <br><small class="text-muted">${escapeHtml(r.group_name)}</small>
+        </td>
+        <td>${escapeHtml(r.parent_name || '—')}<br><small class="text-muted">${escapeHtml(r.parent_phone || '')}</small></td>
+        <td>${formatMoney(r.amount_due)}</td>
+        <td class="${r.amount_paid ? 'text-emerald' : ''}">${formatMoney(r.amount_paid)}</td>
+        <td>${r.debt ? `<b class="text-rose">${formatMoney(r.debt)}</b>` : formatMoney(0)}</td>
+        <td>${formatPaidAt(r.last_paid_at)}</td>
+        <td>${status}</td>
+      </tr>`;
+  }).join('');
+}
+
+async function openChildHistory(childId) {
+  const body = document.getElementById('childHistoryBody');
+  const title = document.getElementById('childHistoryTitle');
+  if (!body) return;
+  body.innerHTML = `<p class="text-muted">${t('common.loading')}</p>`;
+  openModal('childHistoryModal');
+  try {
+    const res = await apiFetch(`${API_BASE}/reports/child/${encodeURIComponent(childId)}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || t('reports.loadError'));
+    if (title) title.textContent = `${t('reports.historyTitle')}: ${data.child.name}`;
+    body.innerHTML = renderChildHistory(data);
+  } catch (err) {
+    body.innerHTML = `<p class="text-rose">${escapeHtml(err.message || t('reports.loadError'))}</p>`;
+  }
+}
+
+function renderChildHistory(data) {
+  const c = data.child;
+  const tot = data.totals;
+  const head = `
+    <p class="text-muted">${escapeHtml(c.group_name)} · ${escapeHtml(c.parent_name || '')} ${escapeHtml(c.parent_phone || '')}${c.active ? '' : ` · <span class="badge badge-slate">${t('reports.leftChild')}</span>`}</p>
+    <div class="reports-kpis">${reportKpis([
+      [t('reports.kpi.allDue'), formatMoney(tot.due)],
+      [t('reports.kpi.allPaid'), formatMoney(tot.paid), 'text-emerald'],
+      [t('reports.kpi.allDebt'), formatMoney(tot.debt), tot.debt ? 'text-rose' : ''],
+    ])}</div>`;
+  if (!data.periods.length) return head + `<p class="text-muted">${t('reports.noHistory')}</p>`;
+  const rows = data.periods.map(p => {
+    const status = p.debt === 0
+      ? `<span class="badge badge-emerald">${t('status.paid')}</span>`
+      : `<span class="badge ${p.overdue ? 'badge-rose' : 'badge-amber'}">${t(p.overdue ? 'reports.status.overdue' : 'reports.status.unpaid')}</span>`;
+    const payments = p.payments.length
+      ? `<ul class="history-payments">${p.payments.map(pay => `
+          <li>
+            <b class="text-emerald">${formatMoney(pay.amount)}</b>
+            · ${payMethodLabel(pay.method)} · ${formatPaidAt(pay.paid_at)}
+            ${pay.recorded_by ? `<small class="text-muted">· ${escapeHtml(pay.recorded_by)}</small>` : ''}
+            ${pay.note ? `<br><small class="text-muted">${escapeHtml(pay.note)}</small>` : ''}
+          </li>`).join('')}</ul>`
+      : `<small class="text-muted">${t('reports.noPayments')}</small>`;
+    return `
+      <tr>
+        <td><b>${periodLabel(p.period)}</b></td>
+        <td>${formatMoney(p.amount_due)}</td>
+        <td>${formatMoney(p.amount_paid)}</td>
+        <td>${p.debt ? `<b class="text-rose">${formatMoney(p.debt)}</b>` : formatMoney(0)}</td>
+        <td>${status}</td>
+        <td>${payments}</td>
+      </tr>`;
+  }).join('');
+  return head + `
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead><tr>
+          <th>${t('reports.th.month')}</th><th>${t('reports.th.due')}</th><th>${t('billing.th.paid')}</th>
+          <th>${t('reports.th.debt')}</th><th>${t('billing.th.status')}</th><th>${t('reports.th.payments')}</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }

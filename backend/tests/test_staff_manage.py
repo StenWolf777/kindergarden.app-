@@ -2,7 +2,7 @@ NEW_STAFF = {"name": "Malika Yusupova", "role": "Тарбиячи", "phone": "+9
 
 
 def _payroll_names(client, headers):
-    return [p["staff_name"] for p in client.get("/api/v1/staff/payroll", headers=headers).json()]
+    return [p["staff_name"] for p in client.get("/api/v1/staff/payroll", headers=headers).json()["rows"]]
 
 
 def test_accountant_can_add_staff_and_they_appear_in_payroll(client, auth_headers):
