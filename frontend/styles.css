@@ -1767,6 +1767,7 @@ h1, h2, h3, h4, h5, h6 {
 .audit-changes-list li { white-space: nowrap; }
 .audit-empty { color: var(--text-secondary); font-size: 0.92rem; padding: 10px 0 0; }
 .text-muted { color: var(--text-secondary); font-size: 0.85rem; }
+.staff-delete-btn { margin-left: 6px; }
 
 .form-group {
   display: flex;

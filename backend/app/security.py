@@ -61,6 +61,7 @@ PERMISSIONS: dict[str, set[str]] = {
     "billing.remind": FINANCE,
     "staff.view": FINANCE,
     "staff.pay": FINANCE,
+    "staff.manage": {"super_admin", "accountant"},
     "staff.attendance.mark": FINANCE,
     "contracts.view": MANAGEMENT,
     "tma.view": {"super_admin"},

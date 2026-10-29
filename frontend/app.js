@@ -314,25 +314,22 @@ function renderStaffPayroll() {
   const tbody = document.getElementById('staffPayrollTableBody');
   if (!tbody) return;
 
-  const defaultPayroll = [
-    { id: 'pr_1', staff_name: 'Gulbahor Karimova', role: 'TARBIYACHI', phone: '+998 93 444 55 66', base_salary: 4500000, bonus: 500000, advance_paid: 2000000, status: 'PAID' },
-    { id: 'pr_2', staff_name: 'Nargiza Olimova', role: 'TARBIYACHI', phone: '+998 90 222 33 44', base_salary: 4500000, bonus: 300000, advance_paid: 1500000, status: 'PENDING' },
-    { id: 'pr_3', staff_name: 'Dilnoza Ahmedova', role: 'ENAGA', phone: '+998 94 111 55 77', base_salary: 2800000, bonus: 0, advance_paid: 1000000, status: 'PENDING' },
-    { id: 'pr_4', staff_name: 'Salim Rahmonov', role: 'OSHPAZ', phone: '+998 97 888 99 00', base_salary: 5000000, bonus: 600000, advance_paid: 2500000, status: 'PAID' },
-    { id: 'pr_5', staff_name: 'Umida Qosimova', role: 'HAMSHIRA', phone: '+998 91 333 77 11', base_salary: 3500000, bonus: 200000, advance_paid: 1000000, status: 'PENDING' },
-  ];
-
-  const list = STATE.staffPayroll.length > 0 ? STATE.staffPayroll : defaultPayroll;
+  const list = STATE.staffPayroll;
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-muted">${t('staff.empty')}</td></tr>`;
+    return;
+  }
+  const canManage = can('staff.manage');
 
   tbody.innerHTML = list.map(p => {
     const toPay = (p.base_salary + p.bonus) - p.advance_paid;
     return `
       <tr>
         <td>
-          <b>${p.staff_name}</b><br>
-          <span class="badge badge-indigo">${p.role}</span>
+          <b>${escapeHtml(p.staff_name)}</b><br>
+          <span class="badge badge-indigo">${escapeHtml(p.role)}</span>
         </td>
-        <td>${p.phone}</td>
+        <td>${escapeHtml(p.phone)}</td>
         <td>${formatMoney(p.base_salary)}</td>
         <td class="${p.bonus ? 'text-emerald' : ''}">${signedMoney(p.bonus)}</td>
         <td class="${p.advance_paid ? 'text-rose' : ''}">${signedMoney(-p.advance_paid)}</td>
@@ -346,10 +343,63 @@ function renderStaffPayroll() {
           ${p.status === 'PAID'
             ? `<button class="btn btn-sm btn-secondary" disabled>${t('staff.paid')}</button>`
             : `<button class="btn btn-sm btn-success" onclick="payStaffSalary('${p.id}', ${toPay})">${t('staff.payBtn')}</button>`}
+          ${canManage ? `<button class="btn btn-sm btn-danger staff-delete-btn" onclick="deleteStaff('${escapeHtml(p.staff_id)}')" title="${t('common.delete')}">${t('common.delete')}</button>` : ''}
         </td>
       </tr>
     `;
   }).join('');
+}
+
+function openAddStaffModal() {
+  document.getElementById('addStaffForm').reset();
+  document.getElementById('newStaffHireDate').value = todayISO();
+  const roles = [...new Set(STATE.staffPayroll.map(p => p.role).filter(Boolean))].sort();
+  document.getElementById('staffRoleOptions').innerHTML = roles.map(r => `<option value="${escapeHtml(r)}"></option>`).join('');
+  openModal('addStaffModal');
+}
+
+async function handleAddStaffSubmit(e) {
+  e.preventDefault();
+  const body = {
+    name: document.getElementById('newStaffName').value.trim(),
+    role: document.getElementById('newStaffRole').value.trim(),
+    phone: document.getElementById('newStaffPhone').value.trim(),
+    base_salary: parseFloat(document.getElementById('newStaffSalary').value),
+    hire_date: document.getElementById('newStaffHireDate').value || null,
+  };
+  const btn = document.getElementById('addStaffSubmitBtn');
+  btn.disabled = true;
+  try {
+    const res = await apiFetch(`${API_BASE}/staff`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(Array.isArray(data.detail) ? t('kitchen.incompleteData') : (data.detail || t('common.error')));
+    closeModal('addStaffModal');
+    showToast(t('staff.added', { name: data.name }), 'success');
+    syncWithBackend();
+    if (can('staff.view')) loadStaffAttendance();
+  } catch (err) {
+    showToast(err.message, 'warning');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deleteStaff(staffId) {
+  const person = STATE.staffPayroll.find(p => p.staff_id === staffId);
+  const name = person ? person.staff_name : '';
+  if (!confirm(t('staff.confirmDelete', { name }))) return;
+  try {
+    const res = await apiFetch(`${API_BASE}/staff/${encodeURIComponent(staffId)}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || t('common.error'));
+    showToast(t('staff.deleted', { name }), 'warning');
+    syncWithBackend();
+    if (can('staff.view')) loadStaffAttendance();
+  } catch (err) {
+    showToast(err.message, 'warning');
+  }
 }
 
 function payStaffSalary(payrollId, amount) {
@@ -1811,7 +1861,7 @@ const AUDIT_FIELD_LABELS = {
   monthly_fee: 'audit.field.monthlyFee', discount: 'audit.field.discount', note: 'audit.field.note',
   allergies: 'audit.field.allergies', week_start: 'audit.field.weekStart', week_end: 'audit.field.weekEnd',
   child_count: 'audit.field.childCount', total_amount: 'audit.field.totalAmount', amount: 'audit.field.amount',
-  status: 'audit.field.status', name: 'settings.orgName', phone: 'settings.orgPhone', address: 'settings.orgAddress',
+  status: 'audit.field.status', role: 'audit.field.role', base_salary: 'audit.field.baseSalary', name: 'settings.orgName', phone: 'settings.orgPhone', address: 'settings.orgAddress',
 };
 
 function formatAuditValue(value) {
