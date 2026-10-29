@@ -402,17 +402,22 @@ async function deleteStaff(staffId) {
   }
 }
 
-function payStaffSalary(payrollId, amount) {
-  apiFetch(`${API_BASE}/staff/pay`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ payroll_id: payrollId, amount: amount })
-  }).then(r => r.json()).then(() => {
-    syncWithBackend();
+async function payStaffSalary(payrollId, amount) {
+  try {
+    const res = await apiFetch(`${API_BASE}/staff/pay`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payroll_id: payrollId, amount: amount })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || t('toast.genericError'));
     showToast(t('staff.paySuccess'), 'success');
-  }).catch(() => {
-    showToast(t('staff.paySaved'), 'success');
-  });
+  } catch (err) {
+    // A network failure surfaces as a TypeError ("Failed to fetch"); show our own message instead.
+    showToast(err instanceof TypeError ? t('toast.genericError') : err.message, 'warning');
+  } finally {
+    syncWithBackend();
+  }
 }
 
 // ============================================================================
